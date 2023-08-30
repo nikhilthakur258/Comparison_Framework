@@ -40,18 +40,18 @@ public class CSVComparator {
 
             // Create a style element for CSS
             Element style = doc.createElement("style");
-         // Add CSS styles for table
-            style.text(".table {border-collapse: collapse; width: 100%; table-layout: fixed;}" +
-                ".table td, .table th {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 200px;}" +
-                ".table th {background-color: #f2f2f2;}" +
-                ".table tr:nth-child(even) {background-color: #f2f2f2;}" +
-                ".different {background-color: #ff9999;}" +
-                ".summary {font-weight: bold;}" +
-                ".summary-table {margin-top: 20px;}" +
-                "@media (max-width: 768px) {" +
-                ".table td, .table th {padding: 2px; font-size: 10px;}" +
-                "}");
-
+            style.text(".table {border-collapse: collapse; width: 100%;}" +
+                    ".table th {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
+                    ".table td {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
+                    ".table tr:nth-child(even) {background-color: #f2f2f2;}" +
+                    ".different {background-color: #ff9999;}" +
+                    ".summary {font-weight: bold;}" +
+                    ".summary-table {margin-top: 20px;}" +
+                    ".index-col {width: 50px;}" + // Fixed width for the index column
+                    ".data-col {width: 150px;}" + // Fixed width for data columns
+                    "@media (max-width: 768px) {" +
+                    ".table td, .table th {padding: 2px; font-size: 10px;}" +
+                    "}");
             doc.head().appendChild(style);
 
             // Add file names and summary
@@ -109,10 +109,21 @@ public class CSVComparator {
             Element comparisonTable = doc.createElement("table");
             comparisonTable.addClass("table");
 
-            // Add the index column header
+            // Add the table header row with column names
+            Element tableHeaderRow = doc.createElement("tr");
             Element indexHeader = doc.createElement("th");
             indexHeader.text("Index");
-            comparisonTable.appendChild(indexHeader);
+            indexHeader.addClass("index-col"); // Apply the class for fixed width
+            tableHeaderRow.appendChild(indexHeader);
+
+            // Add headers for data columns
+            for (int i = 1; i <= Math.max(records1.get(0).size(), records2.get(0).size()); i++) {
+                Element columnHeader = doc.createElement("th");
+                columnHeader.text("Column " + i);
+                columnHeader.addClass("data-col"); // Apply the class for fixed width
+                tableHeaderRow.appendChild(columnHeader);
+            }
+            comparisonTable.appendChild(tableHeaderRow);
 
             // Iterate through rows and columns to create the side-by-side view
             for (int i = 0; i < Math.max(records1.size(), records2.size()); i++) {
@@ -121,6 +132,7 @@ public class CSVComparator {
                 // Add the index column
                 Element indexCell = doc.createElement("td");
                 indexCell.text(String.valueOf(i + 1)); // Index is 1-based
+                indexCell.addClass("index-col"); // Apply the class for fixed width
                 tr.appendChild(indexCell);
 
                 boolean isMismatched = false; // Flag to track if there's a mismatch in this row
@@ -170,7 +182,6 @@ public class CSVComparator {
         
         return isMismatched;
     }
-
 
     private static int countMatchedRecords(List<CSVRecord> records1, List<CSVRecord> records2) {
         int count = 0;
