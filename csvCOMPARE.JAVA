@@ -149,9 +149,10 @@ public class CSVComparator {
 
     private static boolean createTableCell(Document doc, Element tr, Iterator<String> values1, Iterator<String> values2) {
         boolean isMismatched = false;
-        while (values1.hasNext() || values2.hasNext()) {
-            String value1 = values1.hasNext() ? values1.next() : "";
-            String value2 = values2.hasNext() ? values2.next() : "";
+        
+        while (values1 != null && values1.hasNext() || values2 != null && values2.hasNext()) {
+            String value1 = values1 != null && values1.hasNext() ? values1.next() : "Not Found";
+            String value2 = values2 != null && values2.hasNext() ? values2.next() : "Not Found";
 
             Element td = doc.createElement("td");
             if (!value1.equals(value2)) {
@@ -163,8 +164,10 @@ public class CSVComparator {
             td.appendChild(pre);
             tr.appendChild(td);
         }
+        
         return isMismatched;
     }
+
 
     private static int countMatchedRecords(List<CSVRecord> records1, List<CSVRecord> records2) {
         int count = 0;
