@@ -1,0 +1,42 @@
+Key Responsibilities:
+
+UI Automation:
+
+Develop and maintain UI automated test scripts using TestComplete or UFT.
+Create and execute test cases to validate the functionality and performance of the user interface.
+Collaborate with the development team to identify and resolve UI-related defects.
+API Automation:
+
+Design, implement, and maintain automated tests for APIs using ReadyAPI or SoapUI.
+Execute API test suites to ensure the integrity of our backend services.
+Verify data consistency and communication between various system components.
+Database Testing:
+
+Leverage SQL knowledge to perform database testing by writing and executing SQL queries.
+Validate data integrity and data transformations as part of the testing process.
+Test Framework Design:
+
+Architect and build automated test frameworks that are scalable and maintainable.
+Collaborate with the development and QA teams to define best practices for test automation.
+Continuous Integration/Continuous Deployment (CI/CD):
+
+Integrate automated tests into the CI/CD pipeline for continuous testing and deployment.
+Monitor and report on test results, identifying issues early in the development cycle.
+Test Documentation:
+
+Create comprehensive test plans, test cases, and test reports.
+Document automation scripts and ensure they are well-documented for future reference.
+Collaboration:
+
+Work closely with cross-functional teams, including developers, product managers, and quality assurance, to ensure the delivery of high-quality software.
+Qualifications:
+
+Bachelor's degree in Computer Science, Information Technology, or a related field.
+Proven experience in UI automation using TestComplete or UFT and API automation using ReadyAPI or SoapUI.
+Strong SQL skills for database testing and validation.
+Proficiency in designing and implementing test automation frameworks.
+Familiarity with CI/CD pipelines and tools (e.g., Jenkins, Travis CI).
+Excellent problem-solving skills and attention to detail.
+Strong communication and collaboration skills.
+Ability to work in a fast-paced, agile development environment.
+ISTQB or similar testing certification is a plus.
