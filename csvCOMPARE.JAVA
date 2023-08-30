@@ -1,3 +1,4 @@
+package Accessibility.Automation;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -13,8 +14,8 @@ import java.util.List;
 
 public class CSVComparator {
     public static void main(String[] args) {
-        String file1Path = "file1.csv";
-        String file2Path = "file2.csv";
+        String file1Path = "d:\\downloads\\addresses1.csv";
+        String file2Path = "d:\\downloads\\addresses2.csv";
 
         List<CSVRecord> records1 = readCSV(file1Path);
         List<CSVRecord> records2 = readCSV(file2Path);
@@ -33,18 +34,21 @@ public class CSVComparator {
     }
 
     private static void generateHTMLReport(String file1Path, String file2Path, List<CSVRecord> records1, List<CSVRecord> records2) {
-        try (FileWriter writer = new FileWriter("report.html")) {
+        try (FileWriter writer = new FileWriter("d:\\downloads\\report.html")) {
             // Create an HTML document
             Document doc = Jsoup.parse("<html></html>");
 
             // Create a style element for CSS
             Element style = doc.createElement("style");
-            style.text(".table {border-collapse: collapse; width: 100%;} " +
-                    ".table td, .table th {border: 1px solid #dddddd; text-align: left; padding: 8px;} " +
+            style.text(".table {border-collapse: collapse; width: 100%;}" +
+                    ".table td, .table th {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
                     ".table tr:nth-child(even) {background-color: #f2f2f2;}" +
-                    ".different {background-color: #ff9999;} " +
-                    ".summary {font-weight: bold;} " +
-                    ".summary-table {margin-top: 20px;}");
+                    ".different {background-color: #ff9999;}" +
+                    ".summary {font-weight: bold;}" +
+                    ".summary-table {margin-top: 20px;}" +
+                    "@media (max-width: 768px) {" +
+                    ".table td, .table th {padding: 2px; font-size: 10px;}" +
+                    "}");
             doc.head().appendChild(style);
 
             // Add file names and summary
@@ -56,7 +60,7 @@ public class CSVComparator {
             summary.addClass("summary");
 
             int matchedRecords = countMatchedRecords(records1, records2);
-            int mismatchedRecords = 0; // Initialize mismatched records to 0
+            int mismatchedRecords = countMismatchedRecords(records1, records2);
 
             summary.text("Summary:\n" +
                     "Matched Records: " + matchedRecords + "\n" +
@@ -102,16 +106,33 @@ public class CSVComparator {
             Element comparisonTable = doc.createElement("table");
             comparisonTable.addClass("table");
 
+            // Add the index column header
+            Element indexHeader = doc.createElement("th");
+            indexHeader.text("Index");
+            comparisonTable.appendChild(indexHeader);
+
             // Iterate through rows and columns to create the side-by-side view
             for (int i = 0; i < Math.max(records1.size(), records2.size()); i++) {
                 Element tr = doc.createElement("tr");
 
+                // Add the index column
+                Element indexCell = doc.createElement("td");
+                indexCell.text(String.valueOf(i + 1)); // Index is 1-based
+                tr.appendChild(indexCell);
+
+                boolean isMismatched = false; // Flag to track if there's a mismatch in this row
+
                 if (i < records1.size() && i < records2.size()) {
-                    createTableCell(doc, tr, records1.get(i).iterator(), records2.get(i).iterator());
+                    isMismatched = createTableCell(doc, tr, records1.get(i).iterator(), records2.get(i).iterator());
                 } else if (i < records1.size()) {
-                    createTableCell(doc, tr, records1.get(i).iterator(), null);
+                    isMismatched = createTableCell(doc, tr, records1.get(i).iterator(), null);
                 } else {
-                    createTableCell(doc, tr, null, records2.get(i).iterator());
+                    isMismatched = createTableCell(doc, tr, null, records2.get(i).iterator());
+                }
+
+                // Highlight the index column if there is a mismatch
+                if (isMismatched) {
+                    indexCell.addClass("different");
                 }
 
                 comparisonTable.appendChild(tr);
@@ -126,7 +147,8 @@ public class CSVComparator {
         }
     }
 
-    private static void createTableCell(Document doc, Element tr, Iterator<String> values1, Iterator<String> values2) {
+    private static boolean createTableCell(Document doc, Element tr, Iterator<String> values1, Iterator<String> values2) {
+        boolean isMismatched = false;
         while (values1.hasNext() || values2.hasNext()) {
             String value1 = values1.hasNext() ? values1.next() : "";
             String value2 = values2.hasNext() ? values2.next() : "";
@@ -134,12 +156,14 @@ public class CSVComparator {
             Element td = doc.createElement("td");
             if (!value1.equals(value2)) {
                 td.addClass("different");
+                isMismatched = true;
             }
             Element pre = doc.createElement("pre");
             pre.appendText("Left: " + value1 + "\nRight: " + value2 + "\n");
             td.appendChild(pre);
             tr.appendChild(td);
         }
+        return isMismatched;
     }
 
     private static int countMatchedRecords(List<CSVRecord> records1, List<CSVRecord> records2) {
@@ -150,6 +174,16 @@ public class CSVComparator {
                     count++;
                     break; // Move to the next record in records1
                 }
+            }
+        }
+        return count;
+    }
+
+    private static int countMismatchedRecords(List<CSVRecord> records1, List<CSVRecord> records2) {
+        int count = 0;
+        for (int i = 0; i < Math.min(records1.size(), records2.size()); i++) {
+            if (!records1.get(i).equals(records2.get(i))) {
+                count++;
             }
         }
         return count;
