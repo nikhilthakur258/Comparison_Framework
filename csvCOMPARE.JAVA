@@ -40,15 +40,18 @@ public class CSVComparator {
 
             // Create a style element for CSS
             Element style = doc.createElement("style");
-            style.text(".table {border-collapse: collapse; width: 100%;}" +
-                    ".table td, .table th {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
-                    ".table tr:nth-child(even) {background-color: #f2f2f2;}" +
-                    ".different {background-color: #ff9999;}" +
-                    ".summary {font-weight: bold;}" +
-                    ".summary-table {margin-top: 20px;}" +
-                    "@media (max-width: 768px) {" +
-                    ".table td, .table th {padding: 2px; font-size: 10px;}" +
-                    "}");
+         // Add CSS styles for table
+            style.text(".table {border-collapse: collapse; width: 100%; table-layout: fixed;}" +
+                ".table td, .table th {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 200px;}" +
+                ".table th {background-color: #f2f2f2;}" +
+                ".table tr:nth-child(even) {background-color: #f2f2f2;}" +
+                ".different {background-color: #ff9999;}" +
+                ".summary {font-weight: bold;}" +
+                ".summary-table {margin-top: 20px;}" +
+                "@media (max-width: 768px) {" +
+                ".table td, .table th {padding: 2px; font-size: 10px;}" +
+                "}");
+
             doc.head().appendChild(style);
 
             // Add file names and summary
