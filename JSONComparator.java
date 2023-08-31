@@ -22,13 +22,16 @@ public class JSONComparator {
         compareJSON(jsonFile1, jsonFile2);
     }
 
-    private static String getTableCellHtml(String content, String status) {
-        // Highlight only the "Different" status cell in red
-        String cellClass = "status-cell";
+    private static String getTableCellHtml(String content1, String content2, String status) {
+        // Highlight cells in the "Raw Zone" and "Curated Zone" columns with different values in red
+        String cellClass1 = "";
+        String cellClass2 = "";
         if ("Different".equals(status)) {
-            cellClass += " different-status";
+            cellClass1 = " different-status";
+            cellClass2 = " different-status";
         }
-        return "<td class='" + cellClass + "' style='word-wrap: break-word;'>" + StringEscapeUtils.escapeHtml4(content) + "</td>";
+        return "<td class='raw-zone" + cellClass1 + "' style='word-wrap: break-word;'>" + StringEscapeUtils.escapeHtml4(content1) + "</td>"
+                + "<td class='curated-zone" + cellClass2 + "' style='word-wrap: break-word;'>" + StringEscapeUtils.escapeHtml4(content2) + "</td>";
     }
 
     public static void compareJSON(String jsonFile1, String jsonFile2) {
@@ -75,7 +78,7 @@ public class JSONComparator {
                         .append("th, td {text-align: left; padding: 8px; word-wrap: break-word;}")
                         .append("th {background-color: #4CAF50; color: white;}")
                         .append("tr:nth-child(even) {background-color: #f2f2f2;}")
-                        .append("tr.different-status td {background-color: red; color: white;}")
+                        .append(".different-status {background-color: red; color: white;}")
                         .append("</style></head><body>")
                         .append("<h1>Comparison Report</h1>");
 
@@ -94,11 +97,12 @@ public class JSONComparator {
                         .append("<option value='Not found'>Not found</option>")
                         .append("</select>")
                         .append("<button onclick='resetFilters()'>Reset Filters</button>")
+                        .append("<span id='recordCount'></span>") // Add a span for record count
                         .append("</form>");
 
                 // Add table headers
                 reportBuilder.append("<table id='comparisonTable'>")
-                        .append("<thead class='table-header'><tr><th>File Name</th><th>Key</th><th>Value 1</th><th>Value 2</th><th>Status</th></tr></thead>");
+                        .append("<thead class='table-header'><tr><th>File Name</th><th>Key</th><th>Raw Zone</th><th>Curated Zone</th><th>Status</th></tr></thead>");
             } else {
                 // If the report already exists, locate the end of the table to append new rows
                 int tableEndIndex = existingReportContent.indexOf("</tbody>");
@@ -132,8 +136,7 @@ public class JSONComparator {
                 reportBuilder.append("<tr class='").append(key).append("'>")
                         .append("<td>").append(fileName1).append(" - ").append(fileName2).append("</td>")
                         .append("<td>").append(StringEscapeUtils.escapeHtml4(key)).append("</td>")
-                        .append(getTableCellHtml(value1, status))
-                        .append(getTableCellHtml(value2, status))
+                        .append(getTableCellHtml(value1, value2, status))
                         .append("<td>").append(status).append("</td>")
                         .append("</tr>");
             }
@@ -145,13 +148,16 @@ public class JSONComparator {
                     .append("var statusFilter = document.getElementById('statusFilter').value;")
                     .append("var table = document.getElementById('comparisonTable');")
                     .append("var rows = table.getElementsByTagName('tr');")
-                    .append("for (var i = 1; i < rows.length; i++) {")
+                    .append("var recordCount = 0;") // Initialize record count
+                    .append("for (var i = 1; i < rows.length; i++) {") // Start from 1 to skip the header row
                     .append("var row = rows[i];")
                     .append("var key = row.cells[1].textContent.trim();")
                     .append("var status = row.cells[4].textContent.trim();")
                     .append("var hideRow = (keyFilter !== '' && key !== keyFilter) || (statusFilter !== '' && status !== statusFilter);")
                     .append("row.style.display = hideRow ? 'none' : '';")
+                    .append("if (!hideRow) { recordCount++; }") // Increment record count if row is displayed
                     .append("}")
+                    .append("document.getElementById('recordCount').textContent = 'Records: ' + recordCount;") // Update record count
                     .append("}")
 
                     // Add a function to reset filters and show all rows
@@ -160,10 +166,13 @@ public class JSONComparator {
                     .append("document.getElementById('statusFilter').value = '';")
                     .append("var table = document.getElementById('comparisonTable');")
                     .append("var rows = table.getElementsByTagName('tr');")
-                    .append("for (var i = 1; i < rows.length; i++) {")
+                    .append("var recordCount = 0;") // Initialize record count
+                    .append("for (var i = 1; i < rows.length; i++) {") // Start from 1 to skip the header row
                     .append("var row = rows[i];")
                     .append("row.style.display = '';")
+                    .append("recordCount++;") // Increment record count for each row
                     .append("}")
+                    .append("document.getElementById('recordCount').textContent = 'Records: ' + recordCount;") // Update record count
                     .append("}")
                     .append("</script>")
                     .append("</body></html>");
@@ -209,4 +218,3 @@ public class JSONComparator {
         return entries;
     }
 }
-
