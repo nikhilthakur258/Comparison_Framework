@@ -3,9 +3,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.text.StringEscapeUtils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class JSONComparator {
@@ -35,6 +33,23 @@ public class JSONComparator {
 
     public static void compareJSON(String jsonFile1, String jsonFile2) {
         try {
+            String reportFilePath = "results/comparison_report.html";
+
+            // Read the existing report content if it exists
+            StringBuilder existingReportContent = new StringBuilder();
+            boolean reportExists = new File(reportFilePath).exists();
+            if (reportExists) {
+                Scanner scanner = new Scanner(new File(reportFilePath));
+                while (scanner.hasNextLine()) {
+                    existingReportContent.append(scanner.nextLine());
+                }
+                scanner.close();
+            }
+
+            // Extract the file names without extensions
+            String fileName1 = new File(jsonFile1).getName().replaceFirst("[.][^.]+$", "");
+            String fileName2 = new File(jsonFile2).getName().replaceFirst("[.][^.]+$", "");
+
             JsonNode node1 = objectMapper.readTree(new File(jsonFile1));
             JsonNode node2 = objectMapper.readTree(new File(jsonFile2));
 
@@ -52,43 +67,48 @@ public class JSONComparator {
             List<String> statuses = new ArrayList<>(); // Store the status for each row
 
             StringBuilder reportBuilder = new StringBuilder();
-            reportBuilder.append("<html><head><style>")
-                    .append("table {border-collapse: collapse; table-layout: fixed; width: 100%;}")
-                    .append("th, td {text-align: left; padding: 8px; word-wrap: break-word;}")
-                    .append("th {background-color: #4CAF50; color: white;}")
-                    .append("tr:nth-child(even) {background-color: #f2f2f2;}")
-                    .append(".different-status {background-color: red; color: white;}")
-                    .append(".status-cell {white-space: nowrap;}")  // To prevent status cell content from wrapping
-                    .append("</style></head><body>")
-                    .append("<h1>Comparison Report</h1>");
 
-            // Filter options for keys and statuses
-            reportBuilder.append("<form>")
-                    .append("<select id='keyFilter' onchange='filterTable()'>") // Add ID 'keyFilter'
-                    .append("<option value=''>All</option>");
-            for (String key : allKeys) {
-                reportBuilder.append("<option value='").append(key).append("'>").append(key).append("</option>");
+            if (!reportExists) {
+                // If the report doesn't exist, create the initial structure
+                reportBuilder.append("<html><head><style>")
+                        .append("table {border-collapse: collapse; table-layout: fixed; width: 100%;}")
+                        .append("th, td {text-align: left; padding: 8px; word-wrap: break-word;}")
+                        .append("th {background-color: #4CAF50; color: white;}")
+                        .append("tr:nth-child(even) {background-color: #f2f2f2;}")
+                        .append("tr.different-status td {background-color: red; color: white;}")
+                        .append("</style></head><body>")
+                        .append("<h1>Comparison Report</h1>");
+
+                // Add filter options for keys and statuses
+                reportBuilder.append("<form>")
+                        .append("<select id='keyFilter' onchange='filterTable()'>")
+                        .append("<option value=''>All</option>");
+                for (String key : allKeys) {
+                    reportBuilder.append("<option value='").append(key).append("'>").append(key).append("</option>");
+                }
+                reportBuilder.append("</select>")
+                        .append("<select id='statusFilter' onchange='filterTable()'>")
+                        .append("<option value=''>All</option>")
+                        .append("<option value='Same'>Same</option>")
+                        .append("<option value='Different'>Different</option>")
+                        .append("<option value='Not found'>Not found</option>")
+                        .append("</select>")
+                        .append("<button onclick='resetFilters()'>Reset Filters</button>")
+                        .append("</form>");
+
+                // Add table headers
+                reportBuilder.append("<table id='comparisonTable'>")
+                        .append("<thead class='table-header'><tr><th>File Name</th><th>Key</th><th>Value 1</th><th>Value 2</th><th>Status</th></tr></thead>");
+            } else {
+                // If the report already exists, locate the end of the table to append new rows
+                int tableEndIndex = existingReportContent.indexOf("</tbody>");
+                if (tableEndIndex != -1) {
+                    reportBuilder.append(existingReportContent.substring(0, tableEndIndex)); // Exclude the end of the table
+                } else {
+                    // If the table end couldn't be found, use the existing content
+                    reportBuilder.append(existingReportContent);
+                }
             }
-            reportBuilder.append("</select>");
-
-            reportBuilder.append("<select id='statusFilter' onchange='filterTable()'>") // Add ID 'statusFilter'
-                    .append("<option value=''>All</option>")
-                    .append("<option value='Same'>Same</option>")
-                    .append("<option value='Different'>Different</option>")
-                    .append("<option value='Not found'>Not found</option>")
-                    .append("</select>");
-
-            // Add a "Reset Filters" button
-            reportBuilder.append("<button onclick='resetFilters()'>Reset Filters</button>");
-
-            reportBuilder.append("</form>");
-
-            // Table headers
-            reportBuilder.append("<table id='comparisonTable'>")
-                    .append("<thead class='table-header'><tr><th>Key</th><th>Value 1</th><th>Value 2</th><th>Status</th></tr></thead>");
-
-            // Table body
-            reportBuilder.append("<tbody>");
 
             for (String key : allKeys) {
                 String value1 = getNestedValue(entries1, key);
@@ -110,6 +130,7 @@ public class JSONComparator {
                 statuses.add(status); // Add the status to the list
 
                 reportBuilder.append("<tr class='").append(key).append("'>")
+                        .append("<td>").append(fileName1).append(" - ").append(fileName2).append("</td>")
                         .append("<td>").append(StringEscapeUtils.escapeHtml4(key)).append("</td>")
                         .append(getTableCellHtml(value1, status))
                         .append(getTableCellHtml(value2, status))
@@ -124,10 +145,10 @@ public class JSONComparator {
                     .append("var statusFilter = document.getElementById('statusFilter').value;")
                     .append("var table = document.getElementById('comparisonTable');")
                     .append("var rows = table.getElementsByTagName('tr');")
-                    .append("for (var i = 1; i < rows.length; i++) {") // Start from 1 to skip the header row
+                    .append("for (var i = 1; i < rows.length; i++) {")
                     .append("var row = rows[i];")
-                    .append("var key = row.cells[0].textContent.trim();")
-                    .append("var status = row.cells[3].textContent.trim();")
+                    .append("var key = row.cells[1].textContent.trim();")
+                    .append("var status = row.cells[4].textContent.trim();")
                     .append("var hideRow = (keyFilter !== '' && key !== keyFilter) || (statusFilter !== '' && status !== statusFilter);")
                     .append("row.style.display = hideRow ? 'none' : '';")
                     .append("}")
@@ -139,7 +160,7 @@ public class JSONComparator {
                     .append("document.getElementById('statusFilter').value = '';")
                     .append("var table = document.getElementById('comparisonTable');")
                     .append("var rows = table.getElementsByTagName('tr');")
-                    .append("for (var i = 1; i < rows.length; i++) {") // Start from 1 to skip the header row
+                    .append("for (var i = 1; i < rows.length; i++) {")
                     .append("var row = rows[i];")
                     .append("row.style.display = '';")
                     .append("}")
@@ -149,15 +170,8 @@ public class JSONComparator {
 
             String report = reportBuilder.toString();
 
-            // Create the "results" folder if it doesn't exist
-            File resultsFolder = new File("results");
-            if (!resultsFolder.exists()) {
-                resultsFolder.mkdirs();
-            }
-
-            // Save the HTML report to a file
-            String filePath = "results/comparison_report.html";
-            FileWriter fileWriter = new FileWriter(filePath);
+            // Save the report to the file
+            FileWriter fileWriter = new FileWriter(reportFilePath);
             fileWriter.write(report);
             fileWriter.close();
 
@@ -195,3 +209,4 @@ public class JSONComparator {
         return entries;
     }
 }
+
