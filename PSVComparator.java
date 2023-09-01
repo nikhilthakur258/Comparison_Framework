@@ -13,32 +13,38 @@ import java.util.Iterator;
 import java.util.List;
 
 public class PSVComparator {
-    public static void main(String[] args) {
-        String file1Path = "d:\\downloads\\data1.psv";
-        String file2Path = "d:\\downloads\\data2.psv";
+	public static void main(String[] args) {
+	    String file1Path = "d:\\downloads\\data1.psv";
+	    String file2Path = "d:\\downloads\\data2.psv";
+	    int numLinesToSkip = 2; // Specify the number of lines to skip
 
-        List<CSVRecord> records1 = readPSV(file1Path);
-        List<CSVRecord> records2 = readPSV(file2Path);
+	    List<CSVRecord> records1 = readPSV(file1Path, numLinesToSkip);
+	    List<CSVRecord> records2 = readPSV(file2Path, numLinesToSkip);
 
-        generateHTMLReport(file1Path, file2Path, records1, records2);
-    }
+	    generateHTMLReport(file1Path, file2Path, records1, records2);
+	}
 
-    private static List<CSVRecord> readPSV(String filePath) {
-        try (FileReader reader = new FileReader(filePath);
-             CSVParser parser = CSVFormat.DEFAULT.withDelimiter('|').withTrim().parse(reader)) {
-            return parser.getRecords();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+	private static List<CSVRecord> readPSV(String filePath, int numLinesToSkip) {
+	    try (FileReader reader = new FileReader(filePath);
+	         CSVParser parser = CSVFormat.DEFAULT.withDelimiter('|').withTrim().parse(reader)) {
+	        List<CSVRecord> records = parser.getRecords();
+	        
+	        // Check if there are enough lines to skip
+	        if (numLinesToSkip > 0 && records.size() > numLinesToSkip) {
+	            return records.subList(numLinesToSkip, records.size());
+	        } else {
+	            return records;
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
 
     private static void generateHTMLReport(String file1Path, String file2Path, List<CSVRecord> records1, List<CSVRecord> records2) {
         try (FileWriter writer = new FileWriter("d:\\downloads\\report.html")) {
-            // Create an HTML document
             Document doc = Jsoup.parse("<html></html>");
 
-            // Create a style element for CSS
             Element style = doc.createElement("style");
             style.text(".table {border-collapse: collapse; width: 100%;}" +
                     ".table th {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
@@ -51,11 +57,10 @@ public class PSVComparator {
                     ".data-col {width: 150px;}" +
                     "@media (max-width: 768px) {.table td, .table th {padding: 2px; font-size: 10px;}}" +
                     ".filter-box {margin-bottom: 10px;}" +
-                    ".filter-box select {width: 100%; padding: 5px;}" + // Add CSS for select element
+                    ".filter-box select {width: 100%; padding: 5px;}" +
                     ".filter-box p {margin-top: 5px;}");
             doc.head().appendChild(style);
 
-            // Add JavaScript for filtering
             Element script = doc.createElement("script");
             script.attr("type", "text/javascript");
             script.text(
@@ -85,7 +90,6 @@ public class PSVComparator {
             );
             doc.head().appendChild(script);
 
-            // Add file names and summary
             Element header = doc.createElement("h2");
             header.text("Comparison Report: " + file1Path + " vs. " + file2Path);
             doc.body().appendChild(header);
@@ -103,7 +107,6 @@ public class PSVComparator {
                     "Total Records in " + file2Path + ": " + records2.size());
             doc.body().appendChild(summary);
 
-            // Create a filter input box for the index column
             Element filterBox = doc.createElement("div");
             filterBox.addClass("filter-box");
             filterBox.html(
@@ -112,10 +115,10 @@ public class PSVComparator {
                 "<option value='Matched'>Matched</option>" +
                 "<option value='Mismatched'>Mismatched</option>" +
                 "</select>" +
-                "<p id='rowCountCaption'></p>" + // Change the id to rowCountCaption
+                "<p id='rowCountCaption'></p>" +
                 "<script>" +
                 "function filterTable() {" +
-                "  var filter, table, tr, td, i, visibleRowCount = 0, rowCountCaption = 'Total Rows: ';" + // Initialize rowCountCaption
+                "  var filter, table, tr, td, i, visibleRowCount = 0, rowCountCaption = 'Total Rows: ';" +
                 "  filter = document.getElementById('filterSelect').value;" +
                 "  table = document.getElementById('comparisonTable');" +
                 "  tr = table.getElementsByTagName('tr');" +
@@ -131,14 +134,14 @@ public class PSVComparator {
                 "      }" +
                 "    }" +
                 "  }" +
-                "  if (filter === 'All') {" + // Change the caption when 'All' is selected
+                "  if (filter === 'All') {" +
                 "    rowCountCaption = 'Total Rows: ' + (tr.length - 1);" +
-                "  } else if (filter === 'Matched') {" + // Change the caption when 'Matched' is selected
+                "  } else if (filter === 'Matched') {" +
                 "    rowCountCaption = 'Matched Rows: ' + visibleRowCount;" +
                 "  } else {" +
                 "    rowCountCaption = 'Different Rows: ' + visibleRowCount;" +
                 "  }" +
-                "  document.getElementById('rowCountCaption').textContent = rowCountCaption;" + // Update rowCountCaption
+                "  document.getElementById('rowCountCaption').textContent = rowCountCaption;" +
                 "}" +
                 "function clearFilter() {" +
                 "  document.getElementById('filterSelect').value = 'All';" +
@@ -152,7 +155,6 @@ public class PSVComparator {
             );
             doc.body().appendChild(filterBox);
 
-            // Create a summary table
             Element summaryTable = doc.createElement("table");
             summaryTable.addClass("table summary-table");
 
@@ -185,7 +187,6 @@ public class PSVComparator {
 
             doc.body().appendChild(summaryTable);
 
-            // Create a table for side-by-side comparison
             Element comparisonTable = doc.createElement("table");
             comparisonTable.addClass("table");
             comparisonTable.attr("id", "comparisonTable");
@@ -196,25 +197,32 @@ public class PSVComparator {
             indexHeader.addClass("index-col");
             tableHeaderRow.appendChild(indexHeader);
 
-            for (int i = 1; i <= Math.max(records1.get(0).size(), records2.get(0).size()); i++) {
-                Element columnHeader = doc.createElement("th");
-                columnHeader.text("Column " + i);
-                columnHeader.addClass("data-col");
-                tableHeaderRow.appendChild(columnHeader);
+            if (!records1.isEmpty()) {
+                for (int i = 1; i <= records1.get(0).size(); i++) {
+                    Element columnHeader = doc.createElement("th");
+                    columnHeader.text("Column " + i);
+                    columnHeader.addClass("data-col");
+                    tableHeaderRow.appendChild(columnHeader);
+                }
+            } else if (!records2.isEmpty()) {
+                for (int i = 1; i <= records2.get(0).size(); i++) {
+                    Element columnHeader = doc.createElement("th");
+                    columnHeader.text("Column " + i);
+                    columnHeader.addClass("data-col");
+                    tableHeaderRow.appendChild(columnHeader);
+                }
             }
             comparisonTable.appendChild(tableHeaderRow);
 
-            // Iterate through rows and columns to create the side-by-side view
             for (int i = 0; i < Math.max(records1.size(), records2.size()); i++) {
                 Element tr = doc.createElement("tr");
 
-                // Add the index column
                 Element indexCell = doc.createElement("td");
-                indexCell.text(String.valueOf(i + 1)); // Index is 1-based
+                indexCell.text(String.valueOf(i + 1));
                 indexCell.addClass("index-col");
                 tr.appendChild(indexCell);
 
-                boolean isMismatched = false; // Flag to track if there's a mismatch in this row
+                boolean isMismatched = false;
 
                 if (i < records1.size() && i < records2.size()) {
                     isMismatched = createTableCell(doc, tr, records1.get(i).iterator(), records2.get(i).iterator());
@@ -224,7 +232,6 @@ public class PSVComparator {
                     isMismatched = createTableCell(doc, tr, null, records2.get(i).iterator());
                 }
 
-                // Highlight the index column if there is a mismatch
                 if (isMismatched) {
                     indexCell.addClass("different");
                 }
@@ -234,7 +241,6 @@ public class PSVComparator {
 
             doc.body().appendChild(comparisonTable);
 
-            // Write the HTML document to the file
             writer.write(doc.outerHtml());
         } catch (IOException e) {
             e.printStackTrace();
@@ -268,7 +274,6 @@ public class PSVComparator {
             for (CSVRecord record2 : records2) {
                 if (record1.equals(record2)) {
                     count++;
-                    break;
                 }
             }
         }
@@ -284,4 +289,5 @@ public class PSVComparator {
         }
         return count;
     }
+
 }
