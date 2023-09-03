@@ -1,4 +1,5 @@
 package Accessibility.Automation;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -44,13 +45,21 @@ public class CSVComparator {
                     ".table th {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
                     ".table td {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
                     ".table tr:nth-child(even) {background-color: #f2f2f2;}" +
-                    ".different {background-color: #ff9999;}" +
+                    ".different {background-color: #ff9999; animation: blinker 1s linear infinite;}" + // Add the blinking effect
                     ".summary {font-weight: bold;}" +
                     ".summary-table {margin-top: 20px;}" +
                     ".index-col {width: 50px;}" + // Fixed width for the index column
                     ".data-col {width: 150px;}" + // Fixed width for data columns
                     "@media (max-width: 768px) {" +
                     ".table td, .table th {padding: 2px; font-size: 10px;}" +
+                    "}" +
+                    "@keyframes blinker {" + // Keyframes for the blinking effect
+                    "    70%, 100% {" +
+                    "        opacity: 1; /* Fully visible */" +
+                    "    }" +
+                    "    90% {" +
+                    "        opacity: 0.6; /* Fully invisible */" +
+                    "    }" +
                     "}");
             doc.head().appendChild(style);
 
@@ -114,13 +123,6 @@ public class CSVComparator {
 
             int matchedRecords = calculateMatchedRowCount(records1, records2, keyColumnIndices);
             int differentRecords = calculateDifferentRowCount(records1, records2, keyColumnIndices);
-
-            summary.text("Summary:\n" +
-                    "Matched Records: " + matchedRecords + "\n" +
-                    "Different Records: " + differentRecords + "\n" +
-                    "Total Records in " + file1Path + ": " + records1.size() + "\n" +
-                    "Total Records in " + file2Path + ": " + records2.size());
-            doc.body().appendChild(summary);
 
             // Create a summary table
             Element summaryTable = doc.createElement("table");
