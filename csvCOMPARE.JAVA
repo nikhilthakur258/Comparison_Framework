@@ -17,6 +17,7 @@ public class CSVComparator {
     private static final String file2Path = "D:\\Downloads\\addresses2.csv";
     private static final int[] keyColumnIndices = {0}; // Set the indices of the key columns (0-based index)
     private static final boolean isFirstRowHeader = false; // Set this to true if the first row is a header
+    private static final int numberOfLinesToSkip = 1; // Number of lines to skip at the beginning of each CSV file
 
     public static void main(String[] args) {
         List<CSVRecord> records1 = readCSV(file1Path);
@@ -27,13 +28,37 @@ public class CSVComparator {
 
     private static List<CSVRecord> readCSV(String filePath) {
         try (FileReader reader = new FileReader(filePath);
-             CSVParser parser = CSVFormat.DEFAULT.withTrim().parse(reader)) {
-            return parser.getRecords();
+             CSVParser parser = CSVFormat.DEFAULT.withSkipHeaderRecord(isFirstRowHeader).parse(reader)) {
+
+            List<CSVRecord> records = new ArrayList<>();
+
+            Iterator<CSVRecord> iterator = parser.iterator();
+
+            // Skip the specified number of lines at the beginning of the file
+            for (int i = 0; i < numberOfLinesToSkip; i++) {
+                if (iterator.hasNext()) {
+                    iterator.next();
+                }
+            }
+
+            // If isFirstRowHeader is true, add the first record (header)
+            if (isFirstRowHeader && iterator.hasNext()) {
+                records.add(iterator.next());
+            }
+
+            // Add the remaining records
+            while (iterator.hasNext()) {
+                records.add(iterator.next());
+            }
+
+            return records;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
+
+
 
     private static void generateHTMLReport(String file1Path, String file2Path, List<CSVRecord> records1, List<CSVRecord> records2, int[] keyColumnIndices, boolean isFirstRowHeader) {
         try (FileWriter writer = new FileWriter("D:\\Downloads\\comparison_report.html")) {
