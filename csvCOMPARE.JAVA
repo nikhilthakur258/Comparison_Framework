@@ -13,15 +13,16 @@ import java.io.IOException;
 import java.util.*;
 
 public class CSVComparator {
-    public static void main(String[] args) {
-        String file1Path = "D:\\Downloads\\addresses1.csv";
-        String file2Path = "D:\\Downloads\\addresses2.csv";
-        int[] keyColumnIndices = {0}; // Set the indices of the key columns (0-based index)
+    private static final String file1Path = "D:\\Downloads\\addresses1.csv";
+    private static final String file2Path = "D:\\Downloads\\addresses2.csv";
+    private static final int[] keyColumnIndices = {0}; // Set the indices of the key columns (0-based index)
+    private static final boolean isFirstRowHeader = false; // Set this to true if the first row is a header
 
+    public static void main(String[] args) {
         List<CSVRecord> records1 = readCSV(file1Path);
         List<CSVRecord> records2 = readCSV(file2Path);
 
-        generateHTMLReport(file1Path, file2Path, records1, records2, keyColumnIndices);
+        generateHTMLReport(file1Path, file2Path, records1, records2, keyColumnIndices, isFirstRowHeader);
     }
 
     private static List<CSVRecord> readCSV(String filePath) {
@@ -34,7 +35,7 @@ public class CSVComparator {
         }
     }
 
-    private static void generateHTMLReport(String file1Path, String file2Path, List<CSVRecord> records1, List<CSVRecord> records2, int[] keyColumnIndices) {
+    private static void generateHTMLReport(String file1Path, String file2Path, List<CSVRecord> records1, List<CSVRecord> records2, int[] keyColumnIndices, boolean isFirstRowHeader) {
         try (FileWriter writer = new FileWriter("D:\\Downloads\\comparison_report.html")) {
             // Create an HTML document
             Document doc = Jsoup.parse("<html></html>");
@@ -188,9 +189,18 @@ public class CSVComparator {
             tableHeaderRow.appendChild(indexHeader);
 
             // Add headers for data columns
-            for (int i = 1; i <= Math.max(records1.get(0).size(), records2.get(0).size()); i++) {
+            int columnCount = Math.max(records1.get(0).size(), records2.get(0).size());
+            for (int i = 1; i <= columnCount; i++) {
                 Element columnHeader = doc.createElement("th");
-                columnHeader.text("Column " + i);
+                if (isFirstRowHeader) {
+                    if (records1.size() > 0 && i <= records1.get(0).size()) {
+                        columnHeader.text(records1.get(0).get(i - 1));
+                    } else {
+                        columnHeader.text(records2.get(0).get(i - 1));
+                    }
+                } else {
+                    columnHeader.text("Column " + i);
+                }
                 columnHeader.addClass("data-col"); // Apply the class for fixed width
                 tableHeaderRow.appendChild(columnHeader);
             }
@@ -267,6 +277,12 @@ public class CSVComparator {
             doc.body().appendChild(comparisonTable);
 
             // Write the HTML document to the file
+            Element script = doc.createElement("script");
+            script.text("function initializeFilter() {" +
+                    "  filterTable();" +
+                    "}" +
+                    "initializeFilter();"); // Call the initializeFilter() function
+            doc.body().appendChild(script);
             writer.write(doc.outerHtml());
         } catch (IOException e) {
             e.printStackTrace();
