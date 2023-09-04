@@ -1,4 +1,5 @@
 package Accessibility.Automation;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -9,87 +10,136 @@ import org.jsoup.nodes.Element;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-public class PSVComparator {
-	public static void main(String[] args) {
-	    String file1Path = "d:\\downloads\\data1.psv";
-	    String file2Path = "d:\\downloads\\data2.psv";
-	    int numLinesToSkip = 2; // Specify the number of lines to skip
+public class CSVComparator {
+    private static final String file1Path = "D:\\Downloads\\addresses1.csv";
+    private static final String file2Path = "D:\\Downloads\\addresses2.csv";
+    private static final int[] keyColumnIndices = {0}; // Set the indices of the key columns (0-based index)
+    private static final boolean isFirstRowHeader = true; // Set this to true if the first row is a header
+    private static final int numberOfLinesToSkip = 1; // Number of lines to skip at the beginning of each CSV file
 
-	    List<CSVRecord> records1 = readPSV(file1Path, numLinesToSkip);
-	    List<CSVRecord> records2 = readPSV(file2Path, numLinesToSkip);
+    public static void main(String[] args) {
+        List<CSVRecord> records1 = readCSV(file1Path);
+        List<CSVRecord> records2 = readCSV(file2Path);
 
-	    generateHTMLReport(file1Path, file2Path, records1, records2);
-	}
+        generateHTMLReport(file1Path, file2Path, records1, records2, keyColumnIndices, isFirstRowHeader);
+    }
 
-	private static List<CSVRecord> readPSV(String filePath, int numLinesToSkip) {
-	    try (FileReader reader = new FileReader(filePath);
-	         CSVParser parser = CSVFormat.DEFAULT.withDelimiter('|').withTrim().parse(reader)) {
-	        List<CSVRecord> records = parser.getRecords();
-	        
-	        // Check if there are enough lines to skip
-	        if (numLinesToSkip > 0 && records.size() > numLinesToSkip) {
-	            return records.subList(numLinesToSkip, records.size());
-	        } else {
-	            return records;
-	        }
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	        return null;
-	    }
-	}
+    private static List<CSVRecord> readCSV(String filePath) {
+        try (FileReader reader = new FileReader(filePath);
+             CSVParser parser = CSVFormat.DEFAULT.withSkipHeaderRecord(isFirstRowHeader).parse(reader)) {
 
-    private static void generateHTMLReport(String file1Path, String file2Path, List<CSVRecord> records1, List<CSVRecord> records2) {
-        try (FileWriter writer = new FileWriter("d:\\downloads\\report.html")) {
+            List<CSVRecord> records = new ArrayList<>();
+
+            Iterator<CSVRecord> iterator = parser.iterator();
+
+            // Skip the specified number of lines at the beginning of the file
+            for (int i = 0; i < numberOfLinesToSkip; i++) {
+                if (iterator.hasNext()) {
+                    iterator.next();
+                }
+            }
+
+            // If isFirstRowHeader is true, add the first record (header)
+            if (isFirstRowHeader && iterator.hasNext()) {
+                records.add(iterator.next());
+            }
+
+            // Add the remaining records
+            while (iterator.hasNext()) {
+                records.add(iterator.next());
+            }
+
+            return records;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+
+    private static void generateHTMLReport(String file1Path, String file2Path, List<CSVRecord> records1, List<CSVRecord> records2, int[] keyColumnIndices, boolean isFirstRowHeader) {
+        try (FileWriter writer = new FileWriter("D:\\Downloads\\comparison_report.html")) {
+            // Create an HTML document
             Document doc = Jsoup.parse("<html></html>");
 
+            // Create a style element for CSS
             Element style = doc.createElement("style");
             style.text(".table {border-collapse: collapse; width: 100%;}" +
                     ".table th {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
                     ".table td {border: 1px solid #dddddd; text-align: left; padding: 4px; word-wrap: break-word; font-size: 12px;}" +
                     ".table tr:nth-child(even) {background-color: #f2f2f2;}" +
-                    ".different {background-color: #ff9999;}" +
+                    ".different {background-color: #ff9999; animation: blinker 1s linear infinite;}" + // Add the blinking effect
                     ".summary {font-weight: bold;}" +
                     ".summary-table {margin-top: 20px;}" +
-                    ".index-col {width: 50px;}" +
-                    ".data-col {width: 150px;}" +
-                    "@media (max-width: 768px) {.table td, .table th {padding: 2px; font-size: 10px;}}" +
-                    ".filter-box {margin-bottom: 10px;}" +
-                    ".filter-box select {width: 100%; padding: 5px;}" +
-                    ".filter-box p {margin-top: 5px;}");
+                    ".index-col {width: 50px;}" + // Fixed width for the index column
+                    ".data-col {width: 150px;}" + // Fixed width for data columns
+                    "@media (max-width: 768px) {" +
+                    ".table td, .table th {padding: 2px; font-size: 10px;}" +
+                    "}" +
+                    "@keyframes blinker {" + // Keyframes for the blinking effect
+                    "    70%, 100% {" +
+                    "        opacity: 1; /* Fully visible */" +
+                    "    }" +
+                    "    90% {" +
+                    "        opacity: 0.6; /* Fully invisible */" +
+                    "    }" +
+                    "}");
             doc.head().appendChild(style);
 
-            Element script = doc.createElement("script");
-            script.attr("type", "text/javascript");
-            script.text(
-                "function filterTable() {" +
-                "  var filter, table, tr, td, i, visibleRowCount = 0;" +
-                "  filter = document.getElementById('filterSelect').value;" +
-                "  table = document.getElementById('comparisonTable');" +
-                "  tr = table.getElementsByTagName('tr');" +
-                "  for (i = 1; i < tr.length; i++) {" +
-                "    tr[i].style.display = '';" +
-                "    var indexCell = tr[i].getElementsByTagName('td')[0];" +
-                "    if (indexCell) {" +
-                "      var isDifferent = tr[i].classList.contains('different');" +
-                "      if ((filter === 'Matched' && !isDifferent) || (filter === 'Mismatched' && isDifferent) || (filter === 'All')) {" +
-                "        visibleRowCount++;" +
-                "      } else {" +
-                "        tr[i].style.display = 'none';" +
-                "      }" +
-                "    }" +
-                "  }" +
-                "  document.getElementById('differentRowCount').textContent = 'Different Rows: ' + visibleRowCount;" +
-                "}" +
-                "function clearFilter() {" +
-                "  document.getElementById('filterSelect').value = 'All';" +
-                "  filterTable();" +
-                "}"
+            // Add filter dropdown and JavaScript
+            Element filterBox = doc.createElement("div");
+            filterBox.addClass("filter-box");
+            filterBox.html(
+                    "<label for='filterSelect'>Filter by:</label>" +
+                            "<select id='filterSelect' onchange='filterTable()'>" +
+                            "<option value='All'>All</option>" +
+                            "<option value='Matched'>Matched</option>" +
+                            "<option value='Mismatched'>Mismatched</option>" +
+                            "</select>" +
+                            "<p id='rowCountCaption'></p>" +
+                            "<script>" +
+                            "function filterTable() {" +
+                            "  var filter, table, tr, td, i, visibleRowCount = 0, rowCountCaption = 'Total Rows: ';" +
+                            "  filter = document.getElementById('filterSelect').value;" +
+                            "  table = document.getElementById('comparisonTable');" +
+                            "  tr = table.getElementsByTagName('tr');" +
+                            "  for (i = 1; i < tr.length; i++) {" +
+                            "    tr[i].style.display = '';" +
+                            "    var indexCell = tr[i].getElementsByTagName('td')[0];" +
+                            "    if (indexCell) {" +
+                            "      var isDifferent = indexCell.classList.contains('different');" +
+                            "      if ((filter === 'Matched' && !isDifferent) || (filter === 'Mismatched' && isDifferent) || (filter === 'All')) {" +
+                            "        visibleRowCount++;" +
+                            "      } else {" +
+                            "        tr[i].style.display = 'none';" +
+                            "      }" +
+                            "    }" +
+                            "  }" +
+                            "  if (filter === 'All') {" +
+                            "    rowCountCaption = 'Total Rows: ' + (tr.length - 1);" +
+                            "  } else if (filter === 'Matched') {" +
+                            "    rowCountCaption = 'Matched Rows: ' + visibleRowCount;" +
+                            "  } else {" +
+                            "    rowCountCaption = 'Different Rows: ' + visibleRowCount;" +
+                            "  }" +
+                            "  document.getElementById('rowCountCaption').textContent = rowCountCaption;" +
+                            "}" +
+                            "function clearFilter() {" +
+                            "  document.getElementById('filterSelect').value = 'All';" +
+                            "  filterTable();" +
+                            "}" +
+                            "function initializeFilter() {" +
+                            "  filterTable();" +
+                            "}" +
+                            "initializeFilter();" +
+                            "</script>"
             );
-            doc.head().appendChild(script);
+            doc.body().appendChild(filterBox);
 
+            // Add file names and summary
             Element header = doc.createElement("h2");
             header.text("Comparison Report: " + file1Path + " vs. " + file2Path);
             doc.body().appendChild(header);
@@ -97,162 +147,204 @@ public class PSVComparator {
             Element summary = doc.createElement("p");
             summary.addClass("summary");
 
-            int matchedRecords = countMatchedRecords(records1, records2);
-            int mismatchedRecords = countMismatchedRecords(records1, records2);
+            int matchedRecords = calculateMatchedRowCount(records1, records2, keyColumnIndices);
+            int differentRecords = calculateDifferentRowCount(records1, records2, keyColumnIndices);
 
-            summary.text("Summary:\n" +
-                    "Matched Records: " + matchedRecords + "\n" +
-                    "Mismatched Records: " + mismatchedRecords + "\n" +
-                    "Total Records in " + file1Path + ": " + records1.size() + "\n" +
-                    "Total Records in " + file2Path + ": " + records2.size());
-            doc.body().appendChild(summary);
-
-            Element filterBox = doc.createElement("div");
-            filterBox.addClass("filter-box");
-            filterBox.html(
-                "<select id='filterSelect' onchange='filterTable()'>" +
-                "<option value='All'>All</option>" +
-                "<option value='Matched'>Matched</option>" +
-                "<option value='Mismatched'>Mismatched</option>" +
-                "</select>" +
-                "<p id='rowCountCaption'></p>" +
-                "<script>" +
-                "function filterTable() {" +
-                "  var filter, table, tr, td, i, visibleRowCount = 0, rowCountCaption = 'Total Rows: ';" +
-                "  filter = document.getElementById('filterSelect').value;" +
-                "  table = document.getElementById('comparisonTable');" +
-                "  tr = table.getElementsByTagName('tr');" +
-                "  for (i = 1; i < tr.length; i++) {" +
-                "    tr[i].style.display = '';" +
-                "    var indexCell = tr[i].getElementsByTagName('td')[0];" +
-                "    if (indexCell) {" +
-                "      var isDifferent = indexCell.classList.contains('different');" +
-                "      if ((filter === 'Matched' && !isDifferent) || (filter === 'Mismatched' && isDifferent) || (filter === 'All')) {" +
-                "        visibleRowCount++;" +
-                "      } else {" +
-                "        tr[i].style.display = 'none';" +
-                "      }" +
-                "    }" +
-                "  }" +
-                "  if (filter === 'All') {" +
-                "    rowCountCaption = 'Total Rows: ' + (tr.length - 1);" +
-                "  } else if (filter === 'Matched') {" +
-                "    rowCountCaption = 'Matched Rows: ' + visibleRowCount;" +
-                "  } else {" +
-                "    rowCountCaption = 'Different Rows: ' + visibleRowCount;" +
-                "  }" +
-                "  document.getElementById('rowCountCaption').textContent = rowCountCaption;" +
-                "}" +
-                "function clearFilter() {" +
-                "  document.getElementById('filterSelect').value = 'All';" +
-                "  filterTable();" +
-                "}" +
-                "function initializeFilter() {" +
-                "  filterTable();" +
-                "}" +
-                "initializeFilter();" +
-                "</script>"
-            );
-            doc.body().appendChild(filterBox);
-
+            // Create a summary table
             Element summaryTable = doc.createElement("table");
             summaryTable.addClass("table summary-table");
 
+            // Add a table header row with column names
             Element summaryTableHeaderRow = doc.createElement("tr");
-            Element summaryTableHeaderCell1 = doc.createElement("th");
-            Element summaryTableHeaderCell2 = doc.createElement("th");
-            summaryTableHeaderCell1.text("File");
-            summaryTableHeaderCell2.text("Record Count");
-            summaryTableHeaderRow.appendChild(summaryTableHeaderCell1);
-            summaryTableHeaderRow.appendChild(summaryTableHeaderCell2);
+            Element typeOfFileHeader = doc.createElement("th");
+            Element fileNameHeader = doc.createElement("th");
+            Element recordCountHeader = doc.createElement("th");
+
+            typeOfFileHeader.text("Type of File");
+            fileNameHeader.text("File Name");
+            recordCountHeader.text("Record Count");
+
+            summaryTableHeaderRow.appendChild(typeOfFileHeader);
+            summaryTableHeaderRow.appendChild(fileNameHeader);
+            summaryTableHeaderRow.appendChild(recordCountHeader);
             summaryTable.appendChild(summaryTableHeaderRow);
 
+            // Add the Baseline file entry
             Element file1SummaryRow = doc.createElement("tr");
-            Element file1SummaryCell1 = doc.createElement("td");
-            Element file1SummaryCell2 = doc.createElement("td");
-            file1SummaryCell1.text(file1Path);
-            file1SummaryCell2.text(String.valueOf(records1.size()));
-            file1SummaryRow.appendChild(file1SummaryCell1);
-            file1SummaryRow.appendChild(file1SummaryCell2);
+            Element baselineCell = doc.createElement("td");
+            Element file1NameCell = doc.createElement("td");
+            Element file1RecordCountCell = doc.createElement("td");
+
+            baselineCell.text("Baseline"); // Type of File
+            file1NameCell.text(file1Path); // File Name
+            file1RecordCountCell.text(String.valueOf(records1.size())); // Record Count
+
+            file1SummaryRow.appendChild(baselineCell);
+            file1SummaryRow.appendChild(file1NameCell);
+            file1SummaryRow.appendChild(file1RecordCountCell);
             summaryTable.appendChild(file1SummaryRow);
 
+            // Add the Current file entry
             Element file2SummaryRow = doc.createElement("tr");
-            Element file2SummaryCell1 = doc.createElement("td");
-            Element file2SummaryCell2 = doc.createElement("td");
-            file2SummaryCell1.text(file2Path);
-            file2SummaryCell2.text(String.valueOf(records2.size()));
-            file2SummaryRow.appendChild(file2SummaryCell1);
-            file2SummaryRow.appendChild(file2SummaryCell2);
+            Element currentCell = doc.createElement("td");
+            Element file2NameCell = doc.createElement("td");
+            Element file2RecordCountCell = doc.createElement("td");
+
+            currentCell.text("Current"); // Type of File
+            file2NameCell.text(file2Path); // File Name
+            file2RecordCountCell.text(String.valueOf(records2.size())); // Record Count
+
+            file2SummaryRow.appendChild(currentCell);
+            file2SummaryRow.appendChild(file2NameCell);
+            file2SummaryRow.appendChild(file2RecordCountCell);
             summaryTable.appendChild(file2SummaryRow);
 
             doc.body().appendChild(summaryTable);
 
+            // Create a table for side-by-side comparison
             Element comparisonTable = doc.createElement("table");
             comparisonTable.addClass("table");
-            comparisonTable.attr("id", "comparisonTable");
+            comparisonTable.attr("id", "comparisonTable"); // Add an ID for filtering
 
+            // Add the table header row with column names
             Element tableHeaderRow = doc.createElement("tr");
             Element indexHeader = doc.createElement("th");
             indexHeader.text("Index");
-            indexHeader.addClass("index-col");
+            indexHeader.addClass("index-col"); // Apply the class for fixed width
             tableHeaderRow.appendChild(indexHeader);
 
-            if (!records1.isEmpty()) {
-                for (int i = 1; i <= records1.get(0).size(); i++) {
-                    Element columnHeader = doc.createElement("th");
+            // Add headers for data columns
+            int columnCount = Math.max(records1.get(0).size(), records2.get(0).size());
+            for (int i = 1; i <= columnCount; i++) {
+                Element columnHeader = doc.createElement("th");
+                if (isFirstRowHeader) {
+                    if (records1.size() > 0 && i <= records1.get(0).size()) {
+                        columnHeader.text(records1.get(0).get(i - 1));
+                    } else {
+                        columnHeader.text(records2.get(0).get(i - 1));
+                    }
+                } else {
                     columnHeader.text("Column " + i);
-                    columnHeader.addClass("data-col");
-                    tableHeaderRow.appendChild(columnHeader);
                 }
-            } else if (!records2.isEmpty()) {
-                for (int i = 1; i <= records2.get(0).size(); i++) {
-                    Element columnHeader = doc.createElement("th");
-                    columnHeader.text("Column " + i);
-                    columnHeader.addClass("data-col");
-                    tableHeaderRow.appendChild(columnHeader);
-                }
+                columnHeader.addClass("data-col"); // Apply the class for fixed width
+                tableHeaderRow.appendChild(columnHeader);
             }
             comparisonTable.appendChild(tableHeaderRow);
 
-            for (int i = 0; i < Math.max(records1.size(), records2.size()); i++) {
+            // Create maps to store records based on the key columns
+            Map<List<String>, CSVRecord> recordMap1 = new HashMap<>();
+            Map<List<String>, CSVRecord> recordMap2 = new HashMap<>();
+
+            for (CSVRecord record : records1) {
+                List<String> key = new ArrayList<>();
+                for (int keyColumnIndex : keyColumnIndices) {
+                    if (record.size() > keyColumnIndex) {
+                        key.add(record.get(keyColumnIndex));
+                    }
+                }
+                recordMap1.put(key, record);
+            }
+
+            for (CSVRecord record : records2) {
+                List<String> key = new ArrayList<>();
+                for (int keyColumnIndex : keyColumnIndices) {
+                    if (record.size() > keyColumnIndex) {
+                        key.add(record.get(keyColumnIndex));
+                    }
+                }
+                recordMap2.put(key, record);
+            }
+
+            // Iterate through all unique keys from both files
+            Set<List<String>> allKeys = new HashSet<>(recordMap1.keySet());
+            allKeys.addAll(recordMap2.keySet());
+
+            int rowIndex = 1;
+            for (List<String> key : allKeys) {
                 Element tr = doc.createElement("tr");
 
+                // Add the index column
                 Element indexCell = doc.createElement("td");
-                indexCell.text(String.valueOf(i + 1));
-                indexCell.addClass("index-col");
+                indexCell.text(String.valueOf(rowIndex));
+                indexCell.addClass("index-col"); // Apply the class for fixed width
                 tr.appendChild(indexCell);
 
-                boolean isMismatched = false;
+                boolean isMismatched = false; // Flag to track if there's a mismatch in this row
 
-                if (i < records1.size() && i < records2.size()) {
-                    isMismatched = createTableCell(doc, tr, records1.get(i).iterator(), records2.get(i).iterator());
-                } else if (i < records1.size()) {
-                    isMismatched = createTableCell(doc, tr, records1.get(i).iterator(), null);
+                CSVRecord record1 = recordMap1.get(key);
+                CSVRecord record2 = recordMap2.get(key);
+
+                if (record1 != null && record2 != null) {
+                    isMismatched = createTableCell(doc, tr, record1.iterator(), record2.iterator());
                 } else {
-                    isMismatched = createTableCell(doc, tr, null, records2.get(i).iterator());
+                    // Handle the case where the key is in one file but not in the other
+                    isMismatched = true;
+                    if (record1 != null) {
+                        createNotFoundCell(doc, tr, record1, "Current");
+                    } else if (record2 != null) {
+                        createNotFoundCell(doc, tr, record2, "Baseline");
+                    } else {
+                        createNotFoundCell(doc, tr, null, "Both");
+                    }
                 }
 
+                // Highlight the index column if there is a mismatch
                 if (isMismatched) {
                     indexCell.addClass("different");
                 }
 
+                tr.addClass(isMismatched ? "mismatched" : "matched");
+                tr.addClass("data-row");
                 comparisonTable.appendChild(tr);
+                rowIndex++;
             }
 
             doc.body().appendChild(comparisonTable);
 
+            // Write the HTML document to the file
+            Element script = doc.createElement("script");
+            script.text("function initializeFilter() {" +
+                    "  filterTable();" +
+                    "}" +
+                    "initializeFilter();"); // Call the initializeFilter() function
+            doc.body().appendChild(script);
             writer.write(doc.outerHtml());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    private static void createNotFoundCell(Document doc, Element tr, CSVRecord record, String side) {
+        // Create a cell for each value in the record
+        for (String value : record) {
+            Element td = doc.createElement("td");
+            td.addClass("different");
+
+            // Set the cell text based on the side
+            if ("Current".equals(side)) {
+                td.text("Key not found in Current file");
+                Element pre = doc.createElement("pre");
+                pre.text("Baseline: " + value);
+                td.appendChild(pre);
+            } else if ("Baseline".equals(side)) {
+                td.text("Key not found in Baseline file");
+                Element pre = doc.createElement("pre");
+                pre.text("Current: " + value);
+                td.appendChild(pre);
+            } else {
+                td.text("Key not found in Both files");
+            }
+
+            tr.appendChild(td);
+        }
+    }
+
     private static boolean createTableCell(Document doc, Element tr, Iterator<String> values1, Iterator<String> values2) {
         boolean isMismatched = false;
 
-        while (values1 != null && values1.hasNext() || values2 != null && values2.hasNext()) {
-            String value1 = values1 != null && values1.hasNext() ? values1.next() : "Not Found";
-            String value2 = values2 != null && values2.hasNext() ? values2.next() : "Not Found";
+        while (values1.hasNext() || values2.hasNext()) {
+            String value1 = values1.hasNext() ? values1.next() : "";
+            String value2 = values2.hasNext() ? values2.next() : "";
 
             Element td = doc.createElement("td");
             if (!value1.equals(value2)) {
@@ -260,7 +352,7 @@ public class PSVComparator {
                 isMismatched = true;
             }
             Element pre = doc.createElement("pre");
-            pre.appendText("Left: " + value1 + "\nRight: " + value2 + "\n");
+            pre.appendText("Baseline: " + value1 + "\nCurrent: " + value2 + "\n");
             td.appendChild(pre);
             tr.appendChild(td);
         }
@@ -268,26 +360,63 @@ public class PSVComparator {
         return isMismatched;
     }
 
-    private static int countMatchedRecords(List<CSVRecord> records1, List<CSVRecord> records2) {
+    private static int calculateMatchedRowCount(List<CSVRecord> records1, List<CSVRecord> records2, int[] keyColumnIndices) {
         int count = 0;
-        for (CSVRecord record1 : records1) {
-            for (CSVRecord record2 : records2) {
-                if (record1.equals(record2)) {
-                    count++;
+        Map<List<String>, CSVRecord> recordMap2 = new HashMap<>();
+
+        for (CSVRecord record : records2) {
+            List<String> key = new ArrayList<>();
+            for (int keyColumnIndex : keyColumnIndices) {
+                if (record.size() > keyColumnIndex) {
+                    key.add(record.get(keyColumnIndex));
                 }
             }
+            recordMap2.put(key, record);
         }
-        return count;
-    }
 
-    private static int countMismatchedRecords(List<CSVRecord> records1, List<CSVRecord> records2) {
-        int count = 0;
-        for (int i = 0; i < Math.min(records1.size(), records2.size()); i++) {
-            if (!records1.get(i).equals(records2.get(i))) {
+        for (CSVRecord record : records1) {
+            List<String> key = new ArrayList<>();
+            for (int keyColumnIndex : keyColumnIndices) {
+                if (record.size() > keyColumnIndex) {
+                    key.add(record.get(keyColumnIndex));
+                }
+            }
+            CSVRecord correspondingRecord = recordMap2.get(key);
+            if (correspondingRecord != null && record.equals(correspondingRecord)) {
                 count++;
             }
         }
+
         return count;
     }
 
+    private static int calculateDifferentRowCount(List<CSVRecord> records1, List<CSVRecord> records2, int[] keyColumnIndices) {
+        int count = 0;
+        Map<List<String>, CSVRecord> recordMap2 = new HashMap<>();
+
+        for (CSVRecord record : records2) {
+            List<String> key = new ArrayList<>();
+            for (int keyColumnIndex : keyColumnIndices) {
+                if (record.size() > keyColumnIndex) {
+                    key.add(record.get(keyColumnIndex));
+                }
+            }
+            recordMap2.put(key, record);
+        }
+
+        for (CSVRecord record : records1) {
+            List<String> key = new ArrayList<>();
+            for (int keyColumnIndex : keyColumnIndices) {
+                if (record.size() > keyColumnIndex) {
+                    key.add(record.get(keyColumnIndex));
+                }
+            }
+            CSVRecord correspondingRecord = recordMap2.get(key);
+            if (correspondingRecord == null || !record.equals(correspondingRecord)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
 }
