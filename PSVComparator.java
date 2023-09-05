@@ -1,5 +1,4 @@
 package Accessibility.Automation;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -12,23 +11,23 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-public class CSVComparator {
-    private static final String file1Path = "D:\\Downloads\\addresses1.csv";
-    private static final String file2Path = "D:\\Downloads\\addresses2.csv";
-    private static final int[] keyColumnIndices = {0}; // Set the indices of the key columns (0-based index)
+public class PSVComparator {
+    private static final String file1Path = "D:\\Downloads\\Data1.psv";
+    private static final String file2Path = "D:\\Downloads\\Data2.psv";
+    private static final int[] keyColumnIndices = {1}; // Set the indices of the key columns (0-based index)
     private static final boolean isFirstRowHeader = true; // Set this to true if the first row is a header
-    private static final int numberOfLinesToSkip = 1; // Number of lines to skip at the beginning of each CSV file
+    private static final int numberOfLinesToSkip = 1; // Number of lines to skip at the beginning of each PSV file
 
     public static void main(String[] args) {
-        List<CSVRecord> records1 = readCSV(file1Path);
-        List<CSVRecord> records2 = readCSV(file2Path);
+        List<CSVRecord> records1 = readPSV(file1Path);
+        List<CSVRecord> records2 = readPSV(file2Path);
 
         generateHTMLReport(file1Path, file2Path, records1, records2, keyColumnIndices, isFirstRowHeader);
     }
 
-    private static List<CSVRecord> readCSV(String filePath) {
+    private static List<CSVRecord> readPSV(String filePath) {
         try (FileReader reader = new FileReader(filePath);
-             CSVParser parser = CSVFormat.DEFAULT.withSkipHeaderRecord(isFirstRowHeader).parse(reader)) {
+             CSVParser parser = CSVFormat.newFormat('|').withSkipHeaderRecord(isFirstRowHeader).parse(reader)) {
 
             List<CSVRecord> records = new ArrayList<>();
 
@@ -57,8 +56,6 @@ public class CSVComparator {
             return null;
         }
     }
-
-
 
     private static void generateHTMLReport(String file1Path, String file2Path, List<CSVRecord> records1, List<CSVRecord> records2, int[] keyColumnIndices, boolean isFirstRowHeader) {
         try (FileWriter writer = new FileWriter("D:\\Downloads\\comparison_report.html")) {
