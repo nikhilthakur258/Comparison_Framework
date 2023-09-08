@@ -1,4 +1,5 @@
-package Accessibility.Automation;
+ package Accessibility.Automation;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.text.StringEscapeUtils;
@@ -11,16 +12,17 @@ public class JSONComparator {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static void main(String[] args) {
-        if (args.length != 3) {
-            System.out.println("Usage: java JSONComparator <jsonFile1> <jsonFile2> <jsonFile3>");
+        if (args.length != 4) {
+            System.out.println("Usage: java JSONComparator <jsonFile1> <jsonFile2> <jsonFile3> <kafkaTopic>");
             return;
         }
 
         String jsonFile1 = args[0];
         String jsonFile2 = args[1];
         String jsonFile3 = args[2];
+        String kafkaTopic = args[3];
 
-        compareJSON(jsonFile1, jsonFile2, jsonFile3);
+        compareJSON(jsonFile1, jsonFile2, jsonFile3, kafkaTopic);
     }
 
     private static String getTableCellHtml(String content, String status) {
@@ -31,7 +33,7 @@ public class JSONComparator {
         return "<td class='" + cellClass + "' style='word-wrap: break-word;'>" + StringEscapeUtils.escapeHtml4(content) + "</td>";
     }
 
-    public static void compareJSON(String jsonFile1, String jsonFile2, String jsonFile3) {
+    public static void compareJSON(String jsonFile1, String jsonFile2, String jsonFile3, String kafkaTopic) {
         try {
             String reportFilePath = "results/comparison_report.html";
 
@@ -85,7 +87,7 @@ public class JSONComparator {
                         .append("</style></head><body>")
                         .append("<h1>Comparison Report</h1>");
 
-                // Add filter options for keys and statuses
+                // Add filter options for keys, Kafka Topic, and statuses
                 reportBuilder.append("<form>")
                         .append("<select id='keyFilter' onchange='filterTable()'>")
                         .append("<option value=''>All</option>");
@@ -93,6 +95,10 @@ public class JSONComparator {
                     reportBuilder.append("<option value='").append(key).append("'>").append(key).append("</option>");
                 }
                 reportBuilder.append("</select>")
+                        .append("<select id='topicFilter' onchange='filterTable()'>")
+                        .append("<option value=''>All</option>")
+                        .append("<option value='").append(kafkaTopic).append("'>").append(kafkaTopic).append("</option>")
+                        .append("</select>")
                         .append("<select id='statusFilter' onchange='filterTable()'>")
                         .append("<option value=''>All</option>")
                         .append("<option value='Same'>Same</option>")
@@ -105,7 +111,7 @@ public class JSONComparator {
 
                 // Add table headers
                 reportBuilder.append("<table id='comparisonTable'>")
-                        .append("<thead class='table-header'><tr><th>File Name</th><th>Key</th><th>Landing zone</th><th>Raw Zone</th><th>Curated Zone</th><th>Status</th></tr></thead>");
+                        .append("<thead class='table-header'><tr><th>File Name</th><th>Kafka Topic</th><th>Key</th><th>Landing</th><th>Raw</th><th>Curated</th><th>Status</th></tr></thead>");
             } else {
                 // If the report already exists, locate the end of the table to append new rows
                 int tableEndIndex = existingReportContent.indexOf("</tbody>");
@@ -124,7 +130,7 @@ public class JSONComparator {
                 String status = "";
 
                 if (value1 != null && value2 != null && value3 != null) {
-                    if (value1.equals(value2) && value2.equals(value3)) {
+                    if (value1.equals(value2) && value1.equals(value3)) {
                         status = "Same";
                     } else {
                         status = "Different";
@@ -139,6 +145,7 @@ public class JSONComparator {
 
                 reportBuilder.append("<tr class='").append(key).append("'>")
                         .append("<td>").append(fileName1).append(" - ").append(fileName2).append(" - ").append(fileName3).append("</td>")
+                        .append("<td>").append(kafkaTopic).append("</td>")
                         .append("<td>").append(StringEscapeUtils.escapeHtml4(key)).append("</td>")
                         .append(getTableCellHtml(value1, status))
                         .append(getTableCellHtml(value2, status))
@@ -151,24 +158,31 @@ public class JSONComparator {
                     .append("<script>")
                     .append("function filterTable() {")
                     .append("var keyFilter = document.getElementById('keyFilter').value;")
+                    .append("var topicFilter = document.getElementById('topicFilter').value;")
                     .append("var statusFilter = document.getElementById('statusFilter').value;")
                     .append("var table = document.getElementById('comparisonTable');")
                     .append("var rows = table.getElementsByTagName('tr');")
                     .append("var recordCount = 0;") // Initialize record count
                     .append("for (var i = 1; i < rows.length; i++) {") // Start from 1 to skip the header row
                     .append("var row = rows[i];")
-                    .append("var key = row.cells[1].textContent.trim();")
-                    .append("var status = row.cells[5].textContent.trim();")
-                    .append("var hideRow = (keyFilter !== '' && key !== keyFilter) || (statusFilter !== '' && status !== statusFilter);")
+                    .append("var fileName = row.cells[0].textContent.trim();")
+                    .append("var topic = row.cells[1].textContent.trim();")
+                    .append("var key = row.cells[2].textContent.trim();")
+                    .append("var status = row.cells[6].textContent.trim();")
+                    .append("var hideRow = false;")
+                    .append("if (keyFilter !== '' && key !== keyFilter) { hideRow = true; }")
+                    .append("if (topicFilter !== '' && topic !== topicFilter) { hideRow = true; }")
+                    .append("if (statusFilter !== '' && status !== statusFilter) { hideRow = true; }")
                     .append("row.style.display = hideRow ? 'none' : '';")
                     .append("if (!hideRow) { recordCount++; }") // Increment record count if row is displayed
                     .append("}")
-                    .append("document.getElementById('recordCount').textContent = 'Records: ' + recordCount;") // Update record count
+                    .append("document.getElementById('recordCount').textContent = 'Records: ' + recordCount;")
                     .append("}")
 
                     // Add a function to reset filters and show all rows
                     .append("function resetFilters() {")
                     .append("document.getElementById('keyFilter').value = '';")
+                    .append("document.getElementById('topicFilter').value = '';")
                     .append("document.getElementById('statusFilter').value = '';")
                     .append("var table = document.getElementById('comparisonTable');")
                     .append("var rows = table.getElementsByTagName('tr');")
@@ -178,7 +192,7 @@ public class JSONComparator {
                     .append("row.style.display = '';")
                     .append("recordCount++;") // Increment record count for each row
                     .append("}")
-                    .append("document.getElementById('recordCount').textContent = 'Records: ' + recordCount;") // Update record count
+                    .append("document.getElementById('recordCount').textContent = 'Records: ' + recordCount;")
                     .append("}")
                     .append("</script>")
                     .append("</body></html>");
