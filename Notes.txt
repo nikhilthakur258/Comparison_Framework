@@ -1,5 +1,9 @@
+I apologize for the confusion. To generate a difference image with red-highlighted areas where the differences occur, you can modify the script to create a mask image that represents the differences and then overlay that mask onto one of the input images. Here's the updated script:
+
+```python
 import argparse
 from PIL import Image, ImageChops, ImageDraw
+import numpy as np
 import sys
 
 def image_diff(image1, image2, output_path):
@@ -15,20 +19,29 @@ def image_diff(image1, image2, output_path):
     diff = ImageChops.difference(img1, img2)
     diff = diff.convert("RGB")
 
-    # Highlight differences in red
-    draw = ImageDraw.Draw(diff)
+    # Create a mask for differing pixels
+    mask = Image.new("L", diff.size)
+    mask_data = []
+
     width, height = diff.size
-    for x in range(width):
-        for y in range(height):
+    for y in range(height):
+        for x in range(width):
             r, g, b = diff.getpixel((x, y))
             if r > 0 or g > 0 or b > 0:
-                draw.rectangle([x, y, x+1, y+1], fill=(255, 0, 0))
+                mask_data.append(255)  # Set to 255 for differing pixels
+            else:
+                mask_data.append(0)    # Set to 0 for non-differing pixels
+
+    mask.putdata(mask_data)
+
+    # Highlight differences in red
+    diff = Image.composite(Image.new("RGB", diff.size, (255, 0, 0)), img1, mask)
 
     # Save the difference image
     diff.save(output_path)
 
     # Calculate total difference (count of differing pixels)
-    total_diff = diff.getbbox()
+    total_diff = np.count_nonzero(mask)
     
     return total_diff
 
@@ -53,3 +66,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+In this updated script:
+
+- We create a "difference" image as before.
+- We create a mask image where differing pixels are set to 255 (white) and non-differing pixels are set to 0 (black).
+- We use the mask to overlay the red-highlighted differences onto the original image.
+- The script calculates the total differing pixels using NumPy's `count_nonzero` function.
+
+Now, when you run the script, it will generate a difference image with red-highlighted areas where the differences occur.
