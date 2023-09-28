@@ -1,9 +1,5 @@
-To modify the utility so that it returns a non-zero exit code when the images are different, you can use the `sys.exit()` function to exit the script with an appropriate exit code. Here's the updated script:
-
-```python
 import argparse
-from PIL import Image
-import numpy as np
+from PIL import Image, ImageChops, ImageDraw
 import sys
 
 def image_diff(image1, image2, output_path):
@@ -15,20 +11,25 @@ def image_diff(image1, image2, output_path):
     if img1.size != img2.size:
         raise ValueError("Images must have the same dimensions for comparison.")
 
-    # Convert images to NumPy arrays
-    np_img1 = np.array(img1)
-    np_img2 = np.array(img2)
+    # Create a "difference" image
+    diff = ImageChops.difference(img1, img2)
+    diff = diff.convert("RGB")
 
-    # Compute the absolute difference between the images
-    diff = np.abs(np_img1 - np_img2)
-
-    # Sum the differences to get a single value representing the difference
-    total_diff = np.sum(diff)
+    # Highlight differences in red
+    draw = ImageDraw.Draw(diff)
+    width, height = diff.size
+    for x in range(width):
+        for y in range(height):
+            r, g, b = diff.getpixel((x, y))
+            if r > 0 or g > 0 or b > 0:
+                draw.rectangle([x, y, x+1, y+1], fill=(255, 0, 0))
 
     # Save the difference image
-    diff_img = Image.fromarray(diff.astype(np.uint8))
-    diff_img.save(output_path)
+    diff.save(output_path)
 
+    # Calculate total difference (count of differing pixels)
+    total_diff = diff.getbbox()
+    
     return total_diff
 
 def main():
@@ -41,10 +42,10 @@ def main():
     
     try:
         difference = image_diff(args.image1, args.image2, args.output)
-        print(f"Total pixel difference: {difference}")
+        print(f"Total differing pixels: {difference}")
         
         # Exit with a non-zero code if images are different
-        if difference > 0:
+        if difference:
             sys.exit(1)
     except Exception as e:
         print(f"Error: {e}")
@@ -52,6 +53,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-```
-
-In this updated script, if the total pixel difference (`difference`) between the two images is greater than 0, the script exits with a non-zero exit code (1). Otherwise, it exits with a zero exit code (indicating that the images are the same). This allows you to check the exit code to determine whether the images are different or not when running the utility from the command line.
