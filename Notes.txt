@@ -1,47 +1,28 @@
-import org.apache.kafka.clients.consumer.*;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.commons.codec.digest.DigestUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeOptions;
+import java.util.Locale;
 
-import java.util.Collections;
-import java.util.Properties;
-
-public class KafkaJsonChecksumCalculator {
+public class EdgeBrowserFrench {
     public static void main(String[] args) {
-        // Kafka consumer configuration
-        Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "your-bootstrap-server:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "json-checksum-group");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        // Set the system property to the path of the EdgeDriver executable
+        System.setProperty("webdriver.edge.driver", "path_to_edge_driver_executable");
 
-        // Create Kafka consumer
-        Consumer<String, String> consumer = new KafkaConsumer<>(props);
+        // Set the EdgeOptions to configure the browser
+        EdgeOptions options = new EdgeOptions();
+        
+        // Set the language to French (France)
+        options.addArguments("--lang=fr-FR");
 
-        // Subscribe to the Kafka topic(s)
-        consumer.subscribe(Collections.singletonList("your-topic-name"));
+        // Launch Microsoft Edge with the configured options
+        WebDriver driver = new EdgeDriver(options);
 
-        // JSON mapper
-        ObjectMapper objectMapper = new ObjectMapper();
+        // Navigate to a website (e.g., google.com)
+        driver.get("https://www.google.com");
 
-        // Consume and process messages
-        while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(100);
-            for (ConsumerRecord<String, String> record : records) {
-                String message = record.value();
+        // Perform your automation tasks here
 
-                // Calculate the checksum (SHA-256 in this example)
-                String checksum = calculateChecksum(message);
-
-                System.out.println("Received Message: " + message);
-                System.out.println("Checksum: " + checksum);
-            }
-        }
-    }
-
-    private static String calculateChecksum(String input) {
-        return DigestUtils.sha256Hex(input); // You can use a different checksum algorithm if needed
+        // Close the browser when done
+        driver.quit();
     }
 }
