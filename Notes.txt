@@ -1,21 +1,18 @@
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
-import java.util.Locale;
 
-public class EdgeBrowserFrench {
+public class EdgeBrowser {
     public static void main(String[] args) {
         // Set the system property to the path of the EdgeDriver executable
-        System.setProperty("webdriver.edge.driver", "path_to_edge_driver_executable");
+        System.setProperty("webdriver.edge.driver", "c:\\edge");
 
-        // Set the EdgeOptions to configure the browser
-        EdgeOptions options = new EdgeOptions();
-        
-        // Set the language to French (France)
-        options.addArguments("--lang=fr-FR");
+     // Set the language to French (France) using a system property
+        System.setProperty("webdriver.edge.driver", "msedgedriver.exe");
+        System.setProperty("webdriver.edge.args", "--lang=fr-FR");
 
-        // Launch Microsoft Edge with the configured options
-        WebDriver driver = new EdgeDriver(options);
+        // Launch Microsoft Edge
+        WebDriver driver = new EdgeDriver();
 
         // Navigate to a website (e.g., google.com)
         driver.get("https://www.google.com");
