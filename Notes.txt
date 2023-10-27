@@ -1,51 +1,23 @@
- 1. Introduction:
-The Test Closure Report for the "US Cash Management" project is an exhaustive document, representing the culmination of a rigorous phase of accessibility testing. The core purpose of this report is to present a detailed account of the testing activities, the results obtained, and offer recommendations for further enhancements in the context of accessibility.
+*** Settings ***
+Library           DatabaseLibrary
 
-2. Objective:
-The primary objective of the accessibility testing phase was to guarantee that the "US Cash Management" project aligns with the Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA. The significance of this objective lies in the broader vision of inclusivity, making sure that users with disabilities can seamlessly access and utilize our digital platform. The secondary objective, equally crucial, revolved around improving the overall user experience, making the platform more user-friendly and accessible to all.
+*** Variables ***
+${DatabaseHost}    Your_Azure_SQL_DB_Hostname.database.windows.net
+${DatabaseName}    Your_Database_Name
+${DatabaseUser}    Your_Database_Username
+${DatabasePassword} Your_Database_Password
+${JDBC_Driver}     com.microsoft.sqlserver.jdbc.SQLServerDriver
+${JDBC_URL}        jdbc:sqlserver://${DatabaseHost}:1433;databaseName=${DatabaseName}
 
-3. Testing Scope:
-The accessibility testing had a profound scope that covered every nook and cranny of the "US Cash Management" project. It included web pages, mobile applications, and the core functionalities that underpin our digital presence. Our intention was to leave no stone unturned, making certain that our digital offerings are accessible and inclusive.
+*** Test Cases ***
+Connect to Azure SQL Database and Run Queries
+    Connect To Database    ${JDBC_Driver}    ${JDBC_URL}    ${DatabaseUser}    ${DatabasePassword}
+    
+    ${query1} =    Set Variable    SELECT * FROM YourTable
+    ${result1} =    Query    ${query1}
+    
+    Log    Query 1 Result: ${result1}
 
-4. Testing Approach:
-Our approach to accessibility testing was a well-balanced combination of manual testing, automated testing using assistive technologies such as JAWS and Ally Auto-Test, and a meticulous manual review of the user interface. This comprehensive strategy provided us with a 360-degree view of accessibility, enabling us to identify and address issues effectively.
-
-5. Accessibility Guidelines:
-The backbone of our accessibility testing was the globally accepted Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA. These guidelines have set the standard for creating digital content that is accessible to people with disabilities, ensuring that it is perceivable, operable, understandable, and robust.
-
-6. Testing Tools and Techniques:
-To thoroughly evaluate accessibility, we harnessed a versatile arsenal of tools and techniques. This encompassed the use of screen readers like JAWS, automated testing with Ally Auto-Test, keyboard-only navigation to assess operability without a mouse, voice recognition software to evaluate speech input, and exhaustive manual reviews. The multifaceted approach ensured that no aspect of accessibility was overlooked.
-
-7. Test Results:
-The accessibility testing phase uncovered a total of [Number of Issues Found] accessibility issues within the "US Cash Management" project. These issues were carefully categorized based on their severity. There were [Number of Critical Issues] critical issues, [Number of Major Issues] major issues, and [Number of Minor Issues] minor issues that were identified. Addressing these issues was essential to ensure an inclusive and accessible platform.
-
-8. Defect Log:
-Our defect log was a comprehensive repository, meticulously recording information on each identified accessibility issue. For each issue, we maintained a detailed description, step-by-step instructions on how to reproduce the issue, a comprehensive list of affected areas within the application, and the date when the issue was initially detected. Importantly, the defect log also served as the foundation for our tracking system in Jira.
-
-9. Resolution and Mitigation:
-After identifying accessibility issues, our development team launched into action to address and resolve each of them. The resolution process was documented with precision, outlining the exact steps taken to ensure compliance with accessibility standards. It was a collaborative effort, involving developers, testers, and accessibility experts.
-
-10. Re-Testing:
-Post-resolution, we conducted a rigorous round of re-testing to validate that the mitigation efforts effectively addressed the accessibility issues. This step was instrumental in confirming that all critical and major issues had been successfully resolved, and the "US Cash Management" project now aligned with the required accessibility standards.
-
-11. Recommendations:
-Our recommendations are integral to the ongoing process of enhancing accessibility. They encompass various aspects, including education, integration, and maintenance.
-
-Regular accessibility training sessions for the development team will foster a culture of awareness and inclusivity.
-The integration of automated accessibility testing into the continuous integration pipeline will ensure that accessibility is consistently verified with each software release.
-The establishment of ongoing accessibility testing as a routine part of the quality assurance process will prevent the introduction of new accessibility issues during development.
-12. Conclusion:
-In conclusion, the accessibility testing phase for the "US Cash Management" project has reached its conclusion. Although challenges were discovered and addressed, our collective effort has borne fruit, successfully resolving all critical and major issues and achieving compliance with WCAG 2.1 at Level AA. This accomplishment represents a substantial step towards a more inclusive and accessible digital platform.
-
-13. Sign-off:
-This Test Closure Report is formally approved and signed by:
-
-[Your Name] - [Your Title]
-[Project Stakeholder's Name] - [Project Stakeholder's Title]
-
-14. Appendices:
-
-Appendix A: Comprehensive Defect Log, including in-depth descriptions, detailed steps for issue reproduction, an exhaustive list of affected areas, and precise dates of issue detection.
-Appendix B: Detailed Test Cases employed in the accessibility testing phase.
-Appendix C: Screenshots of Identified Accessibility Issues, offering visual documentation of the issues that were discovered.
-This extended content provides a comprehensive Test Closure Report for accessibility testing. If you need further information or modifications, please do not hesitate to ask.
+    # Add more queries as needed
+    
+    Disconnect From Database
