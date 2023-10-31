@@ -1,0 +1,31 @@
+Requirement: Test Signed-in Users Get Larger Capacity
+
+Setup:
+
+Open a web browser and go to the Example Website using Google Chrome.
+Test Steps:
+2. Click on the "Upload Files" button.
+
+Wait for the page to load.
+Click on the "Spreadsheet Formats" button.
+Check if the "XLS" and "XLSX" buttons are visible.
+Click on the "XLSX" button.
+Select a file called "500kb-sheet.xlsx" for upload.
+Wait for the upload to complete.
+Check if the "Uploaded Files" table has a cell with the text "500kb-sheet.xlsx."
+Click on the "XLSX" button again.
+Select a file called "1mb-sheet.xlsx" for upload.
+Make sure the upload fails.
+Ensure that the "Uploaded Files" table does not have a cell with the text "1mb-sheet.xlsx."
+Click on the "Login" button.
+Enter "testuser123" as the username and "$Pass123" as the password.
+Click on "Sign in."
+Wait for the page to reload.
+Confirm that the "Uploaded Files" table contains a cell with the text "500kb-sheet.xlsx."
+Make sure the "Uploaded Files" table does not have a cell with the text "1mb-sheet.xlsx."
+Click on the "Spreadsheet Formats" button.
+Check if the "XLS" button is visible.
+Teardown:
+22. Close the web browser.
+
+These requirements explain the actions and checks performed in the test case "Test Signed-in Users Get Larger Capacity." This test case evaluates various features on a website related to file uploads and user logins.

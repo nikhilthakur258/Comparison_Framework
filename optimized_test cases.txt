@@ -1,0 +1,55 @@
+*** Settings ***
+Library    SeleniumLibrary
+
+*** Test Cases ***
+Test Signed-in Users Get Larger Capacity
+    [Tags]    Smoke
+    Open Browser    https://www.example.com    Chrome
+    Login And Upload File    500kb-sheet.xlsx
+    Verify Uploaded File    500kb-sheet.xlsx
+    Upload File    1mb-sheet.xlsx
+    Verify Upload Failure
+    Login    testuser123    $Pass123
+    Wait For Element    xpath=//*[@id="upload-files-button"]
+    Verify Uploaded File    500kb-sheet.xlsx
+    Verify File Not Uploaded    1mb-sheet.xlsx
+    Click Element    xpath=//*[@id="spreadsheet-formats-button"]
+    Verify XLS Buttons Are Visible
+
+*** Keywords ***
+Login And Upload File
+    [Arguments]    ${file_name}
+    Click Element    xpath=//*[@id="upload-files-button"]
+    Wait For Element    xpath=//*[@id="upload-files-button"]
+    Click Element    xpath=//*[@id="spreadsheet-formats-button"]
+    Verify Element Is Visible    xpath=//*[@id="xls-button"]
+    Verify Element Is Visible    xpath=//*[@id="xlsx-button"]
+    Click Element    xpath=//*[@id="xlsx-button"]
+    Choose File    xpath=//*[@id="file-upload-input"]    ${file_name}
+    Wait For Element    xpath=//*[@id="uploaded-files-table"]
+
+Verify Uploaded File
+    [Arguments]    ${file_name}
+    Verify Element Is Visible    xpath=//*[@id="uploaded-files-table"]/td[contains(text(),'${file_name}')]
+
+Upload File
+    [Arguments]    ${file_name}
+    Click Element    xpath=//*[@id="xlsx-button"]
+    Choose File    xpath=//*[@id="file-upload-input"]    ${file_name}
+
+Verify Upload Failure
+    Page Should Not Contain Element    xpath=//*[@id="uploaded-files-table"]
+
+Login
+    [Arguments]    ${username}    ${password}
+    Click Element    xpath=//*[@id="login-button"]
+    Input Text    xpath=//*[@id="username-input"]    ${username}
+    Input Text    xpath=//*[@id="password-input"]    ${password}
+    Click Element    xpath=//*[@id="signin-button"]
+
+Verify File Not Uploaded
+    [Arguments]    ${file_name}
+    Verify Element Is Not Visible    xpath=//*[@id="uploaded-files-table"]/td[contains(text(),'${file_name}')]
+
+Verify XLS Buttons Are Visible
+    Verify Element Is Visible    xpath=//*[@id="xls-button"]
