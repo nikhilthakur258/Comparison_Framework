@@ -1,0 +1,59 @@
+Defect 1: Broken Links
+
+Description: When navigating the application, users encounter links that do not lead to the expected destination. Clicking on these links results in a "404 Not Found" error or takes the user to an unintended page.
+
+Summary: Broken links disrupt the user's ability to access critical information or perform actions, impacting user satisfaction and overall usability.
+
+Defect 2: Inconsistent Fonts
+
+Description: The application uses different fonts or font sizes on various pages or elements, making the UI appear inconsistent and unprofessional.
+
+Summary: Inconsistent fonts can lead to a lack of visual cohesion, causing confusion and making the application appear unpolished.
+
+Defect 3: Missing Images
+
+Description: Images or icons that are meant to be displayed on the UI do not load, resulting in empty or broken image placeholders.
+
+Summary: Missing images can lead to an incomplete and unattractive UI, affecting the overall user experience and potentially obscuring important information.
+
+Defect 4: Overlapping Text or Elements
+
+Description: Text, buttons, or other UI elements overlap, causing visual clutter and making it difficult for users to read or interact with the content.
+
+Summary: Overlapping elements create a messy and confusing UI, which can hinder user interaction and comprehension.
+
+Defect 5: Incorrect Labeling
+
+Description: Labels or captions for UI elements are inaccurate or do not match the content they represent. This can result in user confusion.
+
+Summary: Incorrect labeling can mislead users and lead to errors, as they may not understand the purpose or function of UI elements.
+
+Defect 6: Spelling and Grammar Errors
+
+Description: The UI contains spelling and grammar errors in text content, including labels, instructions, and error messages.
+
+Summary: Spelling and grammar errors diminish the professionalism of the application and can lead to user confusion or misinterpretation of information.
+
+Defect 7: Ineffective Error Messages
+
+Description: When users encounter errors or issues, the application displays error messages that are too vague, unhelpful, or lack clear instructions on how to resolve the problem.
+
+Summary: Ineffective error messages frustrate users and hinder their ability to troubleshoot issues, leading to a poor user experience.
+
+Defect 8: Slow Loading Times
+
+Description: The application has unacceptably slow loading times, causing delays in accessing content and features.
+
+Summary: Slow loading times can lead to user frustration and may deter users from using the application.
+
+Defect 9: Unresponsive Buttons or Links
+
+Description: Users click on buttons or links, but they do not respond or initiate the expected action.
+
+Summary: Unresponsive buttons and links prevent users from interacting with the application and achieving their goals, resulting in frustration.
+
+Defect 10: Poor Contrast and Color Choices
+
+Description: The application uses color schemes that result in poor text-to-background contrast, making text difficult to read or elements hard to distinguish.
+
+Summary: Poor contrast and color choices can lead to accessibility issues and negatively impact users with visual impairments. It also reduces the overall readability of the application.

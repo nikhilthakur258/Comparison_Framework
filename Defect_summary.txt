@@ -1,0 +1,8 @@
+Usability: 3 defects
+Visual Design: 1 defect
+Visual Content: 1 defect
+Layout and Design: 1 defect
+Text and Content: 1 defect
+Functionality: 1 defect
+Performance: 1 defect
+Accessibility: 1 defect
