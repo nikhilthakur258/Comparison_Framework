@@ -21,3 +21,28 @@ Connect to Azure SQL Database and Run Queries
     # Add more queries as needed
     
     Disconnect From Database
+
+
+Asset creation in quality management typically refers to the process of defining and documenting the resources and materials needed to support and maintain a high level of product or service quality. Here are some key aspects of asset creation in quality management:
+
+1. Quality Documentation: This includes creating quality manuals, procedures, work instructions, and other documents that outline the standards, guidelines, and best practices for ensuring quality in the organization's products or services.
+
+2. Quality Control Plans: Developing detailed plans that specify how quality will be monitored and maintained throughout the product or service lifecycle. These plans often include inspection and testing procedures.
+
+3. Training and Skill Development: Creating training programs and materials to ensure that employees have the necessary skills and knowledge to meet quality standards. This may involve onboarding, ongoing training, and certification processes.
+
+4. Inspection and Testing Equipment: Identifying and procuring the necessary tools and equipment for inspecting and testing products or services. This may include measurement devices, testing instruments, and software.
+
+5. Quality Assurance Software: Implementing quality management software and systems to track and manage quality data, corrective actions, and process improvements. These systems can help automate and streamline quality processes.
+
+6. Supplier Quality Management: Establishing criteria and procedures for selecting, evaluating, and managing suppliers to ensure that they meet the organization's quality standards.
+
+7. Quality Metrics and Key Performance Indicators (KPIs): Defining and creating systems for tracking and reporting quality metrics and KPIs to measure and improve quality performance over time.
+
+8. Auditing and Compliance: Developing procedures for internal and external audits to ensure that the organization complies with industry standards, regulations, and its own quality policies.
+
+9. Process Improvement Initiatives: Creating teams or task forces dedicated to continuous improvement and innovation to enhance the quality of products or services.
+
+10. Risk Assessment and Mitigation: Identifying potential risks that could impact quality and creating strategies for mitigating those risks.
+
+Asset creation in quality management is a crucial part of establishing a culture of quality within an organization and ensuring that products or services consistently meet or exceed customer expectations.
