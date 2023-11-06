@@ -1,20 +1,17 @@
+
 *** Settings ***
 Library           XML
 Resource          path/to/your/xml/file.xml
 
 *** Test Cases ***
 Parse and Store XML Values
-    ${root_element}     Get Root Element
-    ${element_text}     Get Element Text     ${root_element}    //element_name
+    ${xml_content}     Parse XML    ${RESOURCE}
+    ${root_element}    Set Variable    ${xml_content}
+    ${element_text}     Get Element Text    ${root_element}    //element_name
     ${attribute_value}  Get Element Attribute    ${root_element}    attribute_name
-    ${number_of_elements}    Get Element Count     ${root_element}    //element_name
+    ${number_of_elements}    Get Element Count    ${root_element}    //element_name
 
-    Set Test Variable    ${root_element_value}    ${root_element}
-    Set Test Variable    ${element_text_value}    ${element_text}
-    Set Test Variable    ${attribute_value_value} ${attribute_value}
-    Set Test Variable    ${number_of_elements_value}    ${number_of_elements}
-
-    Log    Root Element: ${root_element_value}
-    Log    Element Text: ${element_text_value}
-    Log    Attribute Value: ${attribute_value_value}
-    Log    Number of Elements: ${number_of_elements_value}
+    Log    Root Element: ${root_element}
+    Log    Element Text: ${element_text}
+    Log    Attribute Value: ${attribute_value}
+    Log    Number of Elements: ${number_of_elements}
