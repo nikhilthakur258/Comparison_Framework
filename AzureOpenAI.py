@@ -5,8 +5,8 @@ import json
 import os
 
 # Set up OpenAI API key
-openai.api_key = '7f66b5661345437d80e661020d74a2c9'
-openai.api_base = 'https://genaiusecases.openai.azure.com/'
+openai.api_key = '***'
+openai.api_base = '****'
 openai.api_type = 'azure'
 openai.api_version = '2023-07-01-preview' # this may change in the future
 
@@ -14,9 +14,9 @@ deployment_name='OpenAIPOC'
 
 # Set up Jira API credentials
 jira_username = "nikhilthakur258@gmail.com"
-jira_api_token = "ATATT3xFfGF0e0hmGdnjmKFXcy7YNbXtDQenWZRdZUEGF-TXoGgTkveHn0_i6hOWCU7_ut2nPq5uo_RYO7d8zH2KeYZOusMTodp81_hZQOO928mOJ5XGQHIWUJ_6ky81aj_xVoTEglpoz38FFphFIxU2DrXI5S21QDf39Ai3hS9a0jhioH9cfCQ=A68EF9B4"
+jira_api_token = "***"
 jira_issue_key = "GPTMVP-1"
-jira_base_url = "https://jiraopenai.atlassian.net/rest/api/latest/issue/"
+jira_base_url = "***"
 output_file = "Requirement_UI.txt"
 
 
