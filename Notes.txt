@@ -14,3 +14,9 @@ Connect to Azure SQL Server with Active Directory Authentication
     @{results}=    Query    SELECT * FROM your_table
     Log Many    ${results}
     Disconnect From Database
+
+
+Setup library
+
+pip install robotframework-databaselibrary
+pip install pymssql
