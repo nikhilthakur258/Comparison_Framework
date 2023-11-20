@@ -1,17 +1,16 @@
-
 *** Settings ***
-Library           XML
-Resource          path/to/your/xml/file.xml
+Library    DatabaseLibrary
+Library    OperatingSystem
+
+*** Variables ***
+${DB_HOST}        your_server.database.windows.net
+${DB_PORT}        1433
+${DB_DATABASE}    your_database
 
 *** Test Cases ***
-Parse and Store XML Values
-    ${xml_content}     Parse XML    ${RESOURCE}
-    ${root_element}    Set Variable    ${xml_content}
-    ${element_text}     Get Element Text    ${root_element}    //element_name
-    ${attribute_value}  Get Element Attribute    ${root_element}    attribute_name
-    ${number_of_elements}    Get Element Count    ${root_element}    //element_name
-
-    Log    Root Element: ${root_element}
-    Log    Element Text: ${element_text}
-    Log    Attribute Value: ${attribute_value}
-    Log    Number of Elements: ${number_of_elements}
+Connect to Azure SQL Server with Active Directory Authentication
+    ${connection_string}=    Set Variable    DRIVER={ODBC Driver 17 for SQL Server};SERVER=${DB_HOST},${DB_PORT};DATABASE=${DB_DATABASE};Trusted_Connection=yes
+    Connect To Database    mssql    ${connection_string}
+    @{results}=    Query    SELECT * FROM your_table
+    Log Many    ${results}
+    Disconnect From Database
