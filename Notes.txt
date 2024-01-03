@@ -1,22 +1,6 @@
-*** Settings ***
-Library    DatabaseLibrary
-Library    OperatingSystem
-
-*** Variables ***
-${DB_HOST}        your_server.database.windows.net
-${DB_PORT}        1433
-${DB_DATABASE}    your_database
-
-*** Test Cases ***
-Connect to Azure SQL Server with Active Directory Authentication
-    ${connection_string}=    Set Variable    DRIVER={ODBC Driver 17 for SQL Server};SERVER=${DB_HOST},${DB_PORT};DATABASE=${DB_DATABASE};Trusted_Connection=yes
-    Connect To Database    mssql    ${connection_string}
-    @{results}=    Query    SELECT * FROM your_table
-    Log Many    ${results}
-    Disconnect From Database
-
-
-Setup library
-
-pip install robotframework-databaselibrary
-pip install pymssql
+1.Proven experience in developing UI automation scripts using Python, Selenium, and Robot Framework etc
+2.Solid understanding of Workday functionalities, including HCM, Time Tracking, and Payroll modules etc.
+3.Nice to have experience with Workday integration and API usage.
+4.Good understanding of QE tools (Jira, qTest,Github,Jenkins etc)
+5.Strong problem-solving skills and attention to detail.
+6.Excellent communication and collaboration skills.
