@@ -1,6 +1,59 @@
-1.Proven experience in developing UI automation scripts using Python, Selenium, and Robot Framework etc
-2.Solid understanding of Workday functionalities, including HCM, Time Tracking, and Payroll modules etc.
-3.Nice to have experience with Workday integration and API usage.
-4.Good understanding of QE tools (Jira, qTest,Github,Jenkins etc)
-5.Strong problem-solving skills and attention to detail.
-6.Excellent communication and collaboration skills.
+Hands-on Exercise: UI Automation with Java, Selenium, TestNG, and Jenkins
+Step 1: Set Up Your Project
+Create a Maven Project:
+
+Open your preferred IDE (Eclipse, IntelliJ, etc.).
+Create a new Maven project.
+Add Dependencies:
+
+Open the pom.xml file in your project.
+Add dependencies for Selenium WebDriver and TestNG.
+Create a Test Class:
+
+Create a new Java class for your Selenium tests (e.g., UITest.java).
+Set up a simple TestNG test method, e.g., openGoogle().
+Step 2: Write a Simple Test
+Configure WebDriver:
+
+Use the appropriate WebDriver (e.g., ChromeDriver).
+Set the system property for the WebDriver executable.
+Open a Web Page:
+
+In your test method, use Selenium commands to open a website (e.g., Google).
+Perform an Action:
+
+Interact with elements on the page (e.g., enter text into a search bar).
+Assertions:
+
+Add assertions to verify that the expected actions have taken place (e.g., verify the page title).
+Step 3: Execute Tests Locally
+Run the Test Locally:
+Execute your TestNG test locally within your IDE to ensure it works.
+Step 4: Set Up Jenkins
+Install Jenkins:
+
+Download and install Jenkins on your machine from the official Jenkins website.
+Create a New Job:
+
+Open Jenkins in your web browser.
+Create a new freestyle project or pipeline job.
+Configure Source Code Repository:
+
+Link your Jenkins job to the source code repository where your project is hosted (e.g., Git).
+Step 5: Configure Jenkins Job
+Add Build Step:
+
+Configure a build step to build your Maven project (e.g., clean test).
+Install Jenkins Plugins:
+
+Install the "TestNG Results" plugin through the Jenkins plugin manager.
+Configure TestNG Results:
+
+In your Jenkins job configuration, set up "Post-build Actions" to publish TestNG results.
+Step 6: Run the Jenkins Job
+Trigger the Job:
+
+Manually trigger the Jenkins job or set up a schedule for periodic execution.
+Check Console Output:
+
+Review the Jenkins console output to ensure the test execution is successful.
