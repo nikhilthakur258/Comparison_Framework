@@ -1,19 +1,37 @@
-import pyautogui
-import time
+Database and Application Complexity:
 
-def move_mouse_to_prevent_sleep(interval=60):
-    try:
-        while True:
-            # Move the mouse to a different position
-            pyautogui.moveRel(1, 1)
-            pyautogui.moveRel(-1, -1)
+Size and complexity of your database schema.
+Number and complexity of stored procedures, triggers, and views.
+Complexity of your application code that interacts with the database.
+Testing Requirements:
 
-            # Wait for the specified interval (in seconds)
-            time.sleep(interval)
+Detailed testing requirements, including specific scenarios for regression testing, performance testing, and security testing.
+Any specific testing tools or frameworks you plan to use.
+Data Migration Details:
 
-    except KeyboardInterrupt:
-        print("Program terminated by user.")
+Size of your database and the amount of data to be migrated.
+Specific data migration requirements and constraints.
+Development and QA Team Expertise:
 
-if __name__ == "__main__":
-    # You can adjust the interval (in seconds) as needed
-    move_mouse_to_prevent_sleep(interval=60)
+Skill levels and experience of your development and QA teams.
+Familiarity with SQL Server and the upgrade process.
+Infrastructure Details:
+
+Current hardware and software infrastructure.
+Compatibility of existing infrastructure with SQL Server 2022.
+Custom Features and Components:
+
+Any custom features or components in your application that may be affected by the upgrade.
+Integration points with other systems.
+Downtime Constraints:
+
+Any specific downtime constraints or requirements.
+Documentation Standards:
+
+Standards for documentation and the extent of documentation needed.
+Communication and Stakeholder Involvement:
+
+Communication plans and the level of involvement from stakeholders.
+Historical Upgrade Data:
+
+Information about any similar upgrades performed in the past.
