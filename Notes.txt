@@ -33,14 +33,14 @@ time.sleep(2)  # Add a pause to observe the action
 line_number = 16
 column_letter = 'E'
 cell_address = f"{column_letter}{line_number}"
-main_sheet[cell_address] = "ACBS"  # Set the value directly
-logging.info(f"Updated value at {cell_address} to ACBS")
+
+# Assuming a dropdown is a data validation list in cell E16
+# This selects "ACBS" from the dropdown
+main_sheet[cell_address].data_validation = openpyxl.worksheet.datavalidation.DataValidation(
+    type="list", formula1='"ACBS"', allow_blank=True)
+logging.info(f"Selected ACBS in the dropdown at cell: {cell_address}")
 print(f"Selected ACBS in the dropdown at cell: {cell_address}")
 time.sleep(2)  # Add a pause to observe the action
-
-# Switch back to Excel application
-pyautogui.hotkey('alt', 'tab')
-time.sleep(1)  # Add a pause to observe the action
 
 # Step 4: Click on Enter TrialBal Adj button
 # Click on the button at specified coordinates (993, 609)
@@ -61,3 +61,26 @@ pyautogui.screenshot(screenshot_path)
 
 # Log taking a screenshot
 logging.info(f"Took a screenshot and saved it at: {screenshot_path}")
+
+===============================================
+
+import os
+import subprocess
+import openpyxl
+import logging
+import pyautogui
+import time
+from openpyxl import load_workbook
+
+# Step 1: Open Excel file
+excel_file_path = "your_file.xlsm"
+os.system(f'start excel "{excel_file_path}"')
+time.sleep(2)  # Adjust the sleep duration based on your system speed
+
+# Step 2: Run the Python script
+subprocess.run(['python', 'your_script.py'])
+
+# Note: Replace 'your_script.py' with the actual filename of your Python script
+
+# Close Excel (optional, you can manually switch to Excel)
+# os.system('taskkill /f /im excel.exe')
