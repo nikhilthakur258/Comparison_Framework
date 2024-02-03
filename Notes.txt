@@ -17,9 +17,8 @@ logging.info(f"Opened file: {file_path}")
 # Step 2: On Main worksheet, click on Reconnect DB Button
 main_sheet = workbook["Main"]
 
-# Assuming Reconnect DB Button is at column A, row 1
-reconnect_button = main_sheet.cell(row=1, column=1)
-# Replace row and column values with the actual coordinates of the Reconnect DB Button
+# Assuming Reconnect DB Button is at row 8, column 9
+reconnect_button = main_sheet.cell(row=8, column=9)
 
 # Log clicking on Reconnect DB Button
 logging.info("Clicking on Reconnect DB Button")
@@ -36,9 +35,8 @@ main_sheet[cell_address] = "ACBS"  # Set the value directly
 logging.info(f"Updated value at {cell_address} to ACBS")
 
 # Step 4: Click on Enter TrialBal Adj button
-# Assuming Enter TrialBal Adj button is at column B, row 1
-enter_button = main_sheet.cell(row=1, column=2)
-# Replace row and column values with the actual coordinates of the Enter TrialBal Adj button
+# Assuming Enter TrialBal Adj button is at row 8, column 10
+enter_button = main_sheet.cell(row=8, column=10)
 
 # Log clicking on Enter TrialBal Adj button
 logging.info("Clicking on Enter TrialBal Adj button")
