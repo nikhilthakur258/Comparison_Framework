@@ -60,3 +60,21 @@ pyautogui.screenshot(screenshot_path)
 
 # Log taking a screenshot
 logging.info(f"Took a screenshot and saved it at: {screenshot_path}")
+
+
+
+
+
+
+
+≈============
+import pyautogui
+import time
+
+# Wait for the user to position the mouse
+print("Move the mouse over the element in Excel, then press Enter.")
+input()
+
+# Get the current mouse coordinates
+x, y = pyautogui.position()
+print(f"Mouse coordinates: x={x}, y={y}")
