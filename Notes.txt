@@ -3,6 +3,7 @@ import logging
 import pyautogui
 import time
 from openpyxl import load_workbook
+from openpyxl.worksheet.datavalidation import DataValidation
 
 # Configure logging
 logging.basicConfig(filename='automation_log.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
@@ -35,9 +36,10 @@ column_letter = 'E'
 cell_address = f"{column_letter}{line_number}"
 
 # Assuming a dropdown is a data validation list in cell E16
-# This selects "ACBS" from the dropdown
-main_sheet[cell_address].data_validation = openpyxl.worksheet.datavalidation.DataValidation(
-    type="list", formula1='"ACBS"', allow_blank=True)
+# This sets "ACBS" as the data validation for the cell
+data_validation = DataValidation(type="list", formula1='"ACBS"', allow_blank=True)
+main_sheet[cell_address].data_validation = data_validation
+main_sheet[cell_address].value = "ACBS"  # Set the value directly
 logging.info(f"Selected ACBS in the dropdown at cell: {cell_address}")
 print(f"Selected ACBS in the dropdown at cell: {cell_address}")
 time.sleep(2)  # Add a pause to observe the action
