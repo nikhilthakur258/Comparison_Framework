@@ -20,9 +20,12 @@ main_sheet = workbook["Main"]
 # Assuming Reconnect DB Button is at row 8, column 9
 reconnect_button = main_sheet.cell(row=8, column=9)
 
+# Get the screen coordinates of the cell
+cell_position = pyautogui.position(x=reconnect_button.coordinate.x, y=reconnect_button.coordinate.y)
+
 # Log clicking on Reconnect DB Button
 logging.info("Clicking on Reconnect DB Button")
-pyautogui.click(reconnect_button.coordinate)
+pyautogui.click(cell_position)
 
 # Step 3: Go to line 16, column E, select ACBS from dropdown
 line_number = 16
@@ -38,9 +41,12 @@ logging.info(f"Updated value at {cell_address} to ACBS")
 # Assuming Enter TrialBal Adj button is at row 8, column 10
 enter_button = main_sheet.cell(row=8, column=10)
 
+# Get the screen coordinates of the cell
+cell_position = pyautogui.position(x=enter_button.coordinate.x, y=enter_button.coordinate.y)
+
 # Log clicking on Enter TrialBal Adj button
 logging.info("Clicking on Enter TrialBal Adj button")
-pyautogui.click(enter_button.coordinate)
+pyautogui.click(cell_position)
 
 # Save the changes
 workbook.save("updated_file.xlsm")
