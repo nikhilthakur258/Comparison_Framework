@@ -1,9 +1,17 @@
 import openpyxl
+import logging
+import pyautogui
 from openpyxl import load_workbook
+
+# Configure logging
+logging.basicConfig(filename='automation_log.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
 # Step 1: Open xlsm file
 file_path = "your_file.xlsm"
 workbook = load_workbook(filename=file_path, read_only=False, keep_vba=True)
+
+# Log opening file
+logging.info(f"Opened file: {file_path}")
 
 # Step 2: On Main worksheet, click on Reconnect DB Button
 main_sheet = workbook["Main"]
@@ -12,6 +20,10 @@ main_sheet = workbook["Main"]
 reconnect_button = main_sheet['A1']
 # Replace 'A1' with the actual coordinates of the Reconnect DB Button
 
+# Log clicking on Reconnect DB Button
+logging.info("Clicking on Reconnect DB Button")
+pyautogui.click(reconnect_button.coordinate)
+
 # Step 3: Go to line 16, column E, select ACBS from dropdown
 line_number = 16
 column_letter = 'E'
@@ -19,10 +31,27 @@ cell_address = f"{column_letter}{line_number}"
 
 main_sheet[cell_address] = "ACBS"  # Set the value directly
 
+# Log updating value in cell
+logging.info(f"Updated value at {cell_address} to ACBS")
+
 # Step 4: Click on Enter TrialBal Adj button
 # Assuming Enter TrialBal Adj button is at cell B1
 enter_button = main_sheet['B1']
 # Replace 'B1' with the actual coordinates of the Enter TrialBal Adj button
 
+# Log clicking on Enter TrialBal Adj button
+logging.info("Clicking on Enter TrialBal Adj button")
+pyautogui.click(enter_button.coordinate)
+
 # Save the changes
 workbook.save("updated_file.xlsm")
+
+# Log saving changes
+logging.info("Saved changes to the file")
+
+# Take a screenshot
+screenshot_path = "screenshot.png"
+pyautogui.screenshot(screenshot_path)
+
+# Log taking a screenshot
+logging.info(f"Took a screenshot and saved it at: {screenshot_path}")
