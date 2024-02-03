@@ -1,6 +1,7 @@
 import openpyxl
 import logging
 import pyautogui
+import time
 from openpyxl import load_workbook
 
 # Configure logging
@@ -24,7 +25,9 @@ cell_position = pyautogui.position(x=reconnect_button.column, y=reconnect_button
 
 # Log clicking on Reconnect DB Button
 logging.info("Clicking on Reconnect DB Button")
+print(f"Clicking on Reconnect DB Button at coordinates: {cell_position}")
 pyautogui.click(cell_position.x, cell_position.y)
+time.sleep(2)  # Add a pause to observe the action
 
 # Step 3: Go to line 16, column E, select ACBS from dropdown
 line_number = 16
@@ -32,11 +35,19 @@ column_letter = 'E'
 cell_address = f"{column_letter}{line_number}"
 main_sheet[cell_address] = "ACBS"  # Set the value directly
 logging.info(f"Updated value at {cell_address} to ACBS")
+print(f"Selected ACBS in the dropdown at cell: {cell_address}")
+time.sleep(2)  # Add a pause to observe the action
+
+# Switch back to Excel application
+pyautogui.hotkey('alt', 'tab')
+time.sleep(1)  # Add a pause to observe the action
 
 # Step 4: Click on Enter TrialBal Adj button
 # Click on the button at specified coordinates (993, 609)
 logging.info("Clicking on button at coordinates (993, 609)")
+print("Clicking on Enter TrialBal Adj button at coordinates (993, 609)")
 pyautogui.click(993, 609)
+time.sleep(2)  # Add a pause to observe the action
 
 # Save the changes
 workbook.save("updated_file.xlsm")
