@@ -2,7 +2,6 @@ import openpyxl
 import logging
 import pyautogui
 from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
 
 # Configure logging
 logging.basicConfig(filename='automation_log.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
@@ -21,32 +20,23 @@ main_sheet = workbook["Main"]
 reconnect_button = main_sheet.cell(row=8, column=9)
 
 # Get the screen coordinates of the cell
-cell_position = pyautogui.position(x=reconnect_button.coordinate.x, y=reconnect_button.coordinate.y)
+cell_position = pyautogui.position(x=reconnect_button.column, y=reconnect_button.row)
 
 # Log clicking on Reconnect DB Button
 logging.info("Clicking on Reconnect DB Button")
-pyautogui.click(cell_position[0], cell_position[1])
+pyautogui.click(cell_position.x, cell_position.y)
 
 # Step 3: Go to line 16, column E, select ACBS from dropdown
 line_number = 16
 column_letter = 'E'
-cell_address = f"{get_column_letter(main_sheet[column_letter + str(line_number)].column)}{line_number}"
-
+cell_address = f"{column_letter}{line_number}"
 main_sheet[cell_address] = "ACBS"  # Set the value directly
-
-# Log updating value in cell
 logging.info(f"Updated value at {cell_address} to ACBS")
 
 # Step 4: Click on Enter TrialBal Adj button
-# Assuming Enter TrialBal Adj button is at row 8, column 10
-enter_button = main_sheet.cell(row=8, column=10)
-
-# Get the screen coordinates of the cell
-cell_position = pyautogui.position(x=enter_button.coordinate.x, y=enter_button.coordinate.y)
-
-# Log clicking on Enter TrialBal Adj button
-logging.info("Clicking on Enter TrialBal Adj button")
-pyautogui.click(cell_position[0], cell_position[1])
+# Click on the button at specified coordinates (993, 609)
+logging.info("Clicking on button at coordinates (993, 609)")
+pyautogui.click(993, 609)
 
 # Save the changes
 workbook.save("updated_file.xlsm")
@@ -60,21 +50,3 @@ pyautogui.screenshot(screenshot_path)
 
 # Log taking a screenshot
 logging.info(f"Took a screenshot and saved it at: {screenshot_path}")
-
-
-
-
-
-
-
-≈============
-import pyautogui
-import time
-
-# Wait for the user to position the mouse
-print("Move the mouse over the element in Excel, then press Enter.")
-input()
-
-# Get the current mouse coordinates
-x, y = pyautogui.position()
-print(f"Mouse coordinates: x={x}, y={y}")
