@@ -38,7 +38,7 @@ cell_address = f"{column_letter}{line_number}"
 # Assuming a dropdown is a data validation list in cell E16
 # This sets "ACBS" as the data validation for the cell
 data_validation = DataValidation(type="list", formula1='"ACBS"', allow_blank=True)
-main_sheet[cell_address].data_validation = data_validation
+main_sheet.add_data_validation(data_validation)
 main_sheet[cell_address].value = "ACBS"  # Set the value directly
 logging.info(f"Selected ACBS in the dropdown at cell: {cell_address}")
 print(f"Selected ACBS in the dropdown at cell: {cell_address}")
