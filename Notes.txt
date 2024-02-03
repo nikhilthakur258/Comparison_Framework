@@ -2,6 +2,7 @@ import openpyxl
 import logging
 import pyautogui
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 
 # Configure logging
 logging.basicConfig(filename='automation_log.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
@@ -16,9 +17,9 @@ logging.info(f"Opened file: {file_path}")
 # Step 2: On Main worksheet, click on Reconnect DB Button
 main_sheet = workbook["Main"]
 
-# Assuming Reconnect DB Button is at cell A1
-reconnect_button = main_sheet['A1']
-# Replace 'A1' with the actual coordinates of the Reconnect DB Button
+# Assuming Reconnect DB Button is at column A, row 1
+reconnect_button = main_sheet.cell(row=1, column=1)
+# Replace row and column values with the actual coordinates of the Reconnect DB Button
 
 # Log clicking on Reconnect DB Button
 logging.info("Clicking on Reconnect DB Button")
@@ -27,7 +28,7 @@ pyautogui.click(reconnect_button.coordinate)
 # Step 3: Go to line 16, column E, select ACBS from dropdown
 line_number = 16
 column_letter = 'E'
-cell_address = f"{column_letter}{line_number}"
+cell_address = f"{get_column_letter(main_sheet[column_letter + str(line_number)].column)}{line_number}"
 
 main_sheet[cell_address] = "ACBS"  # Set the value directly
 
@@ -35,9 +36,9 @@ main_sheet[cell_address] = "ACBS"  # Set the value directly
 logging.info(f"Updated value at {cell_address} to ACBS")
 
 # Step 4: Click on Enter TrialBal Adj button
-# Assuming Enter TrialBal Adj button is at cell B1
-enter_button = main_sheet['B1']
-# Replace 'B1' with the actual coordinates of the Enter TrialBal Adj button
+# Assuming Enter TrialBal Adj button is at column B, row 1
+enter_button = main_sheet.cell(row=1, column=2)
+# Replace row and column values with the actual coordinates of the Enter TrialBal Adj button
 
 # Log clicking on Enter TrialBal Adj button
 logging.info("Clicking on Enter TrialBal Adj button")
