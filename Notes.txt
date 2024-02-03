@@ -1,7 +1,5 @@
 import openpyxl
 from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
-from openpyxl import Workbook
 
 # Step 1: Open xlsm file
 file_path = "your_file.xlsm"
@@ -9,17 +7,22 @@ workbook = load_workbook(filename=file_path, read_only=False, keep_vba=True)
 
 # Step 2: On Main worksheet, click on Reconnect DB Button
 main_sheet = workbook["Main"]
-reconnect_button = main_sheet['Reconnect DB Button']
+
+# Assuming Reconnect DB Button is at cell A1
+reconnect_button = main_sheet['A1']
+# Replace 'A1' with the actual coordinates of the Reconnect DB Button
 
 # Step 3: Go to line 16, column E, select ACBS from dropdown
 line_number = 16
 column_letter = 'E'
 cell_address = f"{column_letter}{line_number}"
-main_sheet[cell_address].value = "ACBS"
+
+main_sheet[cell_address] = "ACBS"  # Set the value directly
 
 # Step 4: Click on Enter TrialBal Adj button
-enter_button = main_sheet['Enter TrialBal Adj button']
-enter_button.click()
+# Assuming Enter TrialBal Adj button is at cell B1
+enter_button = main_sheet['B1']
+# Replace 'B1' with the actual coordinates of the Enter TrialBal Adj button
 
 # Save the changes
-workbook.save("updated_file.xlsm") 
+workbook.save("updated_file.xlsm")
