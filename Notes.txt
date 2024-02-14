@@ -1,65 +1,67 @@
 import openpyxl
-import logging
-import pyautogui
-import time
-from openpyxl import load_workbook
-from openpyxl.worksheet.datavalidation import DataValidation
+from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.table import Table, TableStyleInfo
 
-# Configure logging
-logging.basicConfig(filename='automation_log.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
+def filter_records_by_sales():
+    wb = openpyxl.load_workbook('YourWorkbook.xlsx')
 
-# Step 1: Open xlsm file
-file_path = "your_file.xlsm"
-workbook = load_workbook(filename=file_path, read_only=False, keep_vba=True)
+    ws_source1 = wb['Sheet1']
+    ws_source2 = wb['Sheet2']
 
-# Log opening file
-logging.info(f"Opened file: {file_path}")
+    try:
+        ws_dest = wb['FilteredData']
+    except KeyError:
+        ws_dest = wb.create_sheet('FilteredData')
+        ws_dest.sheet_properties.tabColor = "1072BA"
+    
+    # Clear existing data in the destination sheet
+    for row in ws_dest.iter_rows(min_row=2, max_row=ws_dest.max_row, min_col=1, max_col=ws_dest.max_column):
+        for cell in row:
+            cell.value = None
 
-# Step 2: On Main worksheet, click on Reconnect DB Button
-main_sheet = workbook["Main"]
+    last_row1 = ws_source1.max_row
+    last_row2 = ws_source2.max_row
 
-# Assuming Reconnect DB Button is at row 8, column 9
-reconnect_button = main_sheet.cell(row=8, column=9)
+    header_last_column = ws_source1.max_column
 
-# Get the screen coordinates of the cell
-cell_position = pyautogui.position(x=reconnect_button.column, y=reconnect_button.row)
+    # Copy headers to destination sheet
+    for col_num in range(1, header_last_column + 1):
+        ws_dest.cell(row=1, column=col_num).value = ws_source1.cell(row=1, column=col_num).value
 
-# Log clicking on Reconnect DB Button
-logging.info("Clicking on Reconnect DB Button")
-print(f"Clicking on Reconnect DB Button at coordinates: {cell_position}")
-pyautogui.click(cell_position.x, cell_position.y)
-time.sleep(2)  # Add a pause to observe the action
+    ws_dest.cell(row=1, column=header_last_column + 1).value = "Total Sale"
+    ws_dest.cell(row=1, column=header_last_column + 2).value = "CreatedDate"
+    ws_dest.cell(row=1, column=header_last_column + 3).value = "SortCode"
 
-# Step 3: Go to line 16, column E, select ACBS from dropdown
-line_number = 16
-column_letter = 'E'
-cell_address = f"{column_letter}{line_number}"
+    dest_row = 2
 
-# Assuming a dropdown is a data validation list in cell E16
-# This sets "ACBS" as the data validation for the cell
-data_validation = DataValidation(type="list", formula1='"ACBS"', allow_blank=True)
-main_sheet.add_data_validation(data_validation)
-main_sheet[cell_address].value = "ACBS"  # Set the value directly
-logging.info(f"Selected ACBS in the dropdown at cell: {cell_address}")
-print(f"Selected ACBS in the dropdown at cell: {cell_address}")
-time.sleep(2)  # Add a pause to observe the action
+    for i in range(2, last_row1 + 1):
+        segment = ws_source1.cell(row=i, column=1).value
 
-# Step 4: Click on Enter TrialBal Adj button
-# Click on the button at specified coordinates (993, 609)
-logging.info("Clicking on button at coordinates (993, 609)")
-print("Clicking on Enter TrialBal Adj button at coordinates (993, 609)")
-pyautogui.click(993, 609)
-time.sleep(2)  # Add a pause to observe the action
+        for j in range(2, last_row2 + 1):
+            if ws_source2.cell(row=j, column=1).value == segment:
+                if ws_source1.cell(row=i, column=10).value > 2000 and ws_source1.cell(row=i, column=11).value > 10000:
+                    total_sale = ws_source1.cell(row=i, column=7).value * ws_source1.cell(row=i, column=5).value
+                    unused_variable = ws_source1.cell(row=i, column=8).value
 
-# Save the changes
-workbook.save("updated_file.xlsm")
+                    if ws_source1.cell(row=i, column=16).value == 2014:
+                        created_date = ws_source1.cell(row=i, column=16).value + 1
+                    else:
+                        created_date = ws_source1.cell(row=i, column=16).value
 
-# Log saving changes
-logging.info("Saved changes to the file")
+                    print(f"Created Date: {created_date}")
 
-# Take a screenshot
-screenshot_path = "screenshot.png"
-pyautogui.screenshot(screenshot_path)
+                    sort_code = ws_source2.cell(row=j, column=2).value
 
-# Log taking a screenshot
-logging.info(f"Took a screenshot and saved it at: {screenshot_path}")
+                    for k in range(1, header_last_column + 1):
+                        ws_dest.cell(row=dest_row, column=k).value = ws_source1.cell(row=i, column=k).value
+
+                    ws_dest.cell(row=dest_row, column=header_last_column + 1).value = total_sale
+                    ws_dest.cell(row=dest_row, column=header_last_column + 2).value = created_date
+                    ws_dest.cell(row=dest_row, column=header_last_column + 3).value = sort_code
+
+                    dest_row += 1
+
+    wb.save('YourWorkbook.xlsx')
+
+# Call the function
+filter_records_by_sales()
