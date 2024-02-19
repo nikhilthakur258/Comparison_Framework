@@ -1,7 +1,7 @@
 DECLARE @TableName NVARCHAR(255)
 DECLARE @ColumnName NVARCHAR(255)
 DECLARE @SQL NVARCHAR(MAX)
-DECLARE @HTMLResult NVARCHAR(MAX) = ''
+DECLARE @HTMLResult NVARCHAR(MAX) = '';
 
 DECLARE table_cursor CURSOR FOR
 SELECT t.name AS TableName, c.name AS ColumnName
@@ -19,26 +19,21 @@ BEGIN
     SET @SQL = 'SELECT ''' + @TableName + ''' AS TableName, COUNT(*) AS CountDuplicates FROM ' + @TableName + ' GROUP BY ' + @ColumnName + ' HAVING COUNT(*) > 1'
 
     -- Execute dynamic SQL and append results to HTML
+    SET @HTMLResult = @HTMLResult + '<h2>' + @TableName + '</h2>';
+    SET @HTMLResult = @HTMLResult + '<table border="1"><tr><th>' + @ColumnName + '</th><th>CountDuplicates</th></tr>';
+    
     INSERT INTO #ResultTable
     EXEC sp_executesql @SQL
 
+    SELECT @HTMLResult = @HTMLResult + '<tr><td>' + CAST(@ColumnName AS NVARCHAR(MAX)) + '</td><td>' + CAST(CountDuplicates AS NVARCHAR(MAX)) + '</td></tr>' FROM #ResultTable;
+
+    SET @HTMLResult = @HTMLResult + '</table>';
+    
     FETCH NEXT FROM table_cursor INTO @TableName, @ColumnName
 END
 
 CLOSE table_cursor
 DEALLOCATE table_cursor
 
--- Output the HTML result to a file
-DECLARE @FileName NVARCHAR(MAX) = 'C:\Path\To\Your\File\DuplicateResults.html'
-
--- Generate HTML content with table names and duplicate row counts
-SET @HTMLResult = '<html><head></head><body><table border="1"><tr><th>Table Name</th><th>Duplicate Row Count</th></tr>'
-INSERT INTO #ResultTable
-SET @HTMLResult = @HTMLResult + '<tr><td>' + TableName + '</td><td>' + CAST(CountDuplicates AS NVARCHAR(MAX)) + '</td></tr>'
-
-SET @HTMLResult = @HTMLResult + '</table></body></html>'
-
--- Write the HTML content to the file
-EXEC sp_writeextendedproc 'xp_cmdshell', 'enable', 'true'
-EXEC xp_cmdshell 'echo ' + @HTMLResult + ' > ' + @FileName
-EXEC sp_writeextendedproc 'xp_cmdshell', 'enable', 'false'
+-- Output the HTML result
+SELECT @HTMLResult AS HTMLResult;
