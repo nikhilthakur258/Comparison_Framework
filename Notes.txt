@@ -1,38 +1,39 @@
+DECLARE @SchemaName NVARCHAR(255)
 DECLARE @TableName NVARCHAR(255)
 DECLARE @ColumnName NVARCHAR(255)
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @HTMLResult NVARCHAR(MAX) = '';
 
 -- Create a temporary table to store the results
-CREATE TABLE #ResultTable (TableName NVARCHAR(255), ColumnName NVARCHAR(255), CountDuplicates INT);
+CREATE TABLE #ResultTable (SchemaName NVARCHAR(255), TableName NVARCHAR(255), ColumnName NVARCHAR(255), CountDuplicates INT);
 
 DECLARE table_cursor CURSOR FOR
-SELECT t.name AS TableName, c.name AS ColumnName
+SELECT s.name AS SchemaName, t.name AS TableName, c.name AS ColumnName
 FROM sys.tables t
+INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
 INNER JOIN sys.columns c ON t.object_id = c.object_id
-WHERE t.schema_id = SCHEMA_ID('dbo') -- You may need to adjust the schema if necessary
-ORDER BY t.name, c.name
+ORDER BY s.name, t.name, c.name
 
 OPEN table_cursor
 
-FETCH NEXT FROM table_cursor INTO @TableName, @ColumnName
+FETCH NEXT FROM table_cursor INTO @SchemaName, @TableName, @ColumnName
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-    SET @SQL = 'INSERT INTO #ResultTable SELECT ''' + @TableName + ''' AS TableName, ''' + @ColumnName + ''' AS ColumnName, COUNT(*) AS CountDuplicates FROM ' + @TableName + ' GROUP BY ' + @ColumnName + ' HAVING COUNT(*) > 1'
+    SET @SQL = 'INSERT INTO #ResultTable SELECT ''' + @SchemaName + ''' AS SchemaName, ''' + @TableName + ''' AS TableName, ''' + @ColumnName + ''' AS ColumnName, COUNT(*) AS CountDuplicates FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) + ' GROUP BY ' + @ColumnName + ' HAVING COUNT(*) > 1'
 
     -- Execute dynamic SQL
     EXEC sp_executesql @SQL
 
-    FETCH NEXT FROM table_cursor INTO @TableName, @ColumnName
+    FETCH NEXT FROM table_cursor INTO @SchemaName, @TableName, @ColumnName
 END
 
 CLOSE table_cursor
 DEALLOCATE table_cursor
 
 -- Output the HTML result
-SELECT @HTMLResult = @HTMLResult + '<html><head></head><body><table border="1"><tr><th>Table Name</th><th>Column Name</th><th>Duplicate Row Count</th></tr>';
-SELECT @HTMLResult = @HTMLResult + '<tr><td>' + TableName + '</td><td>' + ColumnName + '</td><td>' + CAST(CountDuplicates AS NVARCHAR(MAX)) + '</td></tr>' FROM #ResultTable;
+SELECT @HTMLResult = @HTMLResult + '<html><head></head><body><table border="1"><tr><th>Schema Name</th><th>Table Name</th><th>Column Name</th><th>Duplicate Row Count</th></tr>';
+SELECT @HTMLResult = @HTMLResult + '<tr><td>' + SchemaName + '</td><td>' + TableName + '</td><td>' + ColumnName + '</td><td>' + CAST(CountDuplicates AS NVARCHAR(MAX)) + '</td></tr>' FROM #ResultTable;
 SELECT @HTMLResult = @HTMLResult + '</table></body></html>';
 
 -- Drop the temporary table
