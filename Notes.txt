@@ -20,7 +20,7 @@ BEGIN
     PRINT 'Now finding duplicates in table: ' + @tableName;
 
     -- Generate a comma-separated list of column names
-    SELECT @columns = @columns + column_name + ', '
+    SELECT @columns = @columns + QUOTENAME(column_name) + ', '
     FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_SCHEMA = @schemaName AND TABLE_NAME = @tableName;
 
