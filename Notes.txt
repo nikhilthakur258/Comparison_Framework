@@ -27,19 +27,18 @@ BEGIN
 
     -- Build the dynamic SQL query
     DECLARE @sqlQuery NVARCHAR(MAX);
-    SET @sqlQuery = 'SELECT COUNT(*) AS row_count
+    SET @sqlQuery = 'DECLARE @rowCount INT;
+                     SELECT @rowCount = COUNT(*)
                      FROM ' + QUOTENAME(@schemaName) + '.' + QUOTENAME(@tableName) + '
                      GROUP BY ' + @columns + '
-                     HAVING COUNT(*) > 1;';
+                     HAVING COUNT(*) > 1;
+                     IF @rowCount IS NOT NULL
+                     BEGIN
+                         PRINT ''Table: ' + @tableName + ', Duplicate Rows Count: '' + CAST(@rowCount AS NVARCHAR(MAX));
+                     END';
 
-    -- Execute the dynamic SQL query and print results only if duplicates are found
-    DECLARE @rowCount INT;
-    EXEC sp_executesql @sqlQuery, N'@rowCount INT OUTPUT', @rowCount OUTPUT;
-
-    IF @rowCount IS NOT NULL
-    BEGIN
-        PRINT 'Table: ' + @tableName + ', Duplicate Rows Count: ' + CAST(@rowCount AS NVARCHAR(MAX));
-    END
+    -- Execute the dynamic SQL query
+    EXEC sp_executesql @sqlQuery;
 
     -- Reset variables for the next iteration
     SET @columns = '';
