@@ -25,7 +25,7 @@ BEGIN
         'INSERT INTO #ResultTable ' +
         'SELECT ' +
             '''' + @TableName + ''' AS TableName, ' +
-            (SELECT 'CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)), ' FROM sys.columns c WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName) FOR XML PATH('')) +
+            (SELECT 'CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)) AS ColumnName, ' FROM sys.columns c WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName) FOR XML PATH('')) +
             'COUNT(*) AS CountDuplicates ' +
         'FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) +
         ' GROUP BY ' +
