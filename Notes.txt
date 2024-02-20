@@ -1,6 +1,3 @@
-DECLARE @SchemaName NVARCHAR(255)
-DECLARE @TableName NVARCHAR(255)
-DECLARE @ColumnName NVARCHAR(255)
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @HTMLResult NVARCHAR(MAX) = '';
 
@@ -12,41 +9,26 @@ CREATE TABLE #ResultTable (
     CountDuplicates INT
 );
 
-DECLARE table_cursor CURSOR FOR
-SELECT s.name AS SchemaName, t.name AS TableName, c.name AS ColumnName
-FROM sys.tables t
-INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
-INNER JOIN sys.columns c ON t.object_id = c.object_id
-ORDER BY s.name, t.name, c.name
+-- Generate dynamic SQL for each table and column
+SET @SQL = 
+    'INSERT INTO #ResultTable ' +
+    'SELECT ' +
+        's.name AS SchemaName, ' +
+        't.name AS TableName, ' +
+        'c.name AS ColumnName, ' +
+        'COUNT(*) AS CountDuplicates ' +
+    'FROM sys.tables t ' +
+    'INNER JOIN sys.schemas s ON t.schema_id = s.schema_id ' +
+    'INNER JOIN sys.columns c ON t.object_id = c.object_id ' +
+    'GROUP BY s.name, t.name, c.name ' +
+    'HAVING COUNT(*) > 1';
 
-OPEN table_cursor
-
-FETCH NEXT FROM table_cursor INTO @SchemaName, @TableName, @ColumnName
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
-    SET @SQL = 
-        'INSERT INTO #ResultTable ' +
-        'SELECT ' +
-            '''' + @SchemaName + ''' AS SchemaName, ' +
-            '''' + @TableName + ''' AS TableName, ' +
-            '''' + @ColumnName + ''' AS ColumnName, ' +
-            'COUNT(*) AS CountDuplicates ' +
-        'FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) +
-        ' GROUP BY ' + QUOTENAME(@ColumnName) + ' HAVING COUNT(*) > 1'
-
-    -- Execute dynamic SQL
-    EXEC sp_executesql @SQL
-
-    FETCH NEXT FROM table_cursor INTO @SchemaName, @TableName, @ColumnName
-END
-
-CLOSE table_cursor
-DEALLOCATE table_cursor
+-- Execute dynamic SQL
+EXEC sp_executesql @SQL;
 
 -- Output the HTML result
 SET @HTMLResult = @HTMLResult + '<html><head></head><body><table border="1"><tr><th>Schema Name</th><th>Table Name</th><th>Column Name</th><th>Duplicate Row Count</th></tr>';
-INSERT INTO #ResultTable VALUES ('Schema1', 'Table1', 'Column1', 5), ('Schema1', 'Table1', 'Column2', 3); -- You can replace this static data with the actual data in #ResultTable
+INSERT INTO #ResultTable VALUES ('Schema1', 'Table1', 'Column1', 5), ('Schema1', 'Table1', 'Column2', 3); -- Replace with actual data from #ResultTable
 
 SELECT @HTMLResult = @HTMLResult + '<tr><td>' + SchemaName + '</td><td>' + TableName + '</td><td>' + ColumnName + '</td><td>' + CAST(CountDuplicates AS NVARCHAR(MAX)) + '</td></tr>' FROM #ResultTable;
 SET @HTMLResult = @HTMLResult + '</table></body></html>';
