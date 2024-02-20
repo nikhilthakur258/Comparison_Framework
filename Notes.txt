@@ -5,7 +5,7 @@ DECLARE @SQL NVARCHAR(MAX)
 -- Create a temporary table to store the results
 CREATE TABLE #ResultTable (
     TableName NVARCHAR(255),
-    ColumnName NVARCHAR(255),
+    ColumnName NVARCHAR(MAX),
     CountDuplicates INT
 );
 
@@ -25,14 +25,11 @@ BEGIN
         'INSERT INTO #ResultTable ' +
         'SELECT ' +
             '''' + @TableName + ''' AS TableName, ' +
-            (SELECT 'CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)) AS ColumnName, ' FROM sys.columns c WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName) FOR XML PATH('')) +
+            'CAST((SELECT STRING_AGG(CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)), '','') FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) + ') AS NVARCHAR(MAX)) AS ColumnName, ' +
             'COUNT(*) AS CountDuplicates ' +
         'FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) +
         ' GROUP BY ' +
-            (SELECT QUOTENAME(c.name) + ', ' FROM sys.columns c WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName) FOR XML PATH(''))
-
-    -- Remove trailing comma
-    SET @SQL = LEFT(@SQL, LEN(@SQL) - 1)
+            (SELECT STRING_AGG(QUOTENAME(c.name), ', ') FROM sys.columns c WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName))
 
     -- Execute dynamic SQL
     EXEC sp_executesql @SQL
