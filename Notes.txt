@@ -33,7 +33,13 @@ BEGIN
                      HAVING COUNT(*) > 1;';
 
     -- Execute the dynamic SQL query and print results only if duplicates are found
-    EXEC sp_executesql @sqlQuery;
+    DECLARE @rowCount INT;
+    EXEC sp_executesql @sqlQuery, N'@rowCount INT OUTPUT', @rowCount OUTPUT;
+
+    IF @rowCount IS NOT NULL
+    BEGIN
+        PRINT 'Table: ' + @tableName + ', Duplicate Rows Count: ' + CAST(@rowCount AS NVARCHAR(MAX));
+    END
 
     -- Reset variables for the next iteration
     SET @columns = '';
