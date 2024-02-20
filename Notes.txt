@@ -1,10 +1,11 @@
+DECLARE @schemaName NVARCHAR(MAX) = 'your_schema';
 DECLARE @tableName NVARCHAR(MAX) = 'your_table';
 DECLARE @columns NVARCHAR(MAX) = '';
 
 -- Generate a comma-separated list of column names
 SELECT @columns = @columns + column_name + ', '
 FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME = @tableName;
+WHERE TABLE_SCHEMA = @schemaName AND TABLE_NAME = @tableName;
 
 -- Remove the trailing comma
 SET @columns = LEFT(@columns, LEN(@columns) - 1);
@@ -12,7 +13,7 @@ SET @columns = LEFT(@columns, LEN(@columns) - 1);
 -- Build the dynamic SQL query
 DECLARE @sqlQuery NVARCHAR(MAX);
 SET @sqlQuery = 'SELECT ' + @columns + ', COUNT(*) AS row_count
-                 FROM ' + @tableName + '
+                 FROM ' + QUOTENAME(@schemaName) + '.' + QUOTENAME(@tableName) + '
                  GROUP BY ' + @columns + '
                  HAVING COUNT(*) > 1;';
 
