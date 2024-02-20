@@ -21,15 +21,21 @@ FETCH NEXT FROM table_cursor INTO @SchemaName, @TableName
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
+    -- Construct dynamic SQL for column names
+    DECLARE @Columns NVARCHAR(MAX)
+    SELECT @Columns = STRING_AGG(QUOTENAME(c.name), ', ') 
+    FROM sys.columns c 
+    WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName)
+
+    -- Construct the full dynamic SQL
     SET @SQL = 
         'INSERT INTO #ResultTable ' +
         'SELECT ' +
             '''' + @TableName + ''' AS TableName, ' +
-            'CAST((SELECT STRING_AGG(CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)), '','') FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) + ') AS NVARCHAR(MAX)) AS ColumnName, ' +
+            '''' + @Columns + ''' AS ColumnName, ' +
             'COUNT(*) AS CountDuplicates ' +
         'FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) +
-        ' GROUP BY ' +
-            (SELECT STRING_AGG(QUOTENAME(c.name), ', ') FROM sys.columns c WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName))
+        ' GROUP BY ' + @Columns
 
     -- Execute dynamic SQL
     EXEC sp_executesql @SQL
