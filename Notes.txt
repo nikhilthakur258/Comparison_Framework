@@ -1,21 +1,47 @@
 DECLARE @schemaName NVARCHAR(MAX) = 'your_schema';
-DECLARE @tableName NVARCHAR(MAX) = 'your_table';
+DECLARE @tableName NVARCHAR(MAX);
 DECLARE @columns NVARCHAR(MAX) = '';
 
--- Generate a comma-separated list of column names
-SELECT @columns = @columns + column_name + ', '
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_SCHEMA = @schemaName AND TABLE_NAME = @tableName;
+-- Create a cursor to iterate through tables
+DECLARE tableCursor CURSOR FOR
+SELECT TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = @schemaName AND TABLE_TYPE = 'BASE TABLE';
 
--- Remove the trailing comma
-SET @columns = LEFT(@columns, LEN(@columns) - 1);
+-- Open the cursor
+OPEN tableCursor;
 
--- Build the dynamic SQL query
-DECLARE @sqlQuery NVARCHAR(MAX);
-SET @sqlQuery = 'SELECT ' + @columns + ', COUNT(*) AS row_count
-                 FROM ' + QUOTENAME(@schemaName) + '.' + QUOTENAME(@tableName) + '
-                 GROUP BY ' + @columns + '
-                 HAVING COUNT(*) > 1;';
+-- Fetch the first table name
+FETCH NEXT FROM tableCursor INTO @tableName;
 
--- Execute the dynamic SQL query
-EXEC sp_executesql @sqlQuery;
+-- Loop through tables
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Generate a comma-separated list of column names
+    SELECT @columns = @columns + column_name + ', '
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = @schemaName AND TABLE_NAME = @tableName;
+
+    -- Remove the trailing comma
+    SET @columns = LEFT(@columns, LEN(@columns) - 1);
+
+    -- Build the dynamic SQL query
+    DECLARE @sqlQuery NVARCHAR(MAX);
+    SET @sqlQuery = 'SELECT COUNT(*) AS row_count
+                     FROM ' + QUOTENAME(@schemaName) + '.' + QUOTENAME(@tableName) + '
+                     GROUP BY ' + @columns + '
+                     HAVING COUNT(*) > 1;';
+
+    -- Execute the dynamic SQL query and print results only if duplicates are found
+    EXEC sp_executesql @sqlQuery;
+
+    -- Reset variables for the next iteration
+    SET @columns = '';
+
+    -- Fetch the next table name
+    FETCH NEXT FROM tableCursor INTO @tableName;
+END
+
+-- Close and deallocate the cursor
+CLOSE tableCursor;
+DEALLOCATE tableCursor;
