@@ -25,11 +25,11 @@ BEGIN
         'INSERT INTO #ResultTable ' +
         'SELECT ' +
             '''' + @TableName + ''' AS TableName, ' +
-            (SELECT 'CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)), ' FROM sys.columns c WHERE c.object_id = t.object_id FOR XML PATH('')) +
+            (SELECT 'CAST(' + QUOTENAME(c.name) + ' AS NVARCHAR(MAX)), ' FROM sys.columns c WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName) FOR XML PATH('')) +
             'COUNT(*) AS CountDuplicates ' +
         'FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) +
         ' GROUP BY ' +
-            (SELECT QUOTENAME(c.name) + ', ' FROM sys.columns c WHERE c.object_id = t.object_id FOR XML PATH(''))
+            (SELECT QUOTENAME(c.name) + ', ' FROM sys.columns c WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName) FOR XML PATH(''))
 
     -- Remove trailing comma
     SET @SQL = LEFT(@SQL, LEN(@SQL) - 1)
