@@ -1,53 +1,20 @@
-DECLARE @SchemaName NVARCHAR(255)
-DECLARE @TableName NVARCHAR(255)
-DECLARE @SQL NVARCHAR(MAX)
+DECLARE @tableName NVARCHAR(MAX) = 'your_table';
+DECLARE @columns NVARCHAR(MAX) = '';
 
--- Create a temporary table to store the results
-CREATE TABLE #ResultTable (
-    TableName NVARCHAR(255),
-    ColumnName NVARCHAR(MAX),
-    CountDuplicates INT
-);
+-- Generate a comma-separated list of column names
+SELECT @columns = @columns + column_name + ', '
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = @tableName;
 
-DECLARE table_cursor CURSOR FOR
-SELECT s.name AS SchemaName, t.name AS TableName
-FROM sys.tables t
-INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
-ORDER BY s.name, t.name
+-- Remove the trailing comma
+SET @columns = LEFT(@columns, LEN(@columns) - 1);
 
-OPEN table_cursor
+-- Build the dynamic SQL query
+DECLARE @sqlQuery NVARCHAR(MAX);
+SET @sqlQuery = 'SELECT ' + @columns + ', COUNT(*) AS row_count
+                 FROM ' + @tableName + '
+                 GROUP BY ' + @columns + '
+                 HAVING COUNT(*) > 1;';
 
-FETCH NEXT FROM table_cursor INTO @SchemaName, @TableName
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
-    -- Construct dynamic SQL for column names
-    DECLARE @Columns NVARCHAR(MAX)
-    SELECT @Columns = STRING_AGG(QUOTENAME(c.name), ', ') 
-    FROM sys.columns c 
-    WHERE c.object_id = OBJECT_ID(@SchemaName + '.' + @TableName)
-
-    -- Construct the full dynamic SQL
-    SET @SQL = 
-        'INSERT INTO #ResultTable ' +
-        'SELECT ' +
-            '''' + @TableName + ''' AS TableName, ' +
-            '''' + @Columns + ''' AS ColumnName, ' +
-            'COUNT(*) AS CountDuplicates ' +
-        'FROM ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) +
-        ' GROUP BY ' + @Columns
-
-    -- Execute dynamic SQL
-    EXEC sp_executesql @SQL
-
-    FETCH NEXT FROM table_cursor INTO @SchemaName, @TableName
-END
-
-CLOSE table_cursor
-DEALLOCATE table_cursor
-
--- Output the result
-SELECT * FROM #ResultTable
-
--- Drop the temporary table
-DROP TABLE #ResultTable;
+-- Execute the dynamic SQL query
+EXEC sp_executesql @sqlQuery;
