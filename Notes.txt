@@ -1,1 +1,3 @@
 pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "scripts;scripts" app.py
+
+Given the requirement to [specify the requirement], create a set of test scenarios in qTest format to thoroughly validate the functionality. Include various test cases covering positive, negative, and boundary scenarios. Ensure that each test case includes Test Case Name, Description, Steps, Expected Results, and any other relevant fields in the qTest format. Consider different user roles and system states in your scenarios. Aim for comprehensive coverage to guarantee the robustness of the implemented feature
