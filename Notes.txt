@@ -1,5 +1,7 @@
 pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "scripts;scripts" app.py
 
+Write test cases for ETL testing with below fileds: test scenario name|Description|pre-conditions|test data|steps|expected output|Automation eligible. include boundary conditions, negative scenario and multi steps as well
+
 Test Scenarios: Given the requirement to open chrome and go to google.com, create a set of test scenarios in qTest format to thoroughly validate the functionality. Include various test cases covering positive, negative, and boundary scenarios. Ensure that each test case includes Test Case Name, Description, Steps, Expected Results,Pre-requistes, test type, automation eligibale and any other relevant fields in the qTest format. Consider different user roles and system states in your scenarios. Aim for comprehensive coverage to guarantee the robustness of the implemented feature.
 
 Requirement fine tuning:Given the business requirements provided, refine and optimize the specifications for implementation. Ensure clarity, completeness, and alignment with project goals. Consider potential edge cases, dependencies, and performance considerations. Provide detailed and well-structured input suitable for immediate development. Include any specific constraints or considerations that should be taken into account during the implementation. Aim to produce a refined set of specifications that facilitates efficient and error-free development, meeting both functional and non-functional requirements.
