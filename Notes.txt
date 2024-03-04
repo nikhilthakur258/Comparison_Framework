@@ -1,8 +1,10 @@
 pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "scripts;scripts" app.py
 
 import requests
-from fuzzywuzzy import fuzz, process
-import pandas as pd
+from fuzzywuzzy import fuzz
+
+# Install fuzzywuzzy library if not installed
+# pip install fuzzywuzzy
 
 # Set your qTest details
 base_url = "https://<your-qtest-domain>/"
@@ -20,17 +22,21 @@ def search_test_case(test_case_name):
 
     total_result = response_data.get("totalResult", 0)
 
-    if total_result > 0:
-        # Use fuzzy matching to find the closest match
-        test_case_name_actual = response_data["items"][0]["name"]
-        similarity_ratio = fuzz.ratio(test_case_name.lower(), test_case_name_actual.lower())
+    best_match = None
+    best_similarity_ratio = 0
 
-        if similarity_ratio >= 80:  # Adjust the threshold as needed
-            return response_data["items"][0]
-        else:
-            return None
-    else:
-        return None
+    if total_result > 0:
+        for item in response_data["items"]:
+            test_case_name_actual = item["name"]
+            similarity_ratio = fuzz.ratio(test_case_name.lower(), test_case_name_actual.lower())
+
+            if similarity_ratio >= 80 and similarity_ratio > best_similarity_ratio:
+                best_match = item
+                best_similarity_ratio = similarity_ratio
+
+        return best_match
+
+    return None
 
 # Get the last execution date of a test case
 def get_last_execution_date(test_case_id):
@@ -58,9 +64,10 @@ def get_automation_status(test_case_name):
         last_execution_date = get_last_execution_date(test_case_id)
         qtest_link = f"{base_url}p/{project_id}/portal#/testcase/{test_case_id}"
 
-        return {"Test Case": test_case_name_actual, "Test Case ID": test_case_id, "Automation Status": automation_status, "Last Execution Date": last_execution_date, "qTest Link": qtest_link}
+        output = f"{test_case_name}|{test_case_id}|{automation_status}|{last_execution_date}|{qtest_link}"
+        print(output)
     else:
-        return None
+        print(f"No test case found for the partial search: {test_case_name}")
 
 # Read test case names from a file
 def read_test_case_names_from_file(file_path):
@@ -71,17 +78,5 @@ def read_test_case_names_from_file(file_path):
 file_path = "test_case_names.txt"  # Update with your file path
 test_case_names_to_search = read_test_case_names_from_file(file_path)
 
-output_data = []
-
 for test_case_name in test_case_names_to_search:
-    result = get_automation_status(test_case_name)
-    if result:
-        output_data.append(result)
-
-# Convert the list of dictionaries to a Pandas DataFrame
-df = pd.DataFrame(output_data)
-
-# Write the DataFrame to an Excel file
-excel_file_path = "output.xlsx"
-df.to_excel(excel_file_path, index=False)
-print(f"Output written to {excel_file_path}")
+    get_automation_status(test_case_name)
