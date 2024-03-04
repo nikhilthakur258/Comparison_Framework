@@ -1,7 +1,7 @@
 pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "scripts;scripts" app.py
 
 import requests
-from fuzzywuzzy import fuzz
+from fuzzywuzzy import fuzz, process
 
 # Install fuzzywuzzy library if not installed
 # pip install fuzzywuzzy
@@ -23,8 +23,14 @@ def search_test_case(test_case_name):
     total_result = response_data.get("totalResult", 0)
 
     if total_result > 0:
-        # For simplicity, returning the first match
-        return response_data["items"][0]
+        # Use fuzzy matching to find the closest match
+        test_case_name_actual = response_data["items"][0]["name"]
+        similarity_ratio = fuzz.ratio(test_case_name.lower(), test_case_name_actual.lower())
+
+        if similarity_ratio >= 80:  # Adjust the threshold as needed
+            return response_data["items"][0]
+        else:
+            return None
     else:
         return None
 
@@ -49,7 +55,7 @@ def get_automation_status(test_case_name):
 
     if test_case:
         test_case_id = test_case["id"]
-        test_case_name = test_case["name"]
+        test_case_name_actual = test_case["name"]
         automation_status = test_case["automation_status"]
         last_execution_date = get_last_execution_date(test_case_id)
         qtest_link = f"{base_url}p/{project_id}/portal#/testcase/{test_case_id}"
@@ -57,7 +63,7 @@ def get_automation_status(test_case_name):
         output = f"{test_case_name}|{test_case_id}|{automation_status}|{last_execution_date}|{qtest_link}"
         print(output)
     else:
-        print(f"No test case found for the search: {test_case_name}")
+        print(f"No test case found for the partial search: {test_case_name}")
 
 # Read test case names from a file
 def read_test_case_names_from_file(file_path):
