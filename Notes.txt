@@ -42,7 +42,8 @@ def get_automation_status_by_description(test_case_description):
         automation_status = test_case.get("automation_status", "N/A")  # Use get() to handle missing key
         qtest_link = f"{base_url}p/{project_id}/portal#/testcase/{test_case_id}"
 
-        output = f"{test_case_name}|{test_case_id}|{automation_status}|{qtest_link}"
+        # Include the searched test case description as the first column
+        output = f"{test_case_description}|{test_case_name}|{test_case_id}|{automation_status}|{qtest_link}"
         print(output)
     else:
         print(f"No test case found for the partial search: {test_case_description}")
