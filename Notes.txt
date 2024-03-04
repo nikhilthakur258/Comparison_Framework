@@ -11,33 +11,6 @@ base_url = "https://<your-qtest-domain>/"
 project_id = "<your-project-id>"
 token = "<your-api-token>"
 
-# Search for a test case by name using fuzzy matching
-def search_test_case(test_case_name):
-    search_url = f"{base_url}api/v3/projects/{project_id}/search"
-    headers = {"Authorization": f"Bearer {token}"}
-    params = {"object_type": "test-cases", "fields": "id,name,automation_status", "query": test_case_name}
-
-    response = requests.get(search_url, headers=headers, params=params, verify=False)
-    response_data = response.json()
-
-    total_result = response_data.get("totalResult", 0)
-
-    best_match = None
-    best_similarity_ratio = 0
-
-    if total_result > 0:
-        for item in response_data["items"]:
-            test_case_name_actual = item["name"]import requests
-from fuzzywuzzy import fuzz
-
-# Install fuzzywuzzy library if not installed
-# pip install fuzzywuzzy
-
-# Set your qTest details
-base_url = "https://<your-qtest-domain>/"
-project_id = "<your-project-id>"
-token = "<your-api-token>"
-
 # Get test cases and filter locally based on description using fuzzy matching
 def search_test_case_by_description(test_case_description):
     test_cases_url = f"{base_url}api/v3/projects/{project_id}/test-cases"
