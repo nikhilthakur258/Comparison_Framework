@@ -39,7 +39,7 @@ def get_automation_status_by_description(test_case_description):
     if test_case:
         test_case_id = test_case["id"]
         test_case_name = test_case["name"]
-        automation_status = test_case["automation_status"]
+        automation_status = test_case.get("automation_status", "N/A")  # Use get() to handle missing key
         qtest_link = f"{base_url}p/{project_id}/portal#/testcase/{test_case_id}"
 
         output = f"{test_case_name}|{test_case_id}|{automation_status}|{qtest_link}"
