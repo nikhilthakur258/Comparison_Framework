@@ -68,3 +68,166 @@ test_case_names_to_search = read_test_case_names_from_file(file_path)
 
 for test_case_name in test_case_names_to_search:
     get_automation_status(test_case_name)
+
+
+====================================================================================================================
+
+Key improvements:
+
+The usage of SELECT INTO for creating temporary tables.
+Proper indentation and formatting for better readability.
+Corrected syntax errors and improved variable names for better clarity.
+Added TRY-CATCH block for better error handling and rollback in case of an error.
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+USE [DLYRO_Longevity]
+GO
+
+-- Object: Stored Procedure [dbo].[04_RSP_RDW_GetMembershipData_Pensioner] 
+-- Script Date: 27/02/2024 11:18:31 AM
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[04_RSP_RDW_GetMembershipData_Pensioner] 
+    @SubmissionMonth INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE 
+        @PlanRef VARCHAR(32),
+        @BenefitProfileNameZero VARCHAR(32),
+        @BenefitProfileNameLPI3 VARCHAR(32),
+        @BenefitProfileNameLPI5 VARCHAR(32),
+        @BenefitProfileNameRPI VARCHAR(32);
+
+    SELECT 
+        @PlanRef = PlanReference 
+    FROM 
+        [Config].[PlanConfig] WITH (NOLOCK) 
+    WHERE 
+        PlanReference = '04-RSP';
+
+    SELECT 
+        @BenefitProfileNameZero = BenefitProfiLEName 
+    FROM 
+        [config].[BenefitConfig] WITH (NOLOCK) 
+    WHERE 
+        PlanReference = @PlanRef 
+        AND BenefitProfiLEName = '04_RSP_99FIX0000';
+
+    SELECT 
+        @BenefitProfileNameLPI3 = BenefitProfiLEName 
+    FROM 
+        [config].[BenefitConfig] WITH (NOLOCK) 
+    WHERE 
+        PlanReference = @PlanRef 
+        AND BenefitProfiLEName = '04_RSP_03LPI0030';
+
+    SELECT 
+        @BenefitProfileNameLPI5 = BenefitProfiLEName 
+    FROM 
+        [config].[BenefitConfig] WITH (NOLOCK) 
+    WHERE 
+        PlanReference = @PlanRef 
+        AND BenefitProfiLEName = '04_RSP_03LP10050';
+
+    SELECT 
+        @BenefitProfileNameRPI = BenefitProfiLEName 
+    FROM 
+        [config].[BenefitConfig] WITH (NOLOCK) 
+    WHERE 
+        PlanReference = @PlanRef 
+        AND BenefitProfiLEName = '04_RSP_03RPI0099';
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- Execution log variables for tracking purpose
+        DECLARE 
+            @ProcedureSchema VARCHAR(256) = SCHEMA_NAME(),
+            @ProcedureName VARCHAR(256) = OBJECT_NAME(@@PROCID),
+            @ExecutionCommand VARCHAR(MAX),
+            @CurrentDate DATETIME = GETDATE(),
+            @DbError SMALLINT = -1,
+            @ErrorLogId UNIQUEIDENTIFIER;
+
+        -- If #FileLogId exists, drop it
+        IF OBJECT_ID('tempdb..#FileLogId') IS NOT NULL
+            DROP TABLE #FileLogId;
+
+        -- Create #FileLogId with unique File_Log_Id values
+        SELECT DISTINCT 
+            File_Log_Id 
+        INTO 
+            #FileLogId 
+        FROM 
+            Logs.AuditHistory_ETLB WITH (NOLOCK) 
+        WHERE 
+            Submission_Month = @SubmissionMonth 
+            AND IsLoadedTarget = 0 
+            AND Target_Table = 'MBRSHP';
+
+        -- Drop temporary tables if they exist
+        IF OBJECT_ID('tempdb..#tempTable_PensionerZero') IS NOT NULL
+            DROP TABLE #tempTable_PensionerZero;
+
+        IF OBJECT_ID('tempdb..#tempTable_PensionerLPI3') IS NOT NULL
+            DROP TABLE #tempTable_PensionerLPI3;
+
+        IF OBJECT_ID('tempdb..#tempTable_PensionerLPI5') IS NOT NULL
+            DROP TABLE #tempTable_PensionerLPI5;
+
+        IF OBJECT_ID('tempdb..#tempTable_PensionerRPI') IS NOT NULL
+            DROP TABLE #tempTable_PensionerRPI;
+
+        -- Select data for Zero_no_indexation > @SubmissionMonth
+        SELECT
+            CASE
+                WHEN Zero_no_indexation > @SubmissionMonth THEN @BenefitProfileNameZero
+            END AS BenefitRef,
+            @SubmissionMonth AS SubmissionMonth,
+            -- ... (other selected columns)
+
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        -- Handle the error
+        ROLLBACK;
+        -- Log the error
+        -- ...
+    END CATCH;
+END;
+
+=============================================================================================
+
+CASE
+        WHEN Date_of_suspension IS NOT NULL AND CONVERT(DATETIME, Date_of_suspension, 20) > CONVERT(DATETIME, Date_of_suspension, 20) THEN 'A'
+        WHEN Member_Type = 'PENSIONER' THEN 'P'
+        ELSE 'D'
+    END AS MemberType,
+    CASE
+        WHEN Date_of_Reinstatement IS NOT NULL AND CONVERT(DATETIME, Date_of_Reinstatement, 20) > CONVERT(DATETIME, Date_of_suspension, 20) THEN 'S'
+        WHEN Date_of_suspension IS NOT NULL THEN 'S'
+        WHEN Date_of_Death IS NOT NULL THEN 'D'
+        ELSE 'A'
+    END AS MemberStatus,
+    (SELECT DateOfCommutation FROM PlanConfigData) AS DateOfCommutation,
+    Date_of_Birth AS DateOfBirth,
+    CASE
+        WHEN Date_of_Death IS NOT NULL THEN (SELECT DateOfDeath FROM PlanConfigData)
+        WHEN Date_of_suspension IS NOT NULL THEN Date_of_suspension
+        WHEN Date_of_Reinstatement IS NOT NULL AND CONVERT(DATETIME, Date_of_Reinstatement, 20) > CONVERT(DATETIME, Date_of_suspension, 20) THEN Date_of_suspension
+        ELSE (SELECT DateOfSuspension FROM PlanConfigData)
+    END AS DateOfSuspension,
+    CASE
+        WHEN Date_of_Reinstatement IS NOT NULL AND CONVERT(DATETIME, Date_of_Reinstatement, 20) > CONVERT(DATETIME, Date_of_suspension, 20) THEN Date_of_Reinstatement
+        ELSE (SELECT DateOfReinstatement FROM PlanConfigData)
+    END AS DateOfReinstatement,
+
+====================================================================================================
+
