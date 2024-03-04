@@ -1,14 +1,70 @@
 pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "scripts;scripts" app.py
 
-Write test cases for ETL testing with below fileds: test scenario name|Description|pre-conditions|test data|steps|expected output|Automation eligible. include boundary conditions, negative scenario and multi steps as well
+import requests
+from fuzzywuzzy import fuzz
 
-Test Scenarios: Given the requirement to open chrome and go to google.com, create a set of test scenarios in qTest format to thoroughly validate the functionality. Include various test cases covering positive, negative, and boundary scenarios. Ensure that each test case includes Test Case Name, Description, Steps, Expected Results,Pre-requistes, test type, automation eligibale and any other relevant fields in the qTest format. Consider different user roles and system states in your scenarios. Aim for comprehensive coverage to guarantee the robustness of the implemented feature.
+# Install fuzzywuzzy library if not installed
+# pip install fuzzywuzzy
 
-Requirement fine tuning:Given the business requirements provided, refine and optimize the specifications for implementation. Ensure clarity, completeness, and alignment with project goals. Consider potential edge cases, dependencies, and performance considerations. Provide detailed and well-structured input suitable for immediate development. Include any specific constraints or considerations that should be taken into account during the implementation. Aim to produce a refined set of specifications that facilitates efficient and error-free development, meeting both functional and non-functional requirements.
+# Set your qTest details
+base_url = "https://<your-qtest-domain>/"
+project_id = "<your-project-id>"
+token = "<your-api-token>"
 
-BDD: Translate the given business requirements into clear and concise Gherkin syntax following the BDD principles. Capture the expected behavior and interactions of the system in a scenario-based format. Include relevant feature, scenario, and step definitions. Ensure that the Gherkin syntax is understandable by both technical and non-technical stakeholders. Consider incorporating examples and edge cases to provide comprehensive coverage. Aim for a well-organized and structured set of Gherkin scenarios that can serve as executable specifications for the development team
+# Search for a test case by name using fuzzy matching
+def search_test_case(test_case_name):
+    search_url = f"{base_url}api/v3/projects/{project_id}/search"
+    headers = {"Authorization": f"Bearer {token}"}
+    params = {"object_type": "test-cases", "fields": "id,name,automation_status", "query": test_case_name}
 
-Unit tests:Given the business requirements outlined, generate a set of comprehensive unit test cases in [specific programming framework, e.g., JUnit, pytest, NUnit, etc.]. Ensure that each test case addresses a specific aspect of the functionality, covering positive, negative, and edge cases. Include relevant assertions to verify the expected behavior. Consider any dependencies, boundary conditions, and exceptional scenarios. Aim for a well-organized and structured set of unit test cases that facilitates thorough testing and ensures the robustness of the implemented feature.
+    response = requests.get(search_url, headers=headers, params=params)
+    response_data = response.json()
 
+    if response_data.get("totalResult") > 0:
+        # For simplicity, returning the first match
+        return response_data["items"][0]
+    else:
+        return None
 
-Automated test cases: Translate the given business requirements into a set of automated test cases using [specific programming framework, e.g., Selenium, Appium, JUnit, pytest, etc.]. Design test cases that cover various scenarios including positive, negative, and boundary cases. Implement relevant automation scripts with clear steps, verifications, and assertions. Consider data-driven testing and parameterization where applicable. Address any dependencies, ensure proper synchronization, and handle exceptions gracefully. Aim for maintainability, scalability, and efficiency in your automated test suite, providing reliable coverage for the implemented features.
+# Get the last execution date of a test case
+def get_last_execution_date(test_case_id):
+    execution_url = f"{base_url}api/v3/projects/{project_id}/test-runs"
+    headers = {"Authorization": f"Bearer {token}"}
+    params = {"object_type": "test-runs", "fields": "last_test_log_date", "query": f"test_case_id={test_case_id}"}
+
+    response = requests.get(execution_url, headers=headers, params=params)
+    response_data = response.json()
+
+    if response_data.get("totalResult") > 0:
+        last_execution_date = response_data["items"][0]["last_test_log_date"]
+        return last_execution_date
+    else:
+        return None
+
+# Main function to search and print automation status
+def get_automation_status(test_case_name):
+    test_case = search_test_case(test_case_name)
+
+    if test_case:
+        test_case_id = test_case["id"]
+        test_case_name = test_case["name"]
+        automation_status = test_case["automation_status"]
+        last_execution_date = get_last_execution_date(test_case_id)
+        qtest_link = f"{base_url}p/{project_id}/portal#/testcase/{test_case_id}"
+
+        output = f"{test_case_name}|{test_case_id}|{automation_status}|{last_execution_date}|{qtest_link}"
+        print(output)
+    else:
+        print(f"No test case found for the search: {test_case_name}")
+
+# Read test case names from a file
+def read_test_case_names_from_file(file_path):
+    with open(file_path, "r") as file:
+        return [line.strip() for line in file]
+
+# Example usage
+file_path = "test_case_names.txt"  # Update with your file path
+test_case_names_to_search = read_test_case_names_from_file(file_path)
+
+for test_case_name in test_case_names_to_search:
+    get_automation_status(test_case_name)
