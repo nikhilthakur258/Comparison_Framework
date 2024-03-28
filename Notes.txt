@@ -1,40 +1,10 @@
 import tabula
-import pandas as pd
 
 def pdf_to_csv(pdf_path, output_path):
-    # Initialize an empty list to store DataFrames of all tables
-    all_tables = []
-
-    # Get the number of pages in the PDF
-    with open(pdf_path, 'rb') as file:
-        num_pages = len(tabula.read_pdf(file, pages='all', silent=True))
-
-    # Extract tables from each page individually
-    for page in range(1, num_pages + 1):
-        try:
-            print(f"Extracting tables from page {page}...")
-            tables = tabula.read_pdf(pdf_path, pages=page, multiple_tables=True, silent=True)
-            
-            # Check if any tables were extracted
-            if tables:
-                # Append all tables from the current page to the list
-                all_tables.extend(tables)
-            else:
-                print(f"No tables found on page {page}")
-        except Exception as e:
-            print(f"Error extracting tables from page {page}: {e}")
-
-    # Concatenate all tables into one DataFrame
-    if all_tables:
-        combined_table = pd.concat(all_tables, ignore_index=True)
-        
-        # Write the concatenated DataFrame to a single CSV file
-        combined_table.to_csv(output_path, index=False)
-        print("CSV file generated successfully!")
-    else:
-        print("No tables found in the PDF. CSV file not generated.")
+    # Read PDF and convert to CSV
+    tabula.convert_into(pdf_path, output_path, output_format="csv", pages="all")
 
 # Example usage:
 pdf_path = "input.pdf"
-output_path = "output_table.csv"
+output_path = "output.csv"
 pdf_to_csv(pdf_path, output_path)
