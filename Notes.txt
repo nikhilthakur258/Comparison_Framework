@@ -13,11 +13,13 @@ def pdf_to_csv(pdf_path, output_path):
     for page in range(1, num_pages + 1):
         tables = tabula.read_pdf(pdf_path, pages=page, multiple_tables=True, silent=True)
         
-        # Concatenate tables from the current page into one DataFrame
-        page_tables = pd.concat(tables)
-        
-        # Append the tables from the current page to the overall tables DataFrame
-        all_tables = all_tables.append(page_tables, ignore_index=True)
+        # Check if any tables were extracted
+        if tables:
+            # Concatenate tables from the current page into one DataFrame
+            page_tables = pd.concat(tables)
+            
+            # Append the tables from the current page to the overall tables DataFrame
+            all_tables = all_tables.append(page_tables, ignore_index=True)
     
     # Write all tables to a single CSV file
     all_tables.to_csv(output_path, index=False)
