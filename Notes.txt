@@ -11,18 +11,26 @@ def pdf_to_csv(pdf_path, output_path):
 
     # Extract tables from each page individually
     for page in range(1, num_pages + 1):
-        tables = tabula.read_pdf(pdf_path, pages=page, multiple_tables=True, silent=True)
+        print(f"Extracting tables from page {page}...")
+        tables = tabula.read_pdf(pdf_path, pages=page, multiple_tables=True)
         
         # Check if any tables were extracted
         if tables:
+            print(f"Tables extracted from page {page}: {len(tables)}")
             # Concatenate tables from the current page into one DataFrame
             page_tables = pd.concat(tables)
             
             # Append the tables from the current page to the overall tables DataFrame
             all_tables = all_tables.append(page_tables, ignore_index=True)
-    
+        else:
+            print(f"No tables extracted from page {page}")
+
     # Write all tables to a single CSV file
-    all_tables.to_csv(output_path, index=False)
+    if not all_tables.empty:
+        all_tables.to_csv(output_path, index=False)
+        print("CSV file generated successfully!")
+    else:
+        print("No tables found in the PDF. CSV file not generated.")
 
 # Example usage:
 pdf_path = "input.pdf"
