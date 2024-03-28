@@ -2,8 +2,8 @@ import tabula
 import pandas as pd
 
 def pdf_to_csv(pdf_path, output_path):
-    # Initialize an empty list to store DataFrames of filtered tables
-    filtered_tables = []
+    # Initialize an empty list to store DataFrames of all tables
+    all_tables = []
 
     # Get the number of pages in the PDF
     with open(pdf_path, 'rb') as file:
@@ -16,23 +16,20 @@ def pdf_to_csv(pdf_path, output_path):
         
         # Check if any tables were extracted
         if tables:
-            # Filter tables that contain the required columns
-            for table in tables:
-                if all(col in table.columns for col in ["From", "To", "Field", "Length", "Picture"]):
-                    # Append the filtered table to the list
-                    filtered_tables.append(table)
+            # Append all tables from the current page to the list
+            all_tables.extend(tables)
         else:
             print(f"No tables found on page {page}")
 
-    # Concatenate all filtered tables into one DataFrame
-    if filtered_tables:
-        all_tables = pd.concat(filtered_tables, ignore_index=True)
+    # Concatenate all tables into one DataFrame
+    if all_tables:
+        combined_table = pd.concat(all_tables, ignore_index=True)
         
         # Write the concatenated DataFrame to a single CSV file
-        all_tables.to_csv(output_path, index=False)
+        combined_table.to_csv(output_path, index=False)
         print("CSV file generated successfully!")
     else:
-        print("No tables found with the required columns. CSV file not generated.")
+        print("No tables found in the PDF. CSV file not generated.")
 
 # Example usage:
 pdf_path = "input.pdf"
