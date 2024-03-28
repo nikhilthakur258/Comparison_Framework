@@ -1,35 +1,28 @@
-pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "scripts;scripts" app.py
-
-Generate a set of test cases for [specific scenario or functionality], considering different input values, boundary conditions, and potential edge cases. Ensure that the test cases cover positive and negative scenarios to validate the robustness and correctness of the system. Provide detailed steps, expected outcomes, and any assumptions made during the testing process
 import tabula
+import pandas as pd
 
 def pdf_to_csv(pdf_path, output_path):
-    # Extract tables from PDF
-    tables = tabula.read_pdf(pdf_path, pages='all', multiple_tables=True)
+    # Initialize an empty DataFrame to store all tables
+    all_tables = pd.DataFrame()
+
+    # Get the number of pages in the PDF
+    with open(pdf_path, 'rb') as file:
+        num_pages = len(tabula.read_pdf(file, pages='all', silent=True))
+
+    # Extract tables from each page individually
+    for page in range(1, num_pages + 1):
+        tables = tabula.read_pdf(pdf_path, pages=page, multiple_tables=True, silent=True)
+        
+        # Concatenate tables from the current page into one DataFrame
+        page_tables = pd.concat(tables)
+        
+        # Append the tables from the current page to the overall tables DataFrame
+        all_tables = all_tables.append(page_tables, ignore_index=True)
     
-    # Write each table to a CSV file
-    for i, table in enumerate(tables):
-        csv_file = f"{output_path}_{i + 1}.csv"
-        table.to_csv(csv_file, index=False)
+    # Write all tables to a single CSV file
+    all_tables.to_csv(output_path, index=False)
 
 # Example usage:
 pdf_path = "input.pdf"
-output_path = "output_table"
-pdf_to_csv(pdf_path, output_path)
-
-
-import tabula
-
-def pdf_to_csv(pdf_path, output_path):
-    # Extract tables from PDF
-    tables = tabula.read_pdf(pdf_path, pages='all', multiple_tables=True, area=(0, 0, 100, 100))
-    
-    # Write each table to a CSV file
-    for i, table in enumerate(tables):
-        csv_file = f"{output_path}_{i + 1}.csv"
-        table.to_csv(csv_file, index=False)
-
-# Example usage:
-pdf_path = "input.pdf"
-output_path = "output_table"
+output_path = "output_table.csv"
 pdf_to_csv(pdf_path, output_path)
