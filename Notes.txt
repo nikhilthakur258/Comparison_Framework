@@ -1,3 +1,18 @@
 pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "scripts;scripts" app.py
 
 Generate a set of test cases for [specific scenario or functionality], considering different input values, boundary conditions, and potential edge cases. Ensure that the test cases cover positive and negative scenarios to validate the robustness and correctness of the system. Provide detailed steps, expected outcomes, and any assumptions made during the testing process
+import tabula
+
+def pdf_to_csv(pdf_path, output_path):
+    # Extract tables from PDF
+    tables = tabula.read_pdf(pdf_path, pages='all', multiple_tables=True)
+    
+    # Write each table to a CSV file
+    for i, table in enumerate(tables):
+        csv_file = f"{output_path}_{i + 1}.csv"
+        table.to_csv(csv_file, index=False)
+
+# Example usage:
+pdf_path = "input.pdf"
+output_path = "output_table"
+pdf_to_csv(pdf_path, output_path)
