@@ -11,15 +11,18 @@ def pdf_to_csv(pdf_path, output_path):
 
     # Extract tables from each page individually
     for page in range(1, num_pages + 1):
-        print(f"Extracting tables from page {page}...")
-        tables = tabula.read_pdf(pdf_path, pages=page, multiple_tables=True, silent=True)
-        
-        # Check if any tables were extracted
-        if tables:
-            # Append all tables from the current page to the list
-            all_tables.extend(tables)
-        else:
-            print(f"No tables found on page {page}")
+        try:
+            print(f"Extracting tables from page {page}...")
+            tables = tabula.read_pdf(pdf_path, pages=page, multiple_tables=True, silent=True)
+            
+            # Check if any tables were extracted
+            if tables:
+                # Append all tables from the current page to the list
+                all_tables.extend(tables)
+            else:
+                print(f"No tables found on page {page}")
+        except Exception as e:
+            print(f"Error extracting tables from page {page}: {e}")
 
     # Concatenate all tables into one DataFrame
     if all_tables:
