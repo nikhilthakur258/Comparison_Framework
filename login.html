@@ -30,7 +30,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        button[type="submit"], button[type="button"] {
+        button[type="submit"], button[type="button"], .request-access-btn button {
             width: 100%;
             padding: 10px;
             border: none;
@@ -40,12 +40,17 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        button[type="submit"]:hover, button[type="button"]:hover {
+        button[type="submit"]:hover, button[type="button"]:hover, .request-access-btn button:hover {
             background-color: #0056b3;
         }
         .request-access-btn {
             margin-top: 10px;
             text-align: center;
+        }
+        .request-access-btn a {
+            display: block;
+            text-decoration: none;
+            color: #fff;
         }
         .request-access-btn button {
             width: calc(100% - 22px); /* Same width as login button */
