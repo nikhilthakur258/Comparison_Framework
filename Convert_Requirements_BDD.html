@@ -1,0 +1,459 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>GenAI Bot</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="{{url_for('static', filename='vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="{{url_for('static', filename='css/sb-admin-2.min.css')}}" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url_for('index') }}">
+			<img class="img-profile rounded-circle" src="{{url_for('static', filename='TCS.jpg')}}" style="width:60px">
+                <div class="sidebar-brand-text mx-3">GenAI Bot <sup></sup></div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Use Cases
+            </div>
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+                    aria-expanded="true" aria-controls="collapseTwo">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Requiremements</span>
+                </a>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{{ url_for('Generate_Requirements') }}">Fine tune requirements</a>
+						<a class="collapse-item" href="{{ url_for('Convert_Requirements_BDD') }}">Convert into BDD/Gherkins</a>
+                    </div>
+                </div>
+            </li>
+			
+			            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities1"
+                    aria-expanded="true" aria-controls="collapseUtilities1">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Development</span>
+                </a>
+                <div id="collapseUtilities1" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{{ url_for('Generate_UnitTestCases') }}">Generate unit test cases</a>
+						<a class="collapse-item" href="Generate.html">Find Security vulnerabilities</a>
+                        <a class="collapse-item" href="{{ url_for('Code_migration') }}">Convert Code</a>
+                        <a class="collapse-item" href="{{ url_for('Generate_code_optimization')}}">Optimize code</a>
+						<a class="collapse-item" href="{{ url_for('Code_Documentation')}}">NexGen Code Documentation</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Nav Item - Quality enginering Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
+                    aria-expanded="true" aria-controls="collapseUtilities">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Quality Engineering</span>
+                </a>
+                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+					    <a class="collapse-item" href="{{ url_for('Generate_TestScenarios')}}">Generate test scenarios</a>
+                        <a class="collapse-item" href="{{ url_for('Generate_TestCases')}}">Generate test cases for UI</a>
+						<a class="collapse-item" href="{{ url_for('Generate_APITestCases')}}">Generate test cases for API</a>
+						<a class="collapse-item" href="{{ url_for('Generate_TestCasesMetlifePOC')}}">Generate API tests with data</a>
+                        <a class="collapse-item" href="{{ url_for('Code_migration') }}">Convert Code</a>
+                        <a class="collapse-item" href="Generate.html">Optimize test cases</a>
+						<a class="collapse-item" href="{{ url_for('Code_Documentation')}}">NexGen Code Documentation</a>
+						<a class="collapse-item" href="Generate.html">Generate Test Data</a>
+
+                    </div>
+                </div>
+            </li>
+			
+			            <!-- Nav Item - Performance enginering Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities3"
+                    aria-expanded="true" aria-controls="collapseUtilities3">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Performance Engineering</span>
+                </a>
+                <div id="collapseUtilities3" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{{ url_for('Generate_performanceTestCases')}}">Generate performance test cases</a>
+
+
+                    </div>
+                </div>
+            </li>
+			
+			
+			            <!-- Nav Item - Run the bank Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#RTB"
+                    aria-expanded="true" aria-controls="RTB">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Run the Bank(RTB)</span>
+                </a>
+                <div id="RTB" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="Generate.html">Locate Originating Cause</a>
+						<a class="collapse-item" href="{{ url_for('Code_migration') }}">Code Migration</a>
+                        <a class="collapse-item" href="{{ url_for('Generate_code_optimization')}}">Code Fine-Tuning</a>
+                        <a class="collapse-item" href="{{ url_for('Code_Documentation')}}">NexGen Code Documentation</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Settings
+            </div>
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
+                    aria-expanded="true" aria-controls="collapsePages">
+                    <i class="fas fa-fw fa-folder"></i>
+                    <span>Apps (Jira, Github etc)</span>
+                </a>
+                <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="Generate.html">Jira</a>
+                        <a class="collapse-item" href="Generate.html">GitHub</a>
+                        <a class="collapse-item" href="Generate.html">Azure OpenAI</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+                    </ul>
+        <!-- End of Sidebar -->
+
+        
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Page Heading -->
+
+                    <!-- Content Row -->
+                    
+
+                    <!-- Content Row -->
+
+                    
+                    <!-- Content Row -->
+     
+
+                        <!-- Content Column -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GenAI Bot Generate Code</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+ <style>
+  /* Set a fixed height for both text areas */
+  #inputTextArea,
+  #outputTextArea {
+    height: 300px; /* Adjust the height as needed */
+    width: 100%;
+    resize: none; /* Disable textarea resizing */
+    margin: 0; /* Remove default margin */
+    outline: none; /* Remove outline on focus */
+  }
+
+  /* Container styling */
+  .container {
+    padding: 20px;
+    background-color: #f8f9fa; /* Bootstrap background color */
+    border-radius: 10px; /* Border radius for container */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for container */
+    position: relative;
+  }
+
+  /* Additional styling for buttons */
+  #clearBtn,
+  #generateBtn,
+  #downloadBtn {
+    margin-top: 20px;
+  }
+
+  /* Adjust the position of the top-left and top-right buttons */
+  #clearBtn {
+    float: left;
+  }
+
+  #downloadBtn {
+    float: right;
+  }
+
+  /* Add media query for responsiveness */
+  @media (max-width: 767.98px) {
+    #clearBtn,
+    #downloadBtn {
+      float: none;
+      margin-top: 10px;
+    }
+  }
+  #languageDropdown {
+    width: 50%;
+  }
+
+  #dropdownLabel {
+    display: block;
+    margin-bottom: 5px;
+    text-align: left;
+    font-weight: bold;
+  }
+
+  #outputTextArea {
+    background-color: black;
+    color: white;
+  }
+</style>
+
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row justify-content-end">
+            <div class="col-auto">
+                <p class="mt-2 mr-3">Logged in as: {{ session['username'] }}</p>
+            </div>
+        </div>
+    </div>
+	
+<h1 align=center style="font-size: 24px;">Transform requirements into BDD/Gherkins </h1>
+
+    <div class="container mt-5">
+
+        <!-- Buttons -->
+        <div class="row">
+            <div class="col-md-12">
+			
+				    <div class="spinner-border text-primary" role="status" id="loadingSpinner" style="display: none;">
+        <span class="sr-only">Loading...</span>
+    </div>
+                <button id="clearBtn" class="btn btn-warning">Clear Input</button>
+
+                <button id="downloadBtn" class="btn btn-success ml-2" disabled>Download</button>
+            </div>
+        </div>
+
+        <!-- Text Areas -->
+<!-- Text Areas -->
+<div class="row">
+    <div class="col-md-6">
+        <label for="inputTextArea" class="mt-2"><strong>Enter Requirements Here</strong></label>
+        <textarea id="inputTextArea" class="form-control" placeholder="Enter requirements..."></textarea>
+    </div>
+    <div class="col-md-6">
+        <label for="outputTextArea" class="mt-2"><strong>Requirments in BDD/Gherkins format</strong></label>
+        <textarea id="outputTextArea" class="form-control" placeholder="Output will be displayed here..." disabled></textarea>
+    </div>
+</div>
+
+        <!-- Generate Button -->
+        <div class="row mt-3">
+            <div class="col-md-12 text-center">
+                <button id="generateBtn" class="btn btn-primary" onclick="runPythonScript()">Fine tune requirements</button>
+            </div>
+        </div>
+
+    </div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+function runPythonScript() {
+	
+
+    var pythonScriptPath = "AzureOpenAI_requirements_BDD.py";
+    var inputText = document.getElementById('inputTextArea').value;
+	    if (inputText === '') {
+        window.alert('Please enter input before generating requirements.');
+        return; // Exit the function if no input is provided
+    }
+    document.getElementById('loadingSpinner').style.display = 'inline-block';
+    // Make an AJAX request to your Flask server
+    fetch('/run_script', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ scriptPath: pythonScriptPath, inputText: inputText }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('outputTextArea').value = data.output;
+        document.getElementById('downloadBtn').disabled = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        console.log('Request completed');
+        // Hide loading spinner after response
+        document.getElementById('loadingSpinner').style.display = 'none';
+    });
+}
+
+</script>
+<script>
+document.getElementById('clearBtn').addEventListener('click', function () {
+        document.getElementById('inputTextArea').value = '';
+        // Clear Output TextArea as well
+        document.getElementById('outputTextArea').value = '';
+        // Disable the Download button after clearing
+        document.getElementById('downloadBtn').disabled = true;
+
+    // Re-enable the generate button after the fetch request is complete
+    document.getElementById('generateBtn').disabled = false;
+});
+</script>
+
+<!-- Download Button -->
+<script>
+document.getElementById('downloadBtn').addEventListener('click', function() {
+    var outputText = document.getElementById('outputTextArea').value;
+    downloadFile(outputText, 'output.txt');
+  });
+
+// File Download Function
+function downloadFile(content, fileName) {
+    var blob = new Blob([content], { type: 'text/plain' });
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+
+</body>
+
+
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; 2023</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="{{url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="{{url_for('static', filename='vendor/jquery-easing/jquery.easing.min.js')}}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{{url_for('static', filename='js/sb-admin-2.min.js')}}"></script>
+
+    <!-- Page level plugins -->
+    <script src="{{url_for('static', filename='vendor/chart.js/Chart.min.js')}}"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{{url_for('static', filename='js/demo/chart-area-demo.js')}}"></script>
+    <script src="{{url_for('static', filename='js/demo/chart-pie-demo.js')}}"></script>
+
+</body>
+
+</html>
+
