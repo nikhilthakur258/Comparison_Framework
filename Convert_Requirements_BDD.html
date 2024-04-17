@@ -320,14 +320,22 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
 function runPythonScript() {
-	
-
     var pythonScriptPath = "AzureOpenAI_requirements_BDD.py";
     var inputText = document.getElementById('inputTextArea').value;
-	    if (inputText === '') {
+    
+    // Check if input text contains source code
+    var containsSourceCode = detectSourceCode(inputText);
+    if (containsSourceCode) {
+        // Display message in outputTextArea
+        document.getElementById('outputTextArea').value = "Detected source code in input. Please remove it before generating requirements.";
+        return;
+    }
+    
+    if (inputText === '') {
         window.alert('Please enter input before generating requirements.');
         return; // Exit the function if no input is provided
     }
+    
     document.getElementById('loadingSpinner').style.display = 'inline-block';
     // Make an AJAX request to your Flask server
     fetch('/run_script', {
@@ -350,6 +358,53 @@ function runPythonScript() {
         // Hide loading spinner after response
         document.getElementById('loadingSpinner').style.display = 'none';
     });
+}
+
+function detectSourceCode(inputText) {
+    // Regular expression patterns to detect source code
+    var sourceCodePatterns = [
+        // General source code patterns
+        /function\s*\([^)]*\)\s*{[^{}]*}/, // JavaScript function declaration
+        /def\s+[A-Za-z_][A-Za-z0-9_]*\s*\([^)]*\):[^:]*\n/, // Python function declaration
+        /public\s+class\s+[A-Za-z_][A-Za-z0-9_]*\s*{[^{}]*}/, // Java public class declaration
+        /class\s+[A-Za-z_][A-Za-z0-9_]*\s*{[^{}]*}/, // Class declaration
+        /import\s+[A-Za-z0-9_.]+\s*;/, // Java import statement
+        /import\s+[A-Za-z0-9_.]+\s*$/, // Python import statement
+        /#include\s+[<"][A-Za-z0-9_]+[">]/, // C/C++ include statement
+        /<script.*?>[\s\S]*?<\/script>/, // HTML <script> tag
+        /<style.*?>[\s\S]*?<\/style>/, // HTML <style> tag
+        /<\?php[\s\S]*?\?>/s, // PHP code block
+        /\bvar\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*function\s*\([^)]*\)\s*{[^{}]*}/, // JavaScript anonymous function declaration
+        /function\s*\([^)]*\)\s*=>\s*{[^{}]*}/, // JavaScript arrow function declaration
+        /function\s*[A-Za-z_][A-Za-z0-9_]*\s*\([^)]*\)\s*=>\s*{[^{}]*}/, // JavaScript arrow function declaration with name
+        /class\s+[A-Za-z_][A-Za-z0-9_]*\s*{[^{}]*}/, // JavaScript class declaration
+        /def\s+[A-Za-z_][A-Za-z0-9_]*\([^)]*\):[^:]*\n/, // Ruby method declaration
+        /class\s+[A-Za-z_][A-Za-z0-9_]*\s*{[^{}]*}/, // Ruby class declaration
+        /\/\/.*\n/, // Single-line comments
+        /\/\*[\s\S]*?\*\//, // Multi-line comments
+
+        // Automation Test Frameworks
+        /describe\s*\(\s*['"][^'"]+['"]\s*,\s*function\s*\(\s*\)\s*{[^{}]*}/i, // Mocha describe block
+        /test\s*\(\s*['"][^'"]+['"]\s*,\s*function\s*\(\s*\)\s*{[^{}]*}/i, // Mocha test block
+        /test\s*\(\s*['"][^'"]+['"]\s*,\s*async\s*\(?\s*function\s*\(\s*\)\s*{[^{}]*}/i, // Mocha async test block
+        /describe\s*\(\s*['"][^'"]+['"]\s*,\s*async\s*\(?\s*function\s*\(\s*\)\s*{[^{}]*}/i, // Mocha async describe block
+        /test\s*['"][^'"]+['"]\s*,\s*=>\s*{[^{}]*}/i, // Jest test block
+        /describe\s*['"][^'"]+['"]\s*,\s*=>\s*{[^{}]*}/i, // Jest describe block
+        /test\s*\(.*?\)\s*{[^{}]*}/i, // Generic test block
+        /testcase\s+[A-Za-z_][A-Za-z0-9_]*\s*:[^:]*\n/i, // Robot Framework test case declaration
+        /test\s*:\s*function\s*\([^)]*\)\s*{[^{}]*}/i, // WebdriverIO test function declaration
+		/public\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s*args\s*\)\s*{[^{}]*}/i, // Java main method declaration
+        // Add more patterns for other types of source code if needed
+    ];
+
+    // Check if input text matches any source code pattern
+    for (var i = 0; i < sourceCodePatterns.length; i++) {
+        if (sourceCodePatterns[i].test(inputText)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 </script>
