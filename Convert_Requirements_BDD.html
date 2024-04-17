@@ -359,7 +359,6 @@ function runPythonScript() {
         document.getElementById('loadingSpinner').style.display = 'none';
     });
 }
-
 function detectSourceCode(inputText) {
     // Regular expression patterns to detect source code
     var sourceCodePatterns = [
@@ -393,8 +392,14 @@ function detectSourceCode(inputText) {
         /test\s*\(.*?\)\s*{[^{}]*}/i, // Generic test block
         /testcase\s+[A-Za-z_][A-Za-z0-9_]*\s*:[^:]*\n/i, // Robot Framework test case declaration
         /test\s*:\s*function\s*\([^)]*\)\s*{[^{}]*}/i, // WebdriverIO test function declaration
-		/public\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s*args\s*\)\s*{[^{}]*}/i, // Java main method declaration
-        // Add more patterns for other types of source code if needed
+        /public\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s*args\s*\)\s*{[^{}]*}/i, // Java main method declaration
+        /public\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s*args\s*\)\s*{\s*[^{}]*}/, // Java main method declaration with spaces
+        // Additional patterns for other languages
+        /\/\/.*\n/, // Linux/Unix shell comments
+        /PERFORM\s+[A-Za-z_][A-Za-z0-9_]*\s*THROUGH\s*[A-Za-z_][A-Za-z0-9_]*\.$/, // COBOL PERFORM statement
+        /EXEC\s+SQL.*END-EXEC\.$/, // Mainframe SQL embedded in COBOL
+        /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|USE|BEGIN|COMMIT|ROLLBACK)\b.*;/i, // SQL statements
+        // Add more patterns for other languages if needed
     ];
 
     // Check if input text matches any source code pattern
@@ -406,7 +411,6 @@ function detectSourceCode(inputText) {
 
     return false;
 }
-
 </script>
 <script>
 document.getElementById('clearBtn').addEventListener('click', function () {
