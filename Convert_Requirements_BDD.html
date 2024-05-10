@@ -297,7 +297,9 @@
 <div class="row">
     <div class="col-md-6">
         <label for="inputTextArea" class="mt-2"><strong>Enter Requirements Here</strong></label>
-        <textarea id="inputTextArea" class="form-control" placeholder="Enter requirements..."></textarea>
+        <textarea id="inputTextArea" class="form-control" placeholder="Enter requirements..." maxlength="3000"></textarea>
+		<span id="charCount" class="text-muted">0 / 3000 characters</span>
+        <span id="charWarning" class="text-danger" style="display: none;">Exceeded character limit!</span>
     </div>
     <div class="col-md-6">
         <label for="outputTextArea" class="mt-2"><strong>Requirments in BDD/Gherkins format</strong></label>
@@ -399,6 +401,10 @@ function detectSourceCode(inputText) {
         /PERFORM\s+[A-Za-z_][A-Za-z0-9_]*\s*THROUGH\s*[A-Za-z_][A-Za-z0-9_]*\.$/, // COBOL PERFORM statement
         /EXEC\s+SQL.*END-EXEC\.$/, // Mainframe SQL embedded in COBOL
         /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|USE|BEGIN|COMMIT|ROLLBACK)\b.*;/i, // SQL statements
+		/public\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s*args\s*\)\s*{[^{}]*}/i,
+		/public\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s*args\s*\)\s*{[^{}]*}/i, // Java main method declaration
+		/public\s+static\s+void\s+main/i,
+		
         // Add more patterns for other languages if needed
     ];
 
@@ -423,6 +429,20 @@ document.getElementById('clearBtn').addEventListener('click', function () {
     // Re-enable the generate button after the fetch request is complete
     document.getElementById('generateBtn').disabled = false;
 });
+
+document.getElementById('inputTextArea').addEventListener('input', function() {
+    var text = this.value;
+    var charCountSpan = document.getElementById('charCount');
+    var charWarningSpan = document.getElementById('charWarning');
+
+    charCountSpan.textContent = text.length + ' / 3000 characters';
+
+    if (text.length > 3000) {
+        charWarningSpan.style.display = 'inline';
+    } else {
+        charWarningSpan.style.display = 'none';
+    }
+});
 </script>
 
 <!-- Download Button -->
@@ -431,6 +451,8 @@ document.getElementById('downloadBtn').addEventListener('click', function() {
     var outputText = document.getElementById('outputTextArea').value;
     downloadFile(outputText, 'output.txt');
   });
+
+
 
 // File Download Function
 function downloadFile(content, fileName) {
