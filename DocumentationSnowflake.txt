@@ -1,0 +1,160 @@
+open_connection:
+
+Description: Establishes a connection to the Snowflake database using the provided credentials.
+Usage: Open Connection user password account warehouse database schema
+close_connection:
+
+Description: Closes the active connection to the Snowflake database.
+Usage: Close Connection
+test_connection:
+
+Description: Tests the established connection by retrieving the current version of Snowflake.
+Usage: Test Connection
+execute_query:
+
+Description: Executes a SQL query on the connected Snowflake database.
+Usage: Execute Query query
+execute_query_and_fetch_results:
+
+Description: Executes a SQL query on the connected Snowflake database and returns the fetched results.
+Usage: Execute Query And Fetch Results query
+execute_stored_procedure:
+
+Description: Executes a stored procedure with optional arguments.
+Usage: Execute Stored Procedure procedure_name *args
+execute_query_from_file:
+
+Description: Executes a SQL query from a file path.
+Usage: Execute Query From File file_path
+load_data_from_csv:
+
+Description: Loads data from a CSV file into the specified table.
+Usage: Load Data From CSV table_name file_path
+load_data_from_parquet:
+
+Description: Loads data from a Parquet file into the specified table.
+Usage: Load Data From Parquet table_name file_path
+unload_data_to_csv:
+
+Description: Unloads data from a query to a CSV file.
+Usage: Unload Data To CSV query file_path
+unload_data_to_parquet:
+
+Description: Unloads data from a query to a Parquet file.
+Usage: Unload Data To Parquet query file_path
+get_table_schema:
+
+Description: Retrieves the schema of a specified table.
+Usage: Get Table Schema table_name
+create_table:
+
+Description: Creates a new table with the specified name and schema.
+Usage: Create Table table_name schema
+drop_table:
+
+Description: Drops an existing table from the database.
+Usage: Drop Table table_name
+truncate_table:
+
+Description: Removes all rows from a table without deleting the table itself.
+Usage: Truncate Table table_name
+insert_data:
+
+Description: Inserts data into the specified table.
+Usage: Insert Data table_name *data
+update_data:
+
+Description: Updates data in the specified table based on the provided condition.
+Usage: Update Data table_name set_clause condition
+delete_data:
+
+Description: Deletes data from the specified table based on the provided condition.
+Usage: Delete Data table_name condition
+create_database:
+
+Description: Creates a new database with the specified name.
+Usage: Create Database database_name
+drop_database:
+
+Description: Drops an existing database from the Snowflake instance.
+Usage: Drop Database database_name
+use_database:
+
+Description: Switches the active database context to the specified database.
+Usage: Use Database database_name
+create_schema:
+
+Description: Creates a new schema within the active database.
+Usage: Create Schema schema_name
+drop_schema:
+
+Description: Drops an existing schema from the active database.
+Usage: Drop Schema schema_name
+use_schema:
+
+Description: Switches the active schema within the current database context.
+Usage: Use Schema schema_name
+create_user:
+
+Description: Creates a new user with the specified username and password.
+Usage: Create User user_name password
+drop_user:
+
+Description: Deletes an existing user from the Snowflake instance.
+Usage: Drop User user_name
+alter_user:
+
+Description: Modifies the properties of an existing user.
+Usage: Alter User user_name set_clause
+create_role:
+
+Description: Creates a new role with the specified name.
+Usage: Create Role role_name
+drop_role:
+
+Description: Deletes an existing role from the Snowflake instance.
+Usage: Drop Role role_name
+grant_role:
+
+Description: Grants a role to a specified user.
+Usage: Grant Role role_name to_user
+revoke_role:
+
+Description: Revokes a role from a specified user.
+Usage: Revoke Role role_name from_user
+create_warehouse:
+
+Description: Creates a new warehouse with the specified name.
+Usage: Create Warehouse warehouse_name
+drop_warehouse:
+
+Description: Deletes an existing warehouse from the Snowflake instance.
+Usage: Drop Warehouse warehouse_name
+start_warehouse:
+
+Description: Resumes a suspended warehouse, allowing it to accept queries.
+Usage: Start Warehouse warehouse_name
+suspend_warehouse:
+
+Description: Suspends a running warehouse, preventing it from accepting new queries.
+Usage: Suspend Warehouse warehouse_name
+resize_warehouse:
+
+Description: Changes the size of a warehouse (e.g., small, medium, large).
+Usage: Resize Warehouse warehouse_name size
+set_session_parameter:
+
+Description: Sets a session parameter for the current session.
+Usage: Set Session Parameter parameter value
+get_session_parameter:
+
+Description: Retrieves the value of a session parameter.
+Usage: Get Session Parameter parameter
+list_session_parameters:
+
+Description: Retrieves a list of all session parameters and their values.
+Usage: List Session Parameters
+validate_view:
+
+Description: Validates a view by comparing its results with expected results.
+Usage: Validate View view_name expected_results
