@@ -1,0 +1,228 @@
+*** Settings ***
+Library  SnowflakeLibrary.py
+
+*** Variables ***
+${USER}                 your_user
+${PASSWORD}             your_password
+${ACCOUNT}              your_account
+${WAREHOUSE}            your_warehouse
+${DATABASE}             your_database
+${SCHEMA}               your_schema
+${TABLE_NAME}           your_table_name
+${BACKUP_FILE}          path/to/backup/file.csv
+${MASK_COLUMNS}         column1  column2
+${TRANSFORMATION_QUERY} column1 = column1 * 2, column2 = UPPER(column2)
+${VALIDATION_QUERY}     SELECT COUNT(*) FROM your_table
+${EXPECTED_RESULT}      [(1000,)]
+${SCHEMA1}              schema1
+${SCHEMA2}              schema2
+${ARCHIVE_TABLE}        archive_table
+${ARCHIVE_CONDITION}    created_at < '2024-01-01'
+${QUERY}                SELECT * FROM your_table LIMIT 100
+${VIEW_NAME}            your_materialized_view
+${VERSION_ID}           version123
+
+*** Test Cases ***
+
+# Connection Management
+Test Connection Management
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    ${version}=  Test Connection
+    Log  ${version}
+    Close Connection
+
+# Query Execution
+Test Query Execution
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Execute Query  CREATE TABLE test_table (id INT, name STRING)
+    ${results}=  Execute Query And Fetch Results  SELECT * FROM test_table
+    Log  ${results}
+    Drop Table  test_table
+    Close Connection
+
+# Data Loading and Unloading
+Test Data Loading and Unloading
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Execute Query  CREATE TABLE test_table (id INT, name STRING)
+    Load Data From CSV  test_table  ${CSV_FILE}
+    ${results}=  Execute Query And Fetch Results  SELECT * FROM test_table
+    Log  ${results}
+    Unload Data To CSV  SELECT * FROM test_table  ${EXPORT_CSV_FILE}
+    Load Data From Parquet  test_table  ${PARQUET_FILE}
+    ${results_parquet}=  Execute Query And Fetch Results  SELECT * FROM test_table
+    Log  ${results_parquet}
+    Unload Data To Parquet  SELECT * FROM test_table  ${EXPORT_PARQUET_FILE}
+    Drop Table  test_table
+    Close Connection
+
+# Schema Operations
+Test Schema Operations
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Create Table  test_table  id INT, name STRING
+    ${schema}=  Get Table Schema  test_table
+    Log  ${schema}
+    Drop Table  test_table
+    Close Connection
+
+# Table Operations
+Test Table Operations
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Create Table  test_table  id INT, name STRING
+    Insert Data  test_table  1  'John Doe'
+    ${results}=  Execute Query And Fetch Results  SELECT * FROM test_table
+    Log  ${results}
+    Update Data  test_table  name='Jane Doe'  id=1
+    ${results}=  Execute Query And Fetch Results  SELECT * FROM test_table
+    Log  ${results}
+    Delete Data  test_table  id=1
+    ${results}=  Execute Query And Fetch Results  SELECT * FROM test_table
+    Log  ${results}
+    Truncate Table  test_table
+    Drop Table  test_table
+    Close Connection
+
+# Database Management
+Test Database Management
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Create Database  test_db
+    Use Database  test_db
+    Create Schema  test_schema
+    Drop Schema  test_schema
+    Drop Database  test_db
+    Close Connection
+
+# Schema Management
+Test Schema Management
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Create Schema  test_schema
+    Use Schema  test_schema
+    Drop Schema  test_schema
+    Close Connection
+
+# User Management
+Test User Management
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Create User  test_user  TestPassword123
+    Alter User  test_user  PASSWORD='NewPassword123'
+    Drop User  test_user
+    Close Connection
+
+# Role Management
+Test Role Management
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Create Role  test_role
+    Grant Role  test_role  ${USER}
+    Revoke Role  test_role  ${USER}
+    Drop Role  test_role
+    Close Connection
+
+# Warehouse Management
+Test Warehouse Management
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Create Warehouse  test_wh
+    Start Warehouse  test_wh
+    Resize Warehouse  test_wh  X-SMALL
+    Suspend Warehouse  test_wh
+    Drop Warehouse  test_wh
+    Close Connection
+
+# Session Management
+Test Session Management
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Set Session Parameter  TIMEZONE  'UTC'
+    ${parameter}=  Get Session Parameter  TIMEZONE
+    Log  ${parameter}
+    ${parameters}=  List Session Parameters
+    Log  ${parameters}
+    Close Connection
+
+# Validate View
+Test Validate View
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    ${expected_results}=  Execute Query And Fetch Results  SELECT * FROM expected_view_data
+    ${is_valid}=  Validate View  your_view_name  ${expected_results}
+    Should Be True  ${is_valid}
+    Close Connection
+
+Check Row Count
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    ${result}=  Check Row Count  ${TABLE_NAME}  ${EXPECTED_ROW_COUNT}
+    Should Be True  ${result}
+    Close Connection
+
+Check Data Sanity
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    @{sanity_issues}=  Check Data Sanity  ${TABLE_NAME}
+    Log Many  @{sanity_issues}
+    Should Be Empty  ${sanity_issues}
+    Close Connection
+
+Find Duplicates
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    @{duplicates}=  Find Duplicates  ${TABLE_NAME}
+    Log Many  @{duplicates}
+    Should Be Empty  ${duplicates}
+    Close Connection
+
+# Validate Business Logic
+Test Validate Business Logic
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    ${is_valid}=  Validate Business Logic  SELECT * FROM your_test_query  SELECT * FROM your_expected_results_query
+    Should Be True  ${is_valid}
+    Close Connection
+
+# Compare Datasets and Publish Mismatch Report
+Test Compare Datasets and Publish Mismatch Report
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    ${is_matched}=  Compare Datasets And Publish Mismatch Report  SELECT * FROM dataset1  SELECT * FROM dataset2  ${REPORT_FILE}
+    Should Be True  ${is_matched}
+    Close Connection
+
+Backup and Restore Table
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Backup Table  ${TABLE_NAME}  ${BACKUP_FILE}
+    Restore Table  ${TABLE_NAME}  ${BACKUP_FILE}
+    Close Connection
+
+Mask Sensitive Data
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Mask Sensitive Data  ${TABLE_NAME}  ${MASK_COLUMNS}
+    Close Connection
+
+Transform Data
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Transform Data  ${TABLE_NAME}  ${TRANSFORMATION_QUERY}
+    Close Connection
+
+Validate Data
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    ${result}=  Validate Data  ${VALIDATION_QUERY}  ${EXPECTED_RESULT}
+    Should Be True  ${result}
+    Close Connection
+
+Compare Schemas
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    ${result}=  Compare Schemas  ${SCHEMA1}  ${SCHEMA2}
+    Should Be True  ${result}
+    Close Connection
+
+Archive Data
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Archive Data  ${TABLE_NAME}  ${ARCHIVE_TABLE}  ${ARCHIVE_CONDITION}
+    Close Connection
+
+Refresh Materialized View
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Refresh Materialized View  ${VIEW_NAME}
+    Close Connection
+
+Rollback Version
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    Rollback Version  ${VERSION_ID}
+    Close Connection
+
+Profile Query
+    Open Connection  ${USER}  ${PASSWORD}  ${ACCOUNT}  ${WAREHOUSE}  ${DATABASE}  ${SCHEMA}
+    ${profile}=  Profile Query  ${QUERY}
+    Log  ${profile}
+    Close Connection

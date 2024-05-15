@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnowflakeLibrary Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        h2 {
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+        code {
+            font-family: Consolas, monospace;
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>SnowflakeLibrary Documentation</h1>
+
+    <p>This library provides keywords to interact with Snowflake, a cloud-based data warehousing platform, allowing users to execute SQL queries, manage databases, tables, users, roles, warehouses, and more.</p>
+
+    <h2>Installation</h2>
+    <pre><code>pip install snowflake-connector-python pandas jinja2</code></pre>
+
+    <h2>Keywords</h2>
+    <ul>
+        <li><a href="#open-connection">Open Connection</a></li>
+        <li><a href="#close-connection">Close Connection</a></li>
+        <li><a href="#test-connection">Test Connection</a></li>
+        <!-- Add more links for other keywords -->
+    </ul>
+
+    <!-- Open Connection Section -->
+    <h3 id="open-connection">Open Connection</h3>
+    <pre><code>Open Connection  <i>${user}</i>  <i>${password}</i>  <i>${account}</i>  <i>${warehouse}</i>  <i>${database}</i>  <i>${schema}</i></code></pre>
+    <p>Opens a connection to a Snowflake database.</p>
+<ul>
+        <li><a href="#open-connection">Open Connection</a></li>
+        <li><a href="#close-connection">Close Connection</a></li>
+        <li><a href="#test-connection">Test Connection</a></li>
+        <li><a href="#execute-query">Execute Query</a></li>
+        <li><a href="#execute-query-and-fetch-results">Execute Query And Fetch Results</a></li>
+        <li><a href="#execute-stored-procedure">Execute Stored Procedure</a></li>
+        <li><a href="#execute-query-from-file">Execute Query From File</a></li>
+        <li><a href="#load-data-from-csv">Load Data From CSV</a></li>
+        <li><a href="#load-data-from-parquet">Load Data From Parquet</a></li>
+        <li><a href="#unload-data-to-csv">Unload Data To CSV</a></li>
+        <li><a href="#unload-data-to-parquet">Unload Data To Parquet</a></li>
+        <li><a href="#get-table-schema">Get Table Schema</a></li>
+        <li><a href="#create-table">Create Table</a></li>
+        <li><a href="#drop-table">Drop Table</a></li>
+        <li><a href="#truncate-table">Truncate Table</a></li>
+        <li><a href="#insert-data">Insert Data</a></li>
+        <li><a href="#update-data">Update Data</a></li>
+        <li><a href="#delete-data">Delete Data</a></li>
+        <li><a href="#create-database">Create Database</a></li>
+        <li><a href="#drop-database">Drop Database</a></li>
+        <li><a href="#use-database">Use Database</a></li>
+        <li><a href="#create-schema">Create Schema</a></li>
+        <li><a href="#drop-schema">Drop Schema</a></li>
+        <li><a href="#use-schema">Use Schema</a></li>
+        <li><a href="#create-user">Create User</a></li>
+        <li><a href="#drop-user">Drop User</a></li>
+        <li><a href="#alter-user">Alter User</a></li>
+        <li><a href="#create-role">Create Role</a></li>
+        <li><a href="#drop-role">Drop Role</a></li>
+        <li><a href="#grant-role">Grant Role</a></li>
+        <li><a href="#revoke-role">Revoke Role</a></li>
+        <li><a href="#create-warehouse">Create Warehouse</a></li>
+        <li><a href="#drop-warehouse">Drop Warehouse</a></li>
+        <li><a href="#start-warehouse">Start Warehouse</a></li>
+        <li><a href="#suspend-warehouse">Suspend Warehouse</a></li>
+        <li><a href="#resize-warehouse">Resize Warehouse</a></li>
+        <li><a href="#set-session-parameter">Set Session Parameter</a></li>
+        <li><a href="#get-session-parameter">Get Session Parameter</a></li>
+        <li><a href="#list-session-parameters">List Session Parameters</a></li>
+        <li><a href="#validate-view">Validate View</a></li>
+        <li><a href="#validate-business-logic">Validate Business Logic</a></li>
+        <li><a href="#compare-datasets-and-publish-mismatch-report">Compare Datasets And Publish Mismatch Report</a></li>
+    </ul>
+
+    <!-- Close Connection Section -->
+    <h3 id="close-connection">Close Connection</h3>
+    <pre><code>Close Connection</code></pre>
+    <p>Closes the current connection to Snowflake.</p>
+
+    <!-- Test Connection Section -->
+    <h3 id="test-connection">Test Connection</h3>
+    <pre><code>Test Connection</code></pre>
+    <p>Tests the connection to Snowflake by retrieving the current version.</p>
+
+    <!-- Add sections for other keywords -->
+
+</body>
+</html>
