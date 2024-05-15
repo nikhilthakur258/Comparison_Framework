@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnowflakeLibrary Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        h2 {
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+        code {
+            font-family: Consolas, monospace;
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>SnowflakeLibrary Documentation</h1>
+
+    <p>This library provides keywords to interact with Snowflake, a cloud-based data warehousing platform, allowing users to execute SQL queries, manage databases, tables, users, roles, warehouses, and more.</p>
+
+    <h2>Installation</h2>
+    <pre><code>pip install snowflake-connector-python pandas jinja2</code></pre>
+
+    <h2>Keywords</h2>
+
+    <h3>Open Connection</h3>
+    <pre><code>Open Connection  <i>${user}</i>  <i>${password}</i>  <i>${account}</i>  <i>${warehouse}</i>  <i>${database}</i>  <i>${schema}</i></code></pre>
+    <p>Opens a connection to a Snowflake database.</p>
+    <ul>
+        <li><code>${user}</code>: Snowflake username.</li>
+        <li><code>${password}</code>: Snowflake password.</li>
+        <li><code>${account}</code>: Snowflake account name.</li>
+        <li><code>${warehouse}</code>: Snowflake warehouse name.</li>
+        <li><code>${database}</code>: Snowflake database name.</li>
+        <li><code>${schema}</code>: Snowflake schema name.</li>
+    </ul>
+
+    <h3>Close Connection</h3>
+    <pre><code>Close Connection</code></pre>
+    <p>Closes the current connection to Snowflake.</p>
+
+    <h3>Test Connection</h3>
+    <pre><code>Test Connection</code></pre>
+    <p>Tests the connection to Snowflake by retrieving the current version.</p>
+
+    <h3>Execute Query</h3>
+    <pre><code>Execute Query  <i>${query}</i></code></pre>
+    <p>Executes an SQL query in Snowflake.</p>
+    <ul>
+        <li><code>${query}</code>: The SQL query to execute.</li>
+    </ul>
+
+    <h3>Execute Query And Fetch Results</h3>
+    <pre><code>Execute Query And Fetch Results  <i>${query}</i></code></pre>
+    <p>Executes an SQL query in Snowflake and fetches the results.</p>
+    <ul>
+        <li><code>${query}</code>: The SQL query to execute.</li>
+    </ul>
+
+    <h3>Execute Stored Procedure</h3>
+    <pre><code>Execute Stored Procedure  <i>${procedure_name}</i>  [<i>${arg1}</i>]  [<i>${arg2}</i>]  [...]</code></pre>
+    <p>Executes a stored procedure in Snowflake.</p>
+    <ul>
+        <li><code>${procedure_name}</code>: The name of the stored procedure.</li>
+        <li><code>${arg1}</code>, <code>${arg2}</code>, etc.: Optional arguments for the stored procedure.</li>
+    </ul>
+
+    <h3>Execute Query From File</h3>
+    <pre><code>Execute Query From File  <i>${file_path}</i></code></pre>
+    <p>Executes an SQL query stored in a file in Snowflake.</p>
+    <ul>
+        <li><code>${file_path}</code>: The path to the file containing the SQL query.</li>
+    </ul>
+
+    <h3>Load Data From CSV</h3>
+    <pre><code>Load Data From CSV  <i>${table_name}</i>  <i>${file_path}</i></code></pre>
+    <p>Loads data from a CSV file into a Snowflake table.</p>
+    <ul>
+        <li><code>${table_name}</code>: The name of the Snowflake table.</li>
+        <li><code>${file_path}</code>: The path to the CSV file.</li>
+    </ul>
+
+    <h3>Load Data From Parquet</h3>
+    <pre><code>Load Data From Parquet  <i>${table_name}</i>  <i>${file_path}</i></code></pre>
+    <p>Loads data from a Parquet file into a Snowflake table.</p>
+    <ul>
+        <li><code>${table_name}</code>: The name of the Snowflake table.</li>
+        <li><code>${file_path}</code>: The path to the Parquet file.</li>
+    </ul>
+
+    <h3>Unload Data To CSV</h3>
+    <pre><code>Unload Data To CSV  <i>${query}</i>  <i>${file_path}</i></code></pre>
+    <p>Unloads data from a Snowflake query into a CSV file.</p>
+    <ul>
+        <li><code>${query}</code>: The SQL query to execute.</li>
+        <li><code>${file_path}</code>: The path to save the CSV file.</li>
+    </ul>
+
+    <h3>Unload Data To Parquet</h3>
+    <pre><code>Unload Data To Parquet  <i>${query}</i>  <i>${file_path}</i></code></pre>
+    <p>Unloads data from a Snowflake query into a Parquet file.</p>
+    <ul>
+        <li><code>${query}</code>: The SQL query to execute.</li>
+        <li><code>${file_path}</code>: The path to save the Parquet file.</li>
+    </ul>
+
+    <h3>Get Table Schema</h3>
+    <pre><code>Get Table Schema  <i>${table_name}</i></code></pre>
+    <p>Gets the schema of a Snowflake table.</p>
+    <ul>
+        <li><code>${table_name}</code>: The name of the Snowflake table.</li>
+    </ul>
+
+    <h3>Create Table</h3>
+    <pre><code>Create Table  <i>${table_name}</i>  <i>${schema}</i></code></pre>
+   
+</head>
+</body>
+</html>
