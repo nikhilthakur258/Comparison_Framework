@@ -1,0 +1,194 @@
+Sample API Specification for Jira-like Service
+Base URL
+arduino
+Copy code
+https://api.example-jira.com
+Authentication
+All endpoints require HTTP Basic Authentication using an API token.
+
+Endpoints
+1. Get All Projects
+Description
+Retrieve a list of all projects.
+
+Request
+URL: /projects
+Method: GET
+Headers:
+Authorization: Basic <base64encoded(username:apitoken)>
+Accept: application/json
+Response
+Status: 200 OK
+Body:
+json
+Copy code
+[
+  {
+    "id": "10000",
+    "name": "Project Alpha",
+    "key": "ALPHA",
+    "lead": "user1"
+  },
+  {
+    "id": "10001",
+    "name": "Project Beta",
+    "key": "BETA",
+    "lead": "user2"
+  }
+]
+2. Get Project by Key
+Description
+Retrieve details of a project by its key.
+
+Request
+URL: /projects/{projectKey}
+Method: GET
+Headers:
+Authorization: Basic <base64encoded(username:apitoken)>
+Accept: application/json
+Response
+Status: 200 OK
+Body:
+json
+Copy code
+{
+  "id": "10000",
+  "name": "Project Alpha",
+  "key": "ALPHA",
+  "description": "This is Project Alpha",
+  "lead": "user1",
+  "url": "https://example-jira.com/projects/ALPHA"
+}
+3. Create an Issue
+Description
+Create a new issue in a project.
+
+Request
+URL: /issues
+Method: POST
+Headers:
+Authorization: Basic <base64encoded(username:apitoken)>
+Content-Type: application/json
+Body:
+json
+Copy code
+{
+  "projectKey": "ALPHA",
+  "summary": "Issue summary",
+  "description": "Detailed description of the issue",
+  "issueType": "Bug",
+  "assignee": "user1",
+  "priority": "High"
+}
+Response
+Status: 201 Created
+Body:
+json
+Copy code
+{
+  "id": "20000",
+  "key": "ALPHA-1",
+  "self": "https://api.example-jira.com/issues/20000"
+}
+4. Get Issue by ID
+Description
+Retrieve details of an issue by its ID.
+
+Request
+URL: /issues/{issueId}
+Method: GET
+Headers:
+Authorization: Basic <base64encoded(username:apitoken)>
+Accept: application/json
+Response
+Status: 200 OK
+Body:
+json
+Copy code
+{
+  "id": "20000",
+  "key": "ALPHA-1",
+  "summary": "Issue summary",
+  "description": "Detailed description of the issue",
+  "issueType": "Bug",
+  "assignee": "user1",
+  "priority": "High",
+  "status": "Open",
+  "project": {
+    "id": "10000",
+    "key": "ALPHA",
+    "name": "Project Alpha"
+  }
+}
+5. Update an Issue
+Description
+Update details of an existing issue.
+
+Request
+URL: /issues/{issueId}
+Method: PUT
+Headers:
+Authorization: Basic <base64encoded(username:apitoken)>
+Content-Type: application/json
+Body:
+json
+Copy code
+{
+  "summary": "Updated summary",
+  "description": "Updated description",
+  "assignee": "user2",
+  "priority": "Medium",
+  "status": "In Progress"
+}
+Response
+Status: 204 No Content
+6. Delete an Issue
+Description
+Delete an existing issue by its ID.
+
+Request
+URL: /issues/{issueId}
+Method: DELETE
+Headers:
+Authorization: Basic <base64encoded(username:apitoken)>
+Response
+Status: 204 No Content
+7. Search Issues
+Description
+Search for issues using JQL (Jira Query Language).
+
+Request
+URL: /search
+Method: GET
+Headers:
+Authorization: Basic <base64encoded(username:apitoken)>
+Accept: application/json
+Query Parameters:
+jql: The JQL query string (e.g., project=ALPHA AND assignee=user1)
+Response
+Status: 200 OK
+Body:
+json
+Copy code
+{
+  "total": 1,
+  "issues": [
+    {
+      "id": "20000",
+      "key": "ALPHA-1",
+      "summary": "Issue summary",
+      "description": "Detailed description of the issue",
+      "issueType": "Bug",
+      "assignee": "user1",
+      "priority": "High",
+      "status": "Open"
+    }
+  ]
+}
+Error Handling
+Common Error Responses
+400 Bad Request: Invalid input data.
+401 Unauthorized: Missing or invalid authentication token.
+403 Forbidden: Insufficient permissions.
+404 Not Found: Resource not found.
+500 Internal Server Error: Unexpected server error
