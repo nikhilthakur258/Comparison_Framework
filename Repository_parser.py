@@ -92,7 +92,7 @@ def get_file_details(repo_name, extensions):
         file_details = []
         for file in files:
             content = file.decoded_content.decode('utf-8', errors='ignore')
-            lines = content.count('\n') if content else 0
+            lines = content.count('\n') + 1 if content else 0
             file_details.append({
                 'name': file.name,
                 'path': file.path,
@@ -179,7 +179,7 @@ def analyze_manifest_files(repo_name):
         manifest_details = []
         for manifest_file in manifest_files:
             content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
-            lines = content.count('\n') if content else 0
+            lines = content.count('\n') + 1 if content else 0
             manifest_details.append({
                 'name': manifest_file.name,
                 'path': manifest_file.path,
@@ -211,7 +211,7 @@ def search_pcf_references(repo_name):
                         'name': file.name,
                         'path': file.path,
                         'size': file.size,
-                        'lines_of_code': content.count('\n'),
+                        'lines_of_code': content.count('\n') + 1,
                         'line_number': line_number,
                         'line_content': line.strip()
                     })
@@ -313,9 +313,7 @@ def generate_html_report(repo_name, repo_info, java_files_count, file_details, d
     html_content += """
         </table>
         
-        <h2>Java Files</h2>
-        <p>Number of Java files: {java_files_count}</p>
-        
+       
         <h2>File Details</h2>
         <table>
             <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
@@ -449,7 +447,7 @@ def main():
         java_files_count = count_java_files(repo_name)
         
         print("Fetching file details...")
-        file_details = get_file_details(repo_name, [".java", ".properties", ".yml", ".yaml", "manifest.yml", "Dockerfile", ".md"])
+        file_details = get_file_details(repo_name, [])
         
         print("Fetching dependencies and Java versions...")
         dependencies, java_versions = get_dependencies_and_versions(repo_name)
