@@ -1,1 +1,228 @@
-Generate a breakdown for the given epic into stories, tasks, subtask along with story points: Implement circuit breaker, Provide detailed coverage of given epic
+import os
+import argparse
+from github import Github, GithubException
+from datetime import datetime
+import time
+import xml.etree.ElementTree as ET
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.poolmanager import PoolManager
+from requests.packages.urllib3.util.ssl_ import create_urllib3_context
+
+# Set up GitHub API access
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Ensure this is set as an environment variable
+if not GITHUB_TOKEN:
+    raise ValueError("Please set your GITHUB_TOKEN environment variable.")
+GITHUB_HOST = 'rbcgithub.fg.rbc.com'
+BASE_URL = f"https://{GITHUB_HOST}/api/v3"
+
+# Create a custom adapter to disable SSL verification
+class SSLAdapter(HTTPAdapter):
+    def __init__(self, **kwargs):
+        self.context = create_urllib3_context()
+        super(SSLAdapter, self).__init__(**kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs['ssl_context'] = self.context
+        return super(SSLAdapter, self).init_poolmanager(*args, **kwargs)
+
+# Create a session to be used with PyGithub
+session = requests.Session()
+session.mount("https://", SSLAdapter())
+session.verify = False
+
+# Initialize the Github object with the custom session
+g = Github(base_url=BASE_URL, login_or_token=GITHUB_TOKEN, session=session)
+
+def check_rate_limit():
+    rate_limit = g.get_rate_limit()
+    core_limit = rate_limit.core
+    reset_time = core_limit.reset.timestamp()  # Convert to timestamp
+    remaining = core_limit.remaining
+    print(f"Rate limit remaining: {remaining}")
+    print(f"Reset time: {datetime.fromtimestamp(reset_time)}")
+    return remaining, reset_time
+
+def wait_for_rate_limit_reset():
+    remaining, reset_time = check_rate_limit()
+    if remaining == 0:
+        wait_time = max(reset_time - time.time(), 0) + 10  # Add a buffer time
+        print(f"Rate limit exceeded. Waiting for {wait_time} seconds before retrying...")
+        time.sleep(wait_time)
+
+def get_repo_info(repo_name):
+    wait_for_rate_limit_reset()
+    try:
+        repo = g.get_repo(repo_name)
+        info = {
+            'name': repo.name,
+            'description': repo.description,
+            'language': repo.language,
+            'topics': repo.get_topics(),
+            'default_branch': repo.default_branch,
+            'size': repo.size,
+            'created_at': repo.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_at': repo.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'subscribers_count': repo.subscribers_count,
+            'stargazers_count': repo.stargazers_count,
+            'watchers_count': repo.watchers_count,
+            'forks_count': repo.forks_count,
+            'open_issues_count': repo.open_issues_count,
+            'license': repo.license.name if repo.license else 'None',
+            'html_url': repo.html_url,
+        }
+        return info
+    except GithubException as e:
+        if e.status == 403 and 'rate limit exceeded' in str(e):
+            wait_for_rate_limit_reset()
+            return get_repo_info(repo_name)
+        else:
+            raise ValueError(f"Error fetching repository '{repo_name}': {e}")
+
+def get_files_recursively(repo, path='', extensions=None):
+    if extensions is None:
+        extensions = []
+    result_files = []
+    contents = repo.get_contents(path)
+    for content in contents:
+        if content.type == 'dir':
+            result_files.extend(get_files_recursively(repo, content.path, extensions))
+        else:
+            if any(content.name.endswith(ext) for ext in extensions):
+                result_files.append(content)
+            elif not extensions:  # Add all files if no extensions are specified
+                result_files.append(content)
+    return result_files
+
+def count_java_files(repo_name):
+    wait_for_rate_limit_reset()
+    try:
+        repo = g.get_repo(repo_name)
+        java_files = get_files_recursively(repo, '', ['.java'])
+        return len(java_files)
+    except GithubException as e:
+        if e.status == 403 and 'rate limit exceeded' in str(e):
+            wait_for_rate_limit_reset()
+            return count_java_files(repo_name)
+        else:
+            raise ValueError(f"Error counting Java files in repository '{repo_name}': {e}")
+
+def get_file_details(repo_name, extensions):
+    wait_for_rate_limit_reset()
+    try:
+        repo = g.get_repo(repo_name)
+        files = get_files_recursively(repo, '', extensions)
+        file_details = []
+        for file in files:
+            content = file.decoded_content.decode('utf-8', errors='ignore')
+            lines = content.count('\n') + 1 if content else 0
+            file_details.append({
+                'name': file.name,
+                'path': file.path,
+                'size': file.size,
+                'lines_of_code': lines,
+            })
+        return file_details
+    except GithubException as e:
+        if e.status == 403 and 'rate limit exceeded' in str(e):
+            wait_for_rate_limit_reset()
+            return get_file_details(repo_name, extensions)
+        else:
+            raise ValueError(f"Error fetching file details from repository '{repo_name}': {e}")
+
+def parse_pom_xml(content):
+    root = ET.fromstring(content)
+    namespaces = {'maven': 'http://maven.apache.org/POM/4.0.0'}
+    dependencies = []
+    java_version = 'N/A'
+    for dependency in root.findall('.//maven:dependency', namespaces):
+        group_id_element = dependency.find('maven:groupId', namespaces)
+        artifact_id_element = dependency.find('maven:artifactId', namespaces)
+        version_element = dependency.find('maven:version', namespaces)
+        
+        group_id = group_id_element.text if group_id_element is not None else 'N/A'
+        artifact_id = artifact_id_element.text if artifact_id_element is not None else 'N/A'
+        version = version_element.text if version_element is not None else 'N/A'
+        
+        dependencies.append({
+            'group_id': group_id,
+            'artifact_id': artifact_id,
+            'version': version
+        })
+
+    # Extract Java version
+    java_version_element = root.find('.//maven:properties/maven:java.version', namespaces)
+    if java_version_element is not None:
+        java_version = java_version_element.text
+
+    return dependencies, java_version
+
+def parse_gradle_file(content):
+    java_version = 'N/A'
+    lines = content.split('\n')
+    for line in lines:
+        if 'sourceCompatibility' in line or 'targetCompatibility' in line:
+            parts = line.split()
+            if len(parts) == 2:
+                java_version = parts[1].replace("'", "").replace("\"", "")
+    return java_version
+
+def get_dependencies_and_versions(repo_name):
+    wait_for_rate_limit_reset()
+    try:
+        repo = g.get_repo(repo_name)
+        pom_files = get_files_recursively(repo, '', ['pom.xml'])
+        gradle_files = get_files_recursively(repo, '', ['build.gradle'])
+        dependencies = []
+        java_versions = []
+        for pom_file in pom_files:
+            content = repo.get_contents(pom_file.path).decoded_content.decode('utf-8')
+            deps, java_version = parse_pom_xml(content)
+            dependencies.extend(deps)
+            if java_version != 'N/A':
+                java_versions.append(java_version)
+        for gradle_file in gradle_files:
+            content = repo.get_contents(gradle_file.path).decoded_content.decode('utf-8')
+            java_version = parse_gradle_file(content)
+            if java_version != 'N/A':
+                java_versions.append(java_version)
+        return dependencies, java_versions
+    except GithubException as e:
+        if e.status == 403 and 'rate limit exceeded' in str(e):
+            wait_for_rate_limit_reset()
+            return get_dependencies_and_versions(repo_name)
+        else:
+            raise ValueError(f"Error fetching dependencies from repository '{repo_name}': {e}")
+
+def analyze_manifest_files(repo_name):
+    wait_for_rate_limit_reset()
+    try:
+        repo = g.get_repo(repo_name)
+        manifest_files = get_files_recursively(repo, '', ['manifest.yml'])
+        manifest_details = []
+        for manifest_file in manifest_files:
+            content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
+            lines = content.count('\n') + 1 if content else 0
+            manifest_details.append({
+                'name': manifest_file.name,
+                'path': manifest_file.path,
+                'size': manifest_file.size,
+                'lines_of_code': lines,
+                'content': content,
+            })
+        return manifest_details
+    except GithubException as e:
+        if e.status == 403 and 'rate limit exceeded' in str(e):
+            wait_for_rate_limit_reset()
+            return analyze_manifest_files(repo_name)
+        else:
+            raise ValueError(f"Error fetching manifest files from repository '{repo_name}': {e}")
+
+def search_pcf_references(repo_name):
+    wait_for_rate_limit_reset()
+    try:
+        repo = g.get_repo(repo_name)
+        files = get_files_recursively(repo, '')  # Fetch all files
+        pcf_references = []
+        for file in files:
+            content
