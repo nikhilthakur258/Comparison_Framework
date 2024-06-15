@@ -256,7 +256,7 @@ def estimate_migration_time(complexity):
         qa_days = 10
     return dev_days, qa_days
 
-def generate_html_report(repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, pcf_recommendations, complexity, dev_days, qa_days):
+def generate_html_report(repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, pcf_recommendations, complexity, dev_days, qa_days, include_estimates):
     html_content = f"""
     <html>
     <head>
@@ -303,8 +303,14 @@ def generate_html_report(repo_name, repo_info, java_files_count, file_details, d
             <tr><th>Dependencies</th><td>{len(dependencies)}</td></tr>
             <tr><th>Java Versions</th><td>{', '.join(set(java_versions))}</td></tr>
             <tr><th>Complexity</th><td>{complexity}</td></tr>
+    """
+    if include_estimates:
+        html_content += f"""
             <tr><th>Development Estimate (days)</th><td>{dev_days}</td></tr>
             <tr><th>QA Estimate (days)</th><td>{qa_days}</td></tr>
+        """
+    
+    html_content += """
         </table>
         
         <h2>Java Files</h2>
@@ -420,16 +426,18 @@ def generate_html_report(repo_name, repo_info, java_files_count, file_details, d
     </html>
     """
     
-    with open("migration_report.html", "w", encoding='utf-8') as file:
+    with open(f"{repo_name.replace('/', '_')}_analysis.html", "w", encoding='utf-8') as file:
         file.write(html_content)
 
 def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description='Generate migration report for a GitHub repository.')
     parser.add_argument('repository', help='GitHub repository name (e.g., username/repo)')
+    parser.add_argument('--includeestimates', help='Include Dev and QA effort estimates in the report', choices=['Yes', 'No'], default='No')
     args = parser.parse_args()
     
     repo_name = args.repository
+    include_estimates = args.includeestimates == 'Yes'
     
     try:
         print(f"Gathering repository information for {repo_name}...")
@@ -441,7 +449,7 @@ def main():
         java_files_count = count_java_files(repo_name)
         
         print("Fetching file details...")
-        file_details = get_file_details(repo_name, [".java", ".properties", ".yml", ".yaml", "manifest.yml", "Dockerfile"])
+        file_details = get_file_details(repo_name, [".java", ".properties", ".yml", ".yaml", "manifest.yml", "Dockerfile", ".md"])
         
         print("Fetching dependencies and Java versions...")
         dependencies, java_versions = get_dependencies_and_versions(repo_name)
@@ -490,9 +498,9 @@ def main():
         generate_html_report(
             repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, 
             security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, 
-            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, pcf_recommendations, complexity, dev_days, qa_days
+            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, pcf_recommendations, complexity, dev_days, qa_days, include_estimates
         )
-        print("Report generated: migration_report.html")
+        print(f"Report generated: {repo_name.replace('/', '_')}_analysis.html")
     
     except Exception as e:
         print(f"Error: {e}")
