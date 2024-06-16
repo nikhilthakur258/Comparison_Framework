@@ -1,0 +1,612 @@
+
+    <html>
+    <head>
+        <title>GitHub Repositories Migration Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; }
+            h1 { color: #333; }
+            h2 { color: #666; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
+            th { background-color: #f2f2f2; }
+            .tab { overflow: hidden; border: 1px solid #ccc; background-color: #f1f1f1; }
+            .tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; font-size: 17px; }
+            .tab button:hover { background-color: #ddd; }
+            .tab button.active { background-color: #ccc; }
+            .tabcontent { display: none; padding: 6px 12px; border-top: none; border-left: 1px solid #ccc; border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; }
+        </style>
+        <script>
+            function openTab(evt, tabName) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+        </script>
+    </head>
+    <body>
+        <a href="wavefrontHQ_analysis.xlsx" download>Download as Excel</a>
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'summary')">Summary</button><button class="tablinks" onclick="openTab(event, 'tab0')">wavefrontHQ/ansible-collection</button><button class="tablinks" onclick="openTab(event, 'tab1')">wavefrontHQ/cloud-foundry-nozz</button><button class="tablinks" onclick="openTab(event, 'tab2')">wavefrontHQ/cloud-foundry-samp</button><button class="tablinks" onclick="openTab(event, 'tab3')">wavefrontHQ/cloud-foundry-serv</button>
+        </div>
+        <div id="summary" class="tabcontent">
+        <h1>Overall Summary Report</h1>
+        <p><strong>Generated on:</strong> 2024-06-16 00:23:04</p>
+        <h2>Summary of Repositories</h2>
+        <table>
+            <tr>
+                <th>Repository Name</th>
+                <th>Total Files</th>
+                <th>Java Files</th>
+                <th>PCF References</th>
+                <th>Configuration Files</th>
+                <th>Deployment Manifests</th>
+                <th>Dependencies</th>
+                <th>Java Versions</th>
+                <th>Angular Versions</th>
+                <th>Node Versions</th>
+                <th>Complexity</th>
+                <th>Development Estimate (days)</th>
+                <th>QA Estimate (days)</th>
+            </tr>
+    
+            <tr>
+                <td>wavefrontHQ/ansible-collection-wavefront</td>
+                <td>30</td>
+                <td>0</td>
+                <td>0</td>
+                <td>16</td>
+                <td>16</td>
+                <td>0</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Medium</td>
+                <td>10</td>
+                <td>5</td>
+            </tr>
+        
+            <tr>
+                <td>wavefrontHQ/cloud-foundry-nozzle-go</td>
+                <td>27</td>
+                <td>0</td>
+                <td>58</td>
+                <td>2</td>
+                <td>2</td>
+                <td>0</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>High</td>
+                <td>20</td>
+                <td>10</td>
+            </tr>
+        
+            <tr>
+                <td>wavefrontHQ/cloud-foundry-sampleapp</td>
+                <td>13</td>
+                <td>8</td>
+                <td>12</td>
+                <td>2</td>
+                <td>1</td>
+                <td>13</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>High</td>
+                <td>20</td>
+                <td>10</td>
+            </tr>
+        
+            <tr>
+                <td>wavefrontHQ/cloud-foundry-servicebroker</td>
+                <td>18</td>
+                <td>13</td>
+                <td>35</td>
+                <td>1</td>
+                <td>1</td>
+                <td>7</td>
+                <td>1.8</td>
+                <td></td>
+                <td></td>
+                <td>High</td>
+                <td>20</td>
+                <td>10</td>
+            </tr>
+        </table></div><div id="tab0" class="tabcontent">
+        <h1>Migration Report for wavefrontHQ/ansible-collection-wavefront</h1>
+        <p><strong>Generated on:</strong> 2024-06-16 00:18:02</p>
+        
+        <h2>Repository Info</h2>
+        <table>
+            <tr><th>Name</th><td>ansible-collection-wavefront</td></tr>
+            <tr><th>Description</th><td>Ansible Galaxy Collection for Wavefront Proxy & Telegraf</td></tr>
+            <tr><th>Language</th><td>Jinja</td></tr>
+            <tr><th>Topics</th><td></td></tr>
+            <tr><th>Default Branch</th><td>master</td></tr>
+            <tr><th>Size (bytes)</th><td>106</td></tr>
+            <tr><th>Created At</th><td>2020-01-15 04:57:48</td></tr>
+            <tr><th>Updated At</th><td>2023-08-02 03:38:39</td></tr>
+            <tr><th>Subscribers Count</th><td>6</td></tr>
+            <tr><th>Stargazers Count</th><td>0</td></tr>
+            <tr><th>Watchers Count</th><td>0</td></tr>
+            <tr><th>Forks Count</th><td>4</td></tr>
+            <tr><th>Open Issues Count</th><td>1</td></tr>
+            <tr><th>License</th><td>None</td></tr>
+            <tr><th>GitHub URL</th><td><a href="https://github.com/wavefrontHQ/ansible-collection-wavefront">https://github.com/wavefrontHQ/ansible-collection-wavefront</a></td></tr>
+        </table>
+
+        <h2>Summary</h2>
+        <table>
+            <tr><th>Total Files</th><td>30</td></tr>
+            <tr><th>Java Files</th><td>0</td></tr>
+            <tr><th>PCF References</th><td>0</td></tr>
+            <tr><th>Configuration Files</th><td>16</td></tr>
+            <tr><th>Deployment Manifests</th><td>16</td></tr>
+            <tr><th>Dependencies</th><td>0</td></tr>
+            <tr><th>Java Versions</th><td></td></tr>
+            <tr><th>Angular Versions</th><td></td></tr>
+            <tr><th>Node Versions</th><td></td></tr>
+            <tr><th>Complexity</th><td>Medium</td></tr>
+    
+        </table>
+        
+       
+        <h2>File Details</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+    <tr><td>README.md</td><td>README.md</td><td>1270</td><td>54</td></tr><tr><td>galaxy.yml</td><td>galaxy.yml</td><td>2449</td><td>58</td></tr><tr><td>wavefront-ansible_collection_wavefront-1.3.0.tar.gz</td><td>wavefront-ansible_collection_wavefront-1.3.0.tar.gz</td><td>11908</td><td>51</td></tr><tr><td>README.md</td><td>roles/wavefront_proxy/README.md</td><td>1142</td><td>58</td></tr><tr><td>main.yml</td><td>roles/telegraf/defaults/main.yml</td><td>526</td><td>25</td></tr><tr><td>main.yml</td><td>roles/telegraf/handlers/main.yml</td><td>84</td><td>6</td></tr><tr><td>main.yml</td><td>roles/telegraf/meta/main.yml</td><td>684</td><td>48</td></tr><tr><td>configure-telegraf.yml</td><td>roles/telegraf/tasks/configure-telegraf.yml</td><td>1323</td><td>43</td></tr><tr><td>main.yml</td><td>roles/telegraf/tasks/main.yml</td><td>63</td><td>5</td></tr><tr><td>packages.yml</td><td>roles/telegraf/tasks/packages.yml</td><td>510</td><td>23</td></tr><tr><td>10-wavefront.conf.j2</td><td>roles/telegraf/templates/10-wavefront.conf.j2</td><td>286</td><td>10</td></tr><tr><td>input-exec-netstat.conf.j2</td><td>roles/telegraf/templates/input-exec-netstat.conf.j2</td><td>206</td><td>8</td></tr><tr><td>input-kernel-version.conf.j2</td><td>roles/telegraf/templates/input-kernel-version.conf.j2</td><td>334</td><td>15</td></tr><tr><td>kernel-version.sh.j2</td><td>roles/telegraf/templates/kernel-version.sh.j2</td><td>333</td><td>10</td></tr><tr><td>telegraf.conf.j2</td><td>roles/telegraf/templates/telegraf.conf.j2</td><td>2931</td><td>102</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/defaults/main.yml</td><td>1225</td><td>50</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/handlers/main.yml</td><td>94</td><td>6</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/meta/main.yml</td><td>673</td><td>48</td></tr><tr><td>apt_install.yml</td><td>roles/wavefront_proxy/tasks/apt_install.yml</td><td>565</td><td>25</td></tr><tr><td>configure.yml</td><td>roles/wavefront_proxy/tasks/configure.yml</td><td>544</td><td>24</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/tasks/main.yml</td><td>640</td><td>22</td></tr><tr><td>yum_install.yml</td><td>roles/wavefront_proxy/tasks/yum_install.yml</td><td>443</td><td>25</td></tr><tr><td>wavefront-proxy.conf.j2</td><td>roles/wavefront_proxy/templates/wavefront-proxy.conf.j2</td><td>10888</td><td>242</td></tr><tr><td>wavefront-proxy.repo.j2</td><td>roles/wavefront_proxy/templates/wavefront-proxy.repo.j2</td><td>274</td><td>11</td></tr><tr><td>inventory</td><td>roles/wavefront_proxy/tests/inventory</td><td>11</td><td>3</td></tr><tr><td>test.yml</td><td>roles/wavefront_proxy/tests/test.yml</td><td>73</td><td>5</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/vars/main.yml</td><td>43</td><td>2</td></tr><tr><td>kernel-version.sh.j2</td><td>roles/telegraf/templates/scripts/kernel-version.sh.j2</td><td>333</td><td>10</td></tr><tr><td>netstat.sh</td><td>roles/telegraf/templates/scripts/netstat.sh</td><td>1188</td><td>39</td></tr><tr><td>os-version.sh.j2</td><td>roles/telegraf/templates/scripts/os-version.sh.j2</td><td>190</td><td>4</td></tr>
+        </table>
+    
+            <h2>Configuration Files</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>galaxy.yml</td><td>galaxy.yml</td><td>2449</td><td>58</td></tr><tr><td>main.yml</td><td>roles/telegraf/defaults/main.yml</td><td>526</td><td>25</td></tr><tr><td>main.yml</td><td>roles/telegraf/handlers/main.yml</td><td>84</td><td>6</td></tr><tr><td>main.yml</td><td>roles/telegraf/meta/main.yml</td><td>684</td><td>48</td></tr><tr><td>configure-telegraf.yml</td><td>roles/telegraf/tasks/configure-telegraf.yml</td><td>1323</td><td>43</td></tr><tr><td>main.yml</td><td>roles/telegraf/tasks/main.yml</td><td>63</td><td>5</td></tr><tr><td>packages.yml</td><td>roles/telegraf/tasks/packages.yml</td><td>510</td><td>23</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/defaults/main.yml</td><td>1225</td><td>50</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/handlers/main.yml</td><td>94</td><td>6</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/meta/main.yml</td><td>673</td><td>48</td></tr><tr><td>apt_install.yml</td><td>roles/wavefront_proxy/tasks/apt_install.yml</td><td>565</td><td>25</td></tr><tr><td>configure.yml</td><td>roles/wavefront_proxy/tasks/configure.yml</td><td>544</td><td>24</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/tasks/main.yml</td><td>640</td><td>22</td></tr><tr><td>yum_install.yml</td><td>roles/wavefront_proxy/tasks/yum_install.yml</td><td>443</td><td>25</td></tr><tr><td>test.yml</td><td>roles/wavefront_proxy/tests/test.yml</td><td>73</td><td>5</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/vars/main.yml</td><td>43</td><td>2</td></tr>
+            </table>
+            
+            <h2>Deployment Manifests</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>galaxy.yml</td><td>galaxy.yml</td><td>2449</td><td>58</td></tr><tr><td>main.yml</td><td>roles/telegraf/defaults/main.yml</td><td>526</td><td>25</td></tr><tr><td>main.yml</td><td>roles/telegraf/handlers/main.yml</td><td>84</td><td>6</td></tr><tr><td>main.yml</td><td>roles/telegraf/meta/main.yml</td><td>684</td><td>48</td></tr><tr><td>configure-telegraf.yml</td><td>roles/telegraf/tasks/configure-telegraf.yml</td><td>1323</td><td>43</td></tr><tr><td>main.yml</td><td>roles/telegraf/tasks/main.yml</td><td>63</td><td>5</td></tr><tr><td>packages.yml</td><td>roles/telegraf/tasks/packages.yml</td><td>510</td><td>23</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/defaults/main.yml</td><td>1225</td><td>50</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/handlers/main.yml</td><td>94</td><td>6</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/meta/main.yml</td><td>673</td><td>48</td></tr><tr><td>apt_install.yml</td><td>roles/wavefront_proxy/tasks/apt_install.yml</td><td>565</td><td>25</td></tr><tr><td>configure.yml</td><td>roles/wavefront_proxy/tasks/configure.yml</td><td>544</td><td>24</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/tasks/main.yml</td><td>640</td><td>22</td></tr><tr><td>yum_install.yml</td><td>roles/wavefront_proxy/tasks/yum_install.yml</td><td>443</td><td>25</td></tr><tr><td>test.yml</td><td>roles/wavefront_proxy/tests/test.yml</td><td>73</td><td>5</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/vars/main.yml</td><td>43</td><td>2</td></tr>
+            </table>
+            
+            <h2>Security Settings</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>galaxy.yml</td><td>galaxy.yml</td><td>2449</td><td>58</td></tr><tr><td>main.yml</td><td>roles/telegraf/defaults/main.yml</td><td>526</td><td>25</td></tr><tr><td>main.yml</td><td>roles/telegraf/handlers/main.yml</td><td>84</td><td>6</td></tr><tr><td>main.yml</td><td>roles/telegraf/meta/main.yml</td><td>684</td><td>48</td></tr><tr><td>configure-telegraf.yml</td><td>roles/telegraf/tasks/configure-telegraf.yml</td><td>1323</td><td>43</td></tr><tr><td>main.yml</td><td>roles/telegraf/tasks/main.yml</td><td>63</td><td>5</td></tr><tr><td>packages.yml</td><td>roles/telegraf/tasks/packages.yml</td><td>510</td><td>23</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/defaults/main.yml</td><td>1225</td><td>50</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/handlers/main.yml</td><td>94</td><td>6</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/meta/main.yml</td><td>673</td><td>48</td></tr><tr><td>apt_install.yml</td><td>roles/wavefront_proxy/tasks/apt_install.yml</td><td>565</td><td>25</td></tr><tr><td>configure.yml</td><td>roles/wavefront_proxy/tasks/configure.yml</td><td>544</td><td>24</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/tasks/main.yml</td><td>640</td><td>22</td></tr><tr><td>yum_install.yml</td><td>roles/wavefront_proxy/tasks/yum_install.yml</td><td>443</td><td>25</td></tr><tr><td>test.yml</td><td>roles/wavefront_proxy/tests/test.yml</td><td>73</td><td>5</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/vars/main.yml</td><td>43</td><td>2</td></tr>
+            </table>
+            
+            <h2>Volume Mounts</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>galaxy.yml</td><td>galaxy.yml</td><td>2449</td><td>58</td></tr><tr><td>main.yml</td><td>roles/telegraf/defaults/main.yml</td><td>526</td><td>25</td></tr><tr><td>main.yml</td><td>roles/telegraf/handlers/main.yml</td><td>84</td><td>6</td></tr><tr><td>main.yml</td><td>roles/telegraf/meta/main.yml</td><td>684</td><td>48</td></tr><tr><td>configure-telegraf.yml</td><td>roles/telegraf/tasks/configure-telegraf.yml</td><td>1323</td><td>43</td></tr><tr><td>main.yml</td><td>roles/telegraf/tasks/main.yml</td><td>63</td><td>5</td></tr><tr><td>packages.yml</td><td>roles/telegraf/tasks/packages.yml</td><td>510</td><td>23</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/defaults/main.yml</td><td>1225</td><td>50</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/handlers/main.yml</td><td>94</td><td>6</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/meta/main.yml</td><td>673</td><td>48</td></tr><tr><td>apt_install.yml</td><td>roles/wavefront_proxy/tasks/apt_install.yml</td><td>565</td><td>25</td></tr><tr><td>configure.yml</td><td>roles/wavefront_proxy/tasks/configure.yml</td><td>544</td><td>24</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/tasks/main.yml</td><td>640</td><td>22</td></tr><tr><td>yum_install.yml</td><td>roles/wavefront_proxy/tasks/yum_install.yml</td><td>443</td><td>25</td></tr><tr><td>test.yml</td><td>roles/wavefront_proxy/tests/test.yml</td><td>73</td><td>5</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/vars/main.yml</td><td>43</td><td>2</td></tr>
+            </table>
+            
+            <h2>Logging and Monitoring</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>galaxy.yml</td><td>galaxy.yml</td><td>2449</td><td>58</td></tr><tr><td>main.yml</td><td>roles/telegraf/defaults/main.yml</td><td>526</td><td>25</td></tr><tr><td>main.yml</td><td>roles/telegraf/handlers/main.yml</td><td>84</td><td>6</td></tr><tr><td>main.yml</td><td>roles/telegraf/meta/main.yml</td><td>684</td><td>48</td></tr><tr><td>configure-telegraf.yml</td><td>roles/telegraf/tasks/configure-telegraf.yml</td><td>1323</td><td>43</td></tr><tr><td>main.yml</td><td>roles/telegraf/tasks/main.yml</td><td>63</td><td>5</td></tr><tr><td>packages.yml</td><td>roles/telegraf/tasks/packages.yml</td><td>510</td><td>23</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/defaults/main.yml</td><td>1225</td><td>50</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/handlers/main.yml</td><td>94</td><td>6</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/meta/main.yml</td><td>673</td><td>48</td></tr><tr><td>apt_install.yml</td><td>roles/wavefront_proxy/tasks/apt_install.yml</td><td>565</td><td>25</td></tr><tr><td>configure.yml</td><td>roles/wavefront_proxy/tasks/configure.yml</td><td>544</td><td>24</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/tasks/main.yml</td><td>640</td><td>22</td></tr><tr><td>yum_install.yml</td><td>roles/wavefront_proxy/tasks/yum_install.yml</td><td>443</td><td>25</td></tr><tr><td>test.yml</td><td>roles/wavefront_proxy/tests/test.yml</td><td>73</td><td>5</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/vars/main.yml</td><td>43</td><td>2</td></tr>
+            </table>
+            
+            <h2>Scaling Policies</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>galaxy.yml</td><td>galaxy.yml</td><td>2449</td><td>58</td></tr><tr><td>main.yml</td><td>roles/telegraf/defaults/main.yml</td><td>526</td><td>25</td></tr><tr><td>main.yml</td><td>roles/telegraf/handlers/main.yml</td><td>84</td><td>6</td></tr><tr><td>main.yml</td><td>roles/telegraf/meta/main.yml</td><td>684</td><td>48</td></tr><tr><td>configure-telegraf.yml</td><td>roles/telegraf/tasks/configure-telegraf.yml</td><td>1323</td><td>43</td></tr><tr><td>main.yml</td><td>roles/telegraf/tasks/main.yml</td><td>63</td><td>5</td></tr><tr><td>packages.yml</td><td>roles/telegraf/tasks/packages.yml</td><td>510</td><td>23</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/defaults/main.yml</td><td>1225</td><td>50</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/handlers/main.yml</td><td>94</td><td>6</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/meta/main.yml</td><td>673</td><td>48</td></tr><tr><td>apt_install.yml</td><td>roles/wavefront_proxy/tasks/apt_install.yml</td><td>565</td><td>25</td></tr><tr><td>configure.yml</td><td>roles/wavefront_proxy/tasks/configure.yml</td><td>544</td><td>24</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/tasks/main.yml</td><td>640</td><td>22</td></tr><tr><td>yum_install.yml</td><td>roles/wavefront_proxy/tasks/yum_install.yml</td><td>443</td><td>25</td></tr><tr><td>test.yml</td><td>roles/wavefront_proxy/tests/test.yml</td><td>73</td><td>5</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/vars/main.yml</td><td>43</td><td>2</td></tr>
+            </table>
+            
+            <h2>Compliance Requirements</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>galaxy.yml</td><td>galaxy.yml</td><td>2449</td><td>58</td></tr><tr><td>main.yml</td><td>roles/telegraf/defaults/main.yml</td><td>526</td><td>25</td></tr><tr><td>main.yml</td><td>roles/telegraf/handlers/main.yml</td><td>84</td><td>6</td></tr><tr><td>main.yml</td><td>roles/telegraf/meta/main.yml</td><td>684</td><td>48</td></tr><tr><td>configure-telegraf.yml</td><td>roles/telegraf/tasks/configure-telegraf.yml</td><td>1323</td><td>43</td></tr><tr><td>main.yml</td><td>roles/telegraf/tasks/main.yml</td><td>63</td><td>5</td></tr><tr><td>packages.yml</td><td>roles/telegraf/tasks/packages.yml</td><td>510</td><td>23</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/defaults/main.yml</td><td>1225</td><td>50</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/handlers/main.yml</td><td>94</td><td>6</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/meta/main.yml</td><td>673</td><td>48</td></tr><tr><td>apt_install.yml</td><td>roles/wavefront_proxy/tasks/apt_install.yml</td><td>565</td><td>25</td></tr><tr><td>configure.yml</td><td>roles/wavefront_proxy/tasks/configure.yml</td><td>544</td><td>24</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/tasks/main.yml</td><td>640</td><td>22</td></tr><tr><td>yum_install.yml</td><td>roles/wavefront_proxy/tasks/yum_install.yml</td><td>443</td><td>25</td></tr><tr><td>test.yml</td><td>roles/wavefront_proxy/tests/test.yml</td><td>73</td><td>5</td></tr><tr><td>main.yml</td><td>roles/wavefront_proxy/vars/main.yml</td><td>43</td><td>2</td></tr>
+            </table>
+            
+            <h2>Documentation</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>README.md</td><td>README.md</td><td>1270</td><td>54</td></tr><tr><td>README.md</td><td>roles/wavefront_proxy/README.md</td><td>1142</td><td>58</td></tr>
+            </table>
+            </div><div id="tab1" class="tabcontent">
+        <h1>Migration Report for wavefrontHQ/cloud-foundry-nozzle-go</h1>
+        <p><strong>Generated on:</strong> 2024-06-16 00:19:29</p>
+        
+        <h2>Repository Info</h2>
+        <table>
+            <tr><th>Name</th><td>cloud-foundry-nozzle-go</td></tr>
+            <tr><th>Description</th><td>Wavefront by VMware Go Nozzle for Pivotal Cloud Foundry</td></tr>
+            <tr><th>Language</th><td>Go</td></tr>
+            <tr><th>Topics</th><td>cloud-foundry, wavefront, monitoring</td></tr>
+            <tr><th>Default Branch</th><td>master</td></tr>
+            <tr><th>Size (bytes)</th><td>150</td></tr>
+            <tr><th>Created At</th><td>2019-01-15 18:12:17</td></tr>
+            <tr><th>Updated At</th><td>2023-03-28 15:29:43</td></tr>
+            <tr><th>Subscribers Count</th><td>30</td></tr>
+            <tr><th>Stargazers Count</th><td>1</td></tr>
+            <tr><th>Watchers Count</th><td>1</td></tr>
+            <tr><th>Forks Count</th><td>5</td></tr>
+            <tr><th>Open Issues Count</th><td>2</td></tr>
+            <tr><th>License</th><td>Apache License 2.0</td></tr>
+            <tr><th>GitHub URL</th><td><a href="https://github.com/wavefrontHQ/cloud-foundry-nozzle-go">https://github.com/wavefrontHQ/cloud-foundry-nozzle-go</a></td></tr>
+        </table>
+
+        <h2>Summary</h2>
+        <table>
+            <tr><th>Total Files</th><td>27</td></tr>
+            <tr><th>Java Files</th><td>0</td></tr>
+            <tr><th>PCF References</th><td>58</td></tr>
+            <tr><th>Configuration Files</th><td>2</td></tr>
+            <tr><th>Deployment Manifests</th><td>2</td></tr>
+            <tr><th>Dependencies</th><td>0</td></tr>
+            <tr><th>Java Versions</th><td></td></tr>
+            <tr><th>Angular Versions</th><td></td></tr>
+            <tr><th>Node Versions</th><td></td></tr>
+            <tr><th>Complexity</th><td>High</td></tr>
+    
+        </table>
+        
+       
+        <h2>File Details</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+    <tr><td>.gitignore</td><td>.gitignore</td><td>233</td><td>18</td></tr><tr><td>LICENSE</td><td>LICENSE</td><td>11357</td><td>202</td></tr><tr><td>README.md</td><td>README.md</td><td>1032</td><td>21</td></tr><tr><td>go.mod</td><td>go.mod</td><td>1138</td><td>26</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td></tr><tr><td>main.go</td><td>main.go</td><td>588</td><td>23</td></tr><tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td></tr><tr><td>run.sh</td><td>run.sh</td><td>447</td><td>18</td></tr><tr><td>event_handler.go</td><td>legacy/event_handler.go</td><td>4947</td><td>158</td></tr><tr><td>main.go</td><td>legacy/main.go</td><td>3015</td><td>113</td></tr><tr><td>nozzle.go</td><td>legacy/nozzle.go</td><td>3022</td><td>110</td></tr><tr><td>main.go</td><td>nozzle/main.go</td><td>3094</td><td>134</td></tr><tr><td>nozzle.go</td><td>nozzle/nozzle.go</td><td>5726</td><td>209</td></tr><tr><td>nozzle_test.go</td><td>nozzle/nozzle_test.go</td><td>1761</td><td>67</td></tr><tr><td>uaa.go</td><td>nozzle/uaa.go</td><td>766</td><td>34</td></tr><tr><td>go.yml</td><td>.github/workflows/go.yml</td><td>679</td><td>35</td></tr><tr><td>api_client.go</td><td>internal/api/api_client.go</td><td>3036</td><td>124</td></tr><tr><td>api_client_test.go</td><td>internal/api/api_client_test.go</td><td>1021</td><td>45</td></tr><tr><td>cache.go</td><td>internal/api/cache.go</td><td>1989</td><td>82</td></tr><tr><td>cache_test.go</td><td>internal/api/cache_test.go</td><td>1577</td><td>49</td></tr><tr><td>config.go</td><td>internal/config/config.go</td><td>5612</td><td>167</td></tr><tr><td>config_test.go</td><td>internal/config/config_test.go</td><td>6707</td><td>190</td></tr><tr><td>filter.go</td><td>internal/filter/filter.go</td><td>4421</td><td>170</td></tr><tr><td>filter_test.go</td><td>internal/filter/filter_test.go</td><td>3677</td><td>119</td></tr><tr><td>utils.go</td><td>internal/utils/utils.go</td><td>1585</td><td>60</td></tr><tr><td>utils_test.go</td><td>internal/utils/utils_test.go</td><td>1120</td><td>27</td></tr><tr><td>wavefront.go</td><td>internal/wavefront/wavefront.go</td><td>5316</td><td>169</td></tr>
+        </table>
+    
+            <h2>Configuration Files</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td></tr><tr><td>go.yml</td><td>.github/workflows/go.yml</td><td>679</td><td>35</td></tr>
+            </table>
+            
+            <h2>Deployment Manifests</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td></tr><tr><td>go.yml</td><td>.github/workflows/go.yml</td><td>679</td><td>35</td></tr>
+            </table>
+            
+            <h2>Security Settings</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td></tr><tr><td>go.yml</td><td>.github/workflows/go.yml</td><td>679</td><td>35</td></tr>
+            </table>
+            
+            <h2>Volume Mounts</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td></tr><tr><td>go.yml</td><td>.github/workflows/go.yml</td><td>679</td><td>35</td></tr>
+            </table>
+            
+            <h2>Logging and Monitoring</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td></tr><tr><td>go.yml</td><td>.github/workflows/go.yml</td><td>679</td><td>35</td></tr>
+            </table>
+            
+            <h2>Scaling Policies</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td></tr><tr><td>go.yml</td><td>.github/workflows/go.yml</td><td>679</td><td>35</td></tr>
+            </table>
+            
+            <h2>Compliance Requirements</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td></tr><tr><td>go.yml</td><td>.github/workflows/go.yml</td><td>679</td><td>35</td></tr>
+            </table>
+            
+            <h2>Documentation</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>README.md</td><td>README.md</td><td>1032</td><td>21</td></tr>
+            </table>
+            
+        <h2>Manifest Files Analysis</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Content</th></tr>
+        <tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td><td><pre>---
+applications:
+- name: wavefront-pcf-nozzle
+  no-route: true
+  health-check-type: process
+  buildpack: https://github.com/cloudfoundry/go-buildpack.git
+  env:
+    GOPACKAGENAME: github.com/wavefronthq/cloud-foundry-nozzle-go
+
+    NOZZLE_API_URL: https://api.......
+    NOZZLE_USERNAME: admin
+    NOZZLE_PASSWORD: ......
+
+    NOZZLE_FIREHOSE_SUBSCRIPTION_ID: firehose-subscription-id
+    NOZZLE_SKIP_SSL: true
+    NOZZLE_SELECTED_EVENTS: ValueMetric,CounterEvent,ContainerMetric
+
+    WAVEFRONT_URL: https://......wavefront.com
+    WAVEFRONT_API_TOKEN: .........
+    WAVEFRONT_FLUSH_INTERVAL: 15
+    WAVEFRONT_PREFIX: pcf
+    WAVEFRONT_FOUNDATION: foundation</pre></td></tr>
+        </table>
+        
+        <h2>PCF References</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Line Number</th><th>Line Content</th></tr>
+        <tr><td>README.md</td><td>README.md</td><td>1032</td><td>21</td><td>2</td><td>wavefront go nozzle for pivotal cloud foundry (pcf). included as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/).</td></tr><tr><td>README.md</td><td>README.md</td><td>1032</td><td>21</td><td>4</td><td>## manually configure and deploy to pcf</td></tr><tr><td>README.md</td><td>README.md</td><td>1032</td><td>21</td><td>8</td><td>3. run `cf push` to deploy the nozzle to pcf</td></tr><tr><td>go.mod</td><td>go.mod</td><td>1138</td><td>26</td><td>6</td><td>code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect</td></tr><tr><td>go.mod</td><td>go.mod</td><td>1138</td><td>26</td><td>7</td><td>code.cloudfoundry.org/go-loggregator/v8 v8.0.1</td></tr><tr><td>go.mod</td><td>go.mod</td><td>1138</td><td>26</td><td>8</td><td>github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b</td></tr><tr><td>go.mod</td><td>go.mod</td><td>1138</td><td>26</td><td>9</td><td>github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e</td></tr><tr><td>go.mod</td><td>go.mod</td><td>1138</td><td>26</td><td>10</td><td>github.com/cloudfoundry/noaa v2.1.0+incompatible</td></tr><tr><td>go.mod</td><td>go.mod</td><td>1138</td><td>26</td><td>11</td><td>github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>3</td><td>code.cloudfoundry.org/go-diodes v0.0.0-20180905200951-72629b5276e3/go.mod h1:jzi+cchgo/v/plquaq6hnzcc1c4bs790gx21lrrui4g=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>4</td><td>code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee h1:iaapf9s7/+biigf+rjgcxlm3nozalijsbxjuua63lx8=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>5</td><td>code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee/go.mod h1:jzi+cchgo/v/plquaq6hnzcc1c4bs790gx21lrrui4g=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>6</td><td>code.cloudfoundry.org/go-loggregator/v8 v8.0.1 h1:8pxkkv6o99hfccybqznq9fiavlvguwxz7wyw2n4dd2w=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>7</td><td>code.cloudfoundry.org/go-loggregator/v8 v8.0.1/go.mod h1:l+av5o/2ifezilknm5dclqxule2adtuvh9ylcqe9zmc=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>8</td><td>code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f h1:urkzewtgeiff9vxdrfdqxibzpwjxlnuxdi5m6z3gjak=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>9</td><td>code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f/go.mod h1:sk5lnijb/nieu7yp5sdqexvm62wu0pbh3yrelnguisi=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>10</td><td>code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a h1:8rqv2w8xecenwckcf5onert0qbhlh5bnnffnytrzbxs=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>11</td><td>code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a/go.mod h1:tkzo8gtzbjysj7usvxm4e36lnqw1d3xm6okhgqdaaj4=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>12</td><td>code.cloudfoundry.org/tlsconfig v0.0.0-20200131000646-bbe0f8da39b3 h1:2qal+q+tw/dmdoojbwwdcpe3lijnj/1o7omkkb2c5si=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>13</td><td>code.cloudfoundry.org/tlsconfig v0.0.0-20200131000646-bbe0f8da39b3/go.mod h1:etbfjpyxrgufvyg5+oaj9b2eibic+0/kzjh8ftbtdew=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>25</td><td>github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b h1:dxtgfgx/ljeia9zswjw097bz6cgqdaq2m9xffuzomg8=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>26</td><td>github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b/go.mod h1:rtiewdo+k/czvxvifcmbpyx7jdxsll1rz+da/vk8lwg=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>27</td><td>github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e h1:dfya2+zpeatpeoizajuaee2o7yx3up5tomjkexl8ilo=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>28</td><td>github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e/go.mod h1:8wjcvatsjt8phxckbzwakib9ju8bevhbnsblgkr8wfy=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>29</td><td>github.com/cloudfoundry/dropsonde v1.0.0/go.mod h1:6zwvrwk5tpxbvyi1cdke5wdsio8e0n7qajg3wr9b67c=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>30</td><td>github.com/cloudfoundry/gosteno v0.0.0-20150423193413-0c8581caea35/go.mod h1:3ybpur85rirvautda1dl38ysp6s3ohu1xrwlkgt2mog=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>31</td><td>github.com/cloudfoundry/loggregatorlib v0.0.0-20170823162133-36eddf15ef12/go.mod h1:ucj7+svyacshmxv3zze2nacecdbbf9sczyr+qkcx9/w=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>32</td><td>github.com/cloudfoundry/noaa v2.1.0+incompatible h1:hr6vnm5vlyrn3yd+nmaedqlw8686sumknose0mfs2vo=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>33</td><td>github.com/cloudfoundry/noaa v2.1.0+incompatible/go.mod h1:5lmacnptvxzrtvmfl9+ejhgkufigcwi61bvsth47eco=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>34</td><td>github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4 h1:cwfya7mo/zbnwyvio6ewgsfjhqyw4/k/uhwij1eqrpi=</td></tr><tr><td>go.sum</td><td>go.sum</td><td>23892</td><td>237</td><td>35</td><td>github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4/go.mod h1:gs0pchd7onisewbw8ue9qa9pzpv2v88cuzdttk6kzgi=</td></tr><tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td><td>3</td><td>- name: wavefront-pcf-nozzle</td></tr><tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td><td>6</td><td>buildpack: https://github.com/cloudfoundry/go-buildpack.git</td></tr><tr><td>manifest.yml</td><td>manifest.yml</td><td>659</td><td>22</td><td>21</td><td>wavefront_prefix: pcf</td></tr><tr><td>run.sh</td><td>run.sh</td><td>447</td><td>18</td><td>15</td><td>export wavefront_prefix=pcf</td></tr><tr><td>event_handler.go</td><td>legacy/event_handler.go</td><td>4947</td><td>158</td><td>10</td><td>"github.com/cloudfoundry/sonde-go/events"</td></tr><tr><td>main.go</td><td>legacy/main.go</td><td>3015</td><td>113</td><td>9</td><td>"github.com/cloudfoundry/noaa/consumer"</td></tr><tr><td>main.go</td><td>legacy/main.go</td><td>3015</td><td>113</td><td>10</td><td>noaaerrors "github.com/cloudfoundry/noaa/errors"</td></tr><tr><td>main.go</td><td>legacy/main.go</td><td>3015</td><td>113</td><td>11</td><td>"github.com/cloudfoundry/sonde-go/events"</td></tr><tr><td>nozzle.go</td><td>legacy/nozzle.go</td><td>3022</td><td>110</td><td>6</td><td>"github.com/cloudfoundry/sonde-go/events"</td></tr><tr><td>main.go</td><td>nozzle/main.go</td><td>3094</td><td>134</td><td>8</td><td>loggregator "code.cloudfoundry.org/go-loggregator/v8"</td></tr><tr><td>main.go</td><td>nozzle/main.go</td><td>3094</td><td>134</td><td>9</td><td>"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"</td></tr><tr><td>nozzle.go</td><td>nozzle/nozzle.go</td><td>5726</td><td>209</td><td>7</td><td>"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"</td></tr><tr><td>nozzle.go</td><td>nozzle/nozzle.go</td><td>5726</td><td>209</td><td>33</td><td>"pcf.container.rep.cpu.percentage":     "pcf.container.rep.cpu_percentage",</td></tr><tr><td>nozzle.go</td><td>nozzle/nozzle.go</td><td>5726</td><td>209</td><td>34</td><td>"pcf.container.rep.disk.bytes":         "pcf.container.rep.disk_bytes",</td></tr><tr><td>nozzle.go</td><td>nozzle/nozzle.go</td><td>5726</td><td>209</td><td>35</td><td>"pcf.container.rep.disk_quota.bytes":   "pcf.container.rep.disk_bytes_quota",</td></tr><tr><td>nozzle.go</td><td>nozzle/nozzle.go</td><td>5726</td><td>209</td><td>36</td><td>"pcf.container.rep.memory.bytes":       "pcf.container.rep.memory_bytes",</td></tr><tr><td>nozzle.go</td><td>nozzle/nozzle.go</td><td>5726</td><td>209</td><td>37</td><td>"pcf.container.rep.memory_quota.bytes": "pcf.container.rep.memory_bytes_quota",</td></tr><tr><td>nozzle_test.go</td><td>nozzle/nozzle_test.go</td><td>1761</td><td>67</td><td>4</td><td>"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"</td></tr><tr><td>nozzle_test.go</td><td>nozzle/nozzle_test.go</td><td>1761</td><td>67</td><td>5</td><td>"github.com/cloudfoundry-community/go-cfclient"</td></tr><tr><td>uaa.go</td><td>nozzle/uaa.go</td><td>766</td><td>34</td><td>3</td><td>import "github.com/cloudfoundry-incubator/uaago"</td></tr><tr><td>api_client.go</td><td>internal/api/api_client.go</td><td>3036</td><td>124</td><td>7</td><td>cfclient "github.com/cloudfoundry-community/go-cfclient"</td></tr><tr><td>api_client_test.go</td><td>internal/api/api_client_test.go</td><td>1021</td><td>45</td><td>4</td><td>"github.com/cloudfoundry-community/go-cfclient"</td></tr><tr><td>config.go</td><td>internal/config/config.go</td><td>5612</td><td>167</td><td>20</td><td>// nozzleconfig holds specific pcf env variables</td></tr><tr><td>filter_test.go</td><td>internal/filter/filter_test.go</td><td>3677</td><td>119</td><td>31</td><td>filters.metricswhitelist = []string{"pcf.bosh-*-forwarder*"}</td></tr><tr><td>filter_test.go</td><td>internal/filter/filter_test.go</td><td>3677</td><td>119</td><td>34</td><td>assert.true(t, glob.match("pcf.bosh-hm-forwarder.system.cpu.user.load", nil))</td></tr><tr><td>filter_test.go</td><td>internal/filter/filter_test.go</td><td>3677</td><td>119</td><td>35</td><td>assert.false(t, glob.match("pcf.container.rep.memory_bytes_quota", nil))</td></tr><tr><td>wavefront.go</td><td>internal/wavefront/wavefront.go</td><td>5316</td><td>169</td><td>100</td><td>application.new("pcf-nozzle", "internal-metrics"),</td></tr>
+        </table>
+        
+        <h2>PCF Migration Recommendations</h2>
+        <table>
+            <tr><th>Path</th><th>Line Number</th><th>Line Content</th><th>Recommendation</th></tr>
+        <tr><td>README.md</td><td>2</td><td>wavefront go nozzle for pivotal cloud foundry (pcf). included as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/).</td><td>Replace 'wavefront go nozzle for pivotal cloud foundry (pcf). included as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/).' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>4</td><td>## manually configure and deploy to pcf</td><td>Replace '## manually configure and deploy to pcf' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>8</td><td>3. run `cf push` to deploy the nozzle to pcf</td><td>Replace '3. run `cf push` to deploy the nozzle to pcf' with OCP-specific configuration.</td></tr><tr><td>go.mod</td><td>6</td><td>code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect</td><td>Replace 'code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect' with OCP-specific configuration.</td></tr><tr><td>go.mod</td><td>7</td><td>code.cloudfoundry.org/go-loggregator/v8 v8.0.1</td><td>Replace 'code.cloudfoundry.org/go-loggregator/v8 v8.0.1' with OCP-specific configuration.</td></tr><tr><td>go.mod</td><td>8</td><td>github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b</td><td>Replace 'github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b' with OCP-specific configuration.</td></tr><tr><td>go.mod</td><td>9</td><td>github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e</td><td>Replace 'github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e' with OCP-specific configuration.</td></tr><tr><td>go.mod</td><td>10</td><td>github.com/cloudfoundry/noaa v2.1.0+incompatible</td><td>Replace 'github.com/cloudfoundry/noaa v2.1.0+incompatible' with OCP-specific configuration.</td></tr><tr><td>go.mod</td><td>11</td><td>github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4</td><td>Replace 'github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>3</td><td>code.cloudfoundry.org/go-diodes v0.0.0-20180905200951-72629b5276e3/go.mod h1:jzi+cchgo/v/plquaq6hnzcc1c4bs790gx21lrrui4g=</td><td>Replace 'code.cloudfoundry.org/go-diodes v0.0.0-20180905200951-72629b5276e3/go.mod h1:jzi+cchgo/v/plquaq6hnzcc1c4bs790gx21lrrui4g=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>4</td><td>code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee h1:iaapf9s7/+biigf+rjgcxlm3nozalijsbxjuua63lx8=</td><td>Replace 'code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee h1:iaapf9s7/+biigf+rjgcxlm3nozalijsbxjuua63lx8=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>5</td><td>code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee/go.mod h1:jzi+cchgo/v/plquaq6hnzcc1c4bs790gx21lrrui4g=</td><td>Replace 'code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee/go.mod h1:jzi+cchgo/v/plquaq6hnzcc1c4bs790gx21lrrui4g=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>6</td><td>code.cloudfoundry.org/go-loggregator/v8 v8.0.1 h1:8pxkkv6o99hfccybqznq9fiavlvguwxz7wyw2n4dd2w=</td><td>Replace 'code.cloudfoundry.org/go-loggregator/v8 v8.0.1 h1:8pxkkv6o99hfccybqznq9fiavlvguwxz7wyw2n4dd2w=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>7</td><td>code.cloudfoundry.org/go-loggregator/v8 v8.0.1/go.mod h1:l+av5o/2ifezilknm5dclqxule2adtuvh9ylcqe9zmc=</td><td>Replace 'code.cloudfoundry.org/go-loggregator/v8 v8.0.1/go.mod h1:l+av5o/2ifezilknm5dclqxule2adtuvh9ylcqe9zmc=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>8</td><td>code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f h1:urkzewtgeiff9vxdrfdqxibzpwjxlnuxdi5m6z3gjak=</td><td>Replace 'code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f h1:urkzewtgeiff9vxdrfdqxibzpwjxlnuxdi5m6z3gjak=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>9</td><td>code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f/go.mod h1:sk5lnijb/nieu7yp5sdqexvm62wu0pbh3yrelnguisi=</td><td>Replace 'code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f/go.mod h1:sk5lnijb/nieu7yp5sdqexvm62wu0pbh3yrelnguisi=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>10</td><td>code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a h1:8rqv2w8xecenwckcf5onert0qbhlh5bnnffnytrzbxs=</td><td>Replace 'code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a h1:8rqv2w8xecenwckcf5onert0qbhlh5bnnffnytrzbxs=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>11</td><td>code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a/go.mod h1:tkzo8gtzbjysj7usvxm4e36lnqw1d3xm6okhgqdaaj4=</td><td>Replace 'code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a/go.mod h1:tkzo8gtzbjysj7usvxm4e36lnqw1d3xm6okhgqdaaj4=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>12</td><td>code.cloudfoundry.org/tlsconfig v0.0.0-20200131000646-bbe0f8da39b3 h1:2qal+q+tw/dmdoojbwwdcpe3lijnj/1o7omkkb2c5si=</td><td>Replace 'code.cloudfoundry.org/tlsconfig v0.0.0-20200131000646-bbe0f8da39b3 h1:2qal+q+tw/dmdoojbwwdcpe3lijnj/1o7omkkb2c5si=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>13</td><td>code.cloudfoundry.org/tlsconfig v0.0.0-20200131000646-bbe0f8da39b3/go.mod h1:etbfjpyxrgufvyg5+oaj9b2eibic+0/kzjh8ftbtdew=</td><td>Replace 'code.cloudfoundry.org/tlsconfig v0.0.0-20200131000646-bbe0f8da39b3/go.mod h1:etbfjpyxrgufvyg5+oaj9b2eibic+0/kzjh8ftbtdew=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>25</td><td>github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b h1:dxtgfgx/ljeia9zswjw097bz6cgqdaq2m9xffuzomg8=</td><td>Replace 'github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b h1:dxtgfgx/ljeia9zswjw097bz6cgqdaq2m9xffuzomg8=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>26</td><td>github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b/go.mod h1:rtiewdo+k/czvxvifcmbpyx7jdxsll1rz+da/vk8lwg=</td><td>Replace 'github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b/go.mod h1:rtiewdo+k/czvxvifcmbpyx7jdxsll1rz+da/vk8lwg=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>27</td><td>github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e h1:dfya2+zpeatpeoizajuaee2o7yx3up5tomjkexl8ilo=</td><td>Replace 'github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e h1:dfya2+zpeatpeoizajuaee2o7yx3up5tomjkexl8ilo=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>28</td><td>github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e/go.mod h1:8wjcvatsjt8phxckbzwakib9ju8bevhbnsblgkr8wfy=</td><td>Replace 'github.com/cloudfoundry-incubator/uaago v0.0.0-20190307164349-8136b7bbe76e/go.mod h1:8wjcvatsjt8phxckbzwakib9ju8bevhbnsblgkr8wfy=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>29</td><td>github.com/cloudfoundry/dropsonde v1.0.0/go.mod h1:6zwvrwk5tpxbvyi1cdke5wdsio8e0n7qajg3wr9b67c=</td><td>Replace 'github.com/cloudfoundry/dropsonde v1.0.0/go.mod h1:6zwvrwk5tpxbvyi1cdke5wdsio8e0n7qajg3wr9b67c=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>30</td><td>github.com/cloudfoundry/gosteno v0.0.0-20150423193413-0c8581caea35/go.mod h1:3ybpur85rirvautda1dl38ysp6s3ohu1xrwlkgt2mog=</td><td>Replace 'github.com/cloudfoundry/gosteno v0.0.0-20150423193413-0c8581caea35/go.mod h1:3ybpur85rirvautda1dl38ysp6s3ohu1xrwlkgt2mog=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>31</td><td>github.com/cloudfoundry/loggregatorlib v0.0.0-20170823162133-36eddf15ef12/go.mod h1:ucj7+svyacshmxv3zze2nacecdbbf9sczyr+qkcx9/w=</td><td>Replace 'github.com/cloudfoundry/loggregatorlib v0.0.0-20170823162133-36eddf15ef12/go.mod h1:ucj7+svyacshmxv3zze2nacecdbbf9sczyr+qkcx9/w=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>32</td><td>github.com/cloudfoundry/noaa v2.1.0+incompatible h1:hr6vnm5vlyrn3yd+nmaedqlw8686sumknose0mfs2vo=</td><td>Replace 'github.com/cloudfoundry/noaa v2.1.0+incompatible h1:hr6vnm5vlyrn3yd+nmaedqlw8686sumknose0mfs2vo=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>33</td><td>github.com/cloudfoundry/noaa v2.1.0+incompatible/go.mod h1:5lmacnptvxzrtvmfl9+ejhgkufigcwi61bvsth47eco=</td><td>Replace 'github.com/cloudfoundry/noaa v2.1.0+incompatible/go.mod h1:5lmacnptvxzrtvmfl9+ejhgkufigcwi61bvsth47eco=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>34</td><td>github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4 h1:cwfya7mo/zbnwyvio6ewgsfjhqyw4/k/uhwij1eqrpi=</td><td>Replace 'github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4 h1:cwfya7mo/zbnwyvio6ewgsfjhqyw4/k/uhwij1eqrpi=' with OCP-specific configuration.</td></tr><tr><td>go.sum</td><td>35</td><td>github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4/go.mod h1:gs0pchd7onisewbw8ue9qa9pzpv2v88cuzdttk6kzgi=</td><td>Replace 'github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4/go.mod h1:gs0pchd7onisewbw8ue9qa9pzpv2v88cuzdttk6kzgi=' with OCP-specific configuration.</td></tr><tr><td>manifest.yml</td><td>3</td><td>- name: wavefront-pcf-nozzle</td><td>Replace '- name: wavefront-pcf-nozzle' with OCP-specific configuration.</td></tr><tr><td>manifest.yml</td><td>6</td><td>buildpack: https://github.com/cloudfoundry/go-buildpack.git</td><td>Replace 'buildpack: https://github.com/cloudfoundry/go-buildpack.git' with OCP-specific configuration.</td></tr><tr><td>manifest.yml</td><td>21</td><td>wavefront_prefix: pcf</td><td>Replace 'wavefront_prefix: pcf' with OCP-specific configuration.</td></tr><tr><td>run.sh</td><td>15</td><td>export wavefront_prefix=pcf</td><td>Replace 'export wavefront_prefix=pcf' with OCP-specific configuration.</td></tr><tr><td>legacy/event_handler.go</td><td>10</td><td>"github.com/cloudfoundry/sonde-go/events"</td><td>Replace '"github.com/cloudfoundry/sonde-go/events"' with OCP-specific configuration.</td></tr><tr><td>legacy/main.go</td><td>9</td><td>"github.com/cloudfoundry/noaa/consumer"</td><td>Replace '"github.com/cloudfoundry/noaa/consumer"' with OCP-specific configuration.</td></tr><tr><td>legacy/main.go</td><td>10</td><td>noaaerrors "github.com/cloudfoundry/noaa/errors"</td><td>Replace 'noaaerrors "github.com/cloudfoundry/noaa/errors"' with OCP-specific configuration.</td></tr><tr><td>legacy/main.go</td><td>11</td><td>"github.com/cloudfoundry/sonde-go/events"</td><td>Replace '"github.com/cloudfoundry/sonde-go/events"' with OCP-specific configuration.</td></tr><tr><td>legacy/nozzle.go</td><td>6</td><td>"github.com/cloudfoundry/sonde-go/events"</td><td>Replace '"github.com/cloudfoundry/sonde-go/events"' with OCP-specific configuration.</td></tr><tr><td>nozzle/main.go</td><td>8</td><td>loggregator "code.cloudfoundry.org/go-loggregator/v8"</td><td>Replace 'loggregator "code.cloudfoundry.org/go-loggregator/v8"' with OCP-specific configuration.</td></tr><tr><td>nozzle/main.go</td><td>9</td><td>"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"</td><td>Replace '"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"' with OCP-specific configuration.</td></tr><tr><td>nozzle/nozzle.go</td><td>7</td><td>"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"</td><td>Replace '"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"' with OCP-specific configuration.</td></tr><tr><td>nozzle/nozzle.go</td><td>33</td><td>"pcf.container.rep.cpu.percentage":     "pcf.container.rep.cpu_percentage",</td><td>Replace '"pcf.container.rep.cpu.percentage":     "pcf.container.rep.cpu_percentage",' with OCP-specific configuration.</td></tr><tr><td>nozzle/nozzle.go</td><td>34</td><td>"pcf.container.rep.disk.bytes":         "pcf.container.rep.disk_bytes",</td><td>Replace '"pcf.container.rep.disk.bytes":         "pcf.container.rep.disk_bytes",' with OCP-specific configuration.</td></tr><tr><td>nozzle/nozzle.go</td><td>35</td><td>"pcf.container.rep.disk_quota.bytes":   "pcf.container.rep.disk_bytes_quota",</td><td>Replace '"pcf.container.rep.disk_quota.bytes":   "pcf.container.rep.disk_bytes_quota",' with OCP-specific configuration.</td></tr><tr><td>nozzle/nozzle.go</td><td>36</td><td>"pcf.container.rep.memory.bytes":       "pcf.container.rep.memory_bytes",</td><td>Replace '"pcf.container.rep.memory.bytes":       "pcf.container.rep.memory_bytes",' with OCP-specific configuration.</td></tr><tr><td>nozzle/nozzle.go</td><td>37</td><td>"pcf.container.rep.memory_quota.bytes": "pcf.container.rep.memory_bytes_quota",</td><td>Replace '"pcf.container.rep.memory_quota.bytes": "pcf.container.rep.memory_bytes_quota",' with OCP-specific configuration.</td></tr><tr><td>nozzle/nozzle_test.go</td><td>4</td><td>"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"</td><td>Replace '"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"' with OCP-specific configuration.</td></tr><tr><td>nozzle/nozzle_test.go</td><td>5</td><td>"github.com/cloudfoundry-community/go-cfclient"</td><td>Replace '"github.com/cloudfoundry-community/go-cfclient"' with OCP-specific configuration.</td></tr><tr><td>nozzle/uaa.go</td><td>3</td><td>import "github.com/cloudfoundry-incubator/uaago"</td><td>Replace 'import "github.com/cloudfoundry-incubator/uaago"' with OCP-specific configuration.</td></tr><tr><td>internal/api/api_client.go</td><td>7</td><td>cfclient "github.com/cloudfoundry-community/go-cfclient"</td><td>Replace 'cfclient "github.com/cloudfoundry-community/go-cfclient"' with OCP-specific configuration.</td></tr><tr><td>internal/api/api_client_test.go</td><td>4</td><td>"github.com/cloudfoundry-community/go-cfclient"</td><td>Replace '"github.com/cloudfoundry-community/go-cfclient"' with OCP-specific configuration.</td></tr><tr><td>internal/config/config.go</td><td>20</td><td>// nozzleconfig holds specific pcf env variables</td><td>Replace '// nozzleconfig holds specific pcf env variables' with OCP-specific configuration.</td></tr><tr><td>internal/filter/filter_test.go</td><td>31</td><td>filters.metricswhitelist = []string{"pcf.bosh-*-forwarder*"}</td><td>Replace 'filters.metricswhitelist = []string{"pcf.bosh-*-forwarder*"}' with OCP-specific configuration.</td></tr><tr><td>internal/filter/filter_test.go</td><td>34</td><td>assert.true(t, glob.match("pcf.bosh-hm-forwarder.system.cpu.user.load", nil))</td><td>Replace 'assert.true(t, glob.match("pcf.bosh-hm-forwarder.system.cpu.user.load", nil))' with OCP-specific configuration.</td></tr><tr><td>internal/filter/filter_test.go</td><td>35</td><td>assert.false(t, glob.match("pcf.container.rep.memory_bytes_quota", nil))</td><td>Replace 'assert.false(t, glob.match("pcf.container.rep.memory_bytes_quota", nil))' with OCP-specific configuration.</td></tr><tr><td>internal/wavefront/wavefront.go</td><td>100</td><td>application.new("pcf-nozzle", "internal-metrics"),</td><td>Replace 'application.new("pcf-nozzle", "internal-metrics"),' with OCP-specific configuration.</td></tr>
+        </table>
+        </div><div id="tab2" class="tabcontent">
+        <h1>Migration Report for wavefrontHQ/cloud-foundry-sampleapp</h1>
+        <p><strong>Generated on:</strong> 2024-06-16 00:20:57</p>
+        
+        <h2>Repository Info</h2>
+        <table>
+            <tr><th>Name</th><td>cloud-foundry-sampleapp</td></tr>
+            <tr><th>Description</th><td>Wavefront Cloud Foundry (Spring Boot) Sample Application</td></tr>
+            <tr><th>Language</th><td>Java</td></tr>
+            <tr><th>Topics</th><td>cloud-foundry, wavefront, spring-boot, monitoring</td></tr>
+            <tr><th>Default Branch</th><td>master</td></tr>
+            <tr><th>Size (bytes)</th><td>42</td></tr>
+            <tr><th>Created At</th><td>2017-08-07 22:34:42</td></tr>
+            <tr><th>Updated At</th><td>2023-07-17 20:07:10</td></tr>
+            <tr><th>Subscribers Count</th><td>28</td></tr>
+            <tr><th>Stargazers Count</th><td>1</td></tr>
+            <tr><th>Watchers Count</th><td>1</td></tr>
+            <tr><th>Forks Count</th><td>2</td></tr>
+            <tr><th>Open Issues Count</th><td>1</td></tr>
+            <tr><th>License</th><td>None</td></tr>
+            <tr><th>GitHub URL</th><td><a href="https://github.com/wavefrontHQ/cloud-foundry-sampleapp">https://github.com/wavefrontHQ/cloud-foundry-sampleapp</a></td></tr>
+        </table>
+
+        <h2>Summary</h2>
+        <table>
+            <tr><th>Total Files</th><td>13</td></tr>
+            <tr><th>Java Files</th><td>8</td></tr>
+            <tr><th>PCF References</th><td>12</td></tr>
+            <tr><th>Configuration Files</th><td>2</td></tr>
+            <tr><th>Deployment Manifests</th><td>1</td></tr>
+            <tr><th>Dependencies</th><td>13</td></tr>
+            <tr><th>Java Versions</th><td></td></tr>
+            <tr><th>Angular Versions</th><td></td></tr>
+            <tr><th>Node Versions</th><td></td></tr>
+            <tr><th>Complexity</th><td>High</td></tr>
+    
+        </table>
+        
+       
+        <h2>File Details</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+    <tr><td>.gitignore</td><td>.gitignore</td><td>36</td><td>3</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td></tr><tr><td>pom.xml</td><td>pom.xml</td><td>3527</td><td>141</td></tr><tr><td>application.properties</td><td>src/main/resources/application.properties</td><td>16</td><td>1</td></tr><tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr><tr><td>SampleAppController.java</td><td>src/main/java/controller/SampleAppController.java</td><td>1111</td><td>37</td></tr><tr><td>SampleAppData.java</td><td>src/main/java/domain/SampleAppData.java</td><td>827</td><td>47</td></tr><tr><td>SampleAppRepository.java</td><td>src/main/java/repository/SampleAppRepository.java</td><td>486</td><td>23</td></tr><tr><td>SampleAppService.java</td><td>src/main/java/service/SampleAppService.java</td><td>211</td><td>12</td></tr><tr><td>SampleAppServiceImpl.java</td><td>src/main/java/service/SampleAppServiceImpl.java</td><td>863</td><td>39</td></tr><tr><td>CacheConfiguration.java</td><td>src/main/java/springboot/CacheConfiguration.java</td><td>931</td><td>30</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>112</td></tr><tr><td>SampleApplication.java</td><td>src/main/java/springboot/SampleApplication.java</td><td>562</td><td>19</td></tr>
+        </table>
+    
+        <h2>Dependencies</h2>
+        <table>
+            <tr><th>Group ID</th><th>Artifact ID</th><th>Version</th></tr>
+        <tr><td>org.springframework.boot</td><td>spring-boot-starter-web</td><td>N/A</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-actuator</td><td>N/A</td></tr><tr><td>org.springframework</td><td>spring-context-support</td><td>N/A</td></tr><tr><td>io.dropwizard.metrics</td><td>metrics-core</td><td>N/A</td></tr><tr><td>io.dropwizard.metrics</td><td>metrics-jvm</td><td>3.1.2</td></tr><tr><td>com.h2database</td><td>h2</td><td>2.1.210</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-jdbc</td><td>N/A</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-data-jpa</td><td>N/A</td></tr><tr><td>com.google.guava</td><td>guava</td><td>32.0.1-jre</td></tr><tr><td>com.wavefront</td><td>dropwizard-metrics-3.1</td><td>4.19</td></tr><tr><td>org.apache.avro</td><td>avro</td><td>1.11.1</td></tr><tr><td>org.json</td><td>json</td><td>20230227</td></tr><tr><td>junit</td><td>junit</td><td>4.13.1</td></tr>
+        </table>
+        
+            <h2>Configuration Files</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>application.properties</td><td>src/main/resources/application.properties</td><td>16</td><td>1</td></tr><tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr>
+            </table>
+            
+            <h2>Deployment Manifests</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr>
+            </table>
+            
+            <h2>Security Settings</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr>
+            </table>
+            
+            <h2>Volume Mounts</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr>
+            </table>
+            
+            <h2>Logging and Monitoring</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr>
+            </table>
+            
+            <h2>Scaling Policies</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr>
+            </table>
+            
+            <h2>Compliance Requirements</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr>
+            </table>
+            
+            <h2>Documentation</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td></tr>
+            </table>
+            
+        <h2>Manifest Files Analysis</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Content</th></tr>
+        <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td><td><pre>---
+applications:
+- name: wavefront-sample-app
+  services:
+   - wfproxy-service1</pre></td></tr>
+        </table>
+        
+        <h2>PCF References</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Line Number</th><th>Line Content</th></tr>
+        <tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>7</td><td>this project describes how to send application metrics from a spring boot app running in pcf to a wavefront proxy.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>10</td><td>* a wavefront proxy deployed in pcf as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/)</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>11</td><td>* a wavefront proxy service instance provisioned in pcf using the [wavefront service broker for pcf](http://docs.pivotal.io/partners/wavefront-nozzle/installing.html#marketplace).</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>17</td><td>the rest of this document assumes the wavefront proxy service instance provisioned in pcf is called `wfproxy-service`. replace the service name accordingly if different.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>21</td><td>a `manifest.yml` file is used to provide parameters to a pcf application. the developer needs to identify the wavefront proxy running in pcf and add it to the manifest file.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>70</td><td>.prefixedwith("pcf")</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>71</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>74</td><td>the `wavefront-proxy` is the name of the wavefront proxy service running in pcf. the wavefront</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>79</td><td>to bind to wavefront proxy (e.g., `bindtocloudfoundryservice()`).</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>85</td><td>cf login -a <pcf-api-url> --skip-ssl-validation --sso</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>112</td><td>74</td><td>.prefixedwith("pcf")</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>112</td><td>75</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td></tr>
+        </table>
+        
+        <h2>PCF Migration Recommendations</h2>
+        <table>
+            <tr><th>Path</th><th>Line Number</th><th>Line Content</th><th>Recommendation</th></tr>
+        <tr><td>README.md</td><td>7</td><td>this project describes how to send application metrics from a spring boot app running in pcf to a wavefront proxy.</td><td>Replace 'this project describes how to send application metrics from a spring boot app running in pcf to a wavefront proxy.' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>10</td><td>* a wavefront proxy deployed in pcf as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/)</td><td>Replace '* a wavefront proxy deployed in pcf as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/)' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>11</td><td>* a wavefront proxy service instance provisioned in pcf using the [wavefront service broker for pcf](http://docs.pivotal.io/partners/wavefront-nozzle/installing.html#marketplace).</td><td>Replace '* a wavefront proxy service instance provisioned in pcf using the [wavefront service broker for pcf](http://docs.pivotal.io/partners/wavefront-nozzle/installing.html#marketplace).' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>17</td><td>the rest of this document assumes the wavefront proxy service instance provisioned in pcf is called `wfproxy-service`. replace the service name accordingly if different.</td><td>Replace 'the rest of this document assumes the wavefront proxy service instance provisioned in pcf is called `wfproxy-service`. replace the service name accordingly if different.' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>21</td><td>a `manifest.yml` file is used to provide parameters to a pcf application. the developer needs to identify the wavefront proxy running in pcf and add it to the manifest file.</td><td>Replace 'a `manifest.yml` file is used to provide parameters to a pcf application. the developer needs to identify the wavefront proxy running in pcf and add it to the manifest file.' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>70</td><td>.prefixedwith("pcf")</td><td>Replace '.prefixedwith("pcf")' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>71</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td><td>Replace '.bindtocloudfoundryservice("wavefront-proxy", true);' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>74</td><td>the `wavefront-proxy` is the name of the wavefront proxy service running in pcf. the wavefront</td><td>Replace 'the `wavefront-proxy` is the name of the wavefront proxy service running in pcf. the wavefront' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>79</td><td>to bind to wavefront proxy (e.g., `bindtocloudfoundryservice()`).</td><td>Replace 'to bind to wavefront proxy (e.g., `bindtocloudfoundryservice()`).' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>85</td><td>cf login -a <pcf-api-url> --skip-ssl-validation --sso</td><td>Replace 'cf login -a <pcf-api-url> --skip-ssl-validation --sso' with OCP-specific configuration.</td></tr><tr><td>src/main/java/springboot/MetricSystem.java</td><td>74</td><td>.prefixedwith("pcf")</td><td>Replace '.prefixedwith("pcf")' with OCP-specific configuration.</td></tr><tr><td>src/main/java/springboot/MetricSystem.java</td><td>75</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td><td>Replace '.bindtocloudfoundryservice("wavefront-proxy", true);' with OCP-specific configuration.</td></tr>
+        </table>
+        </div><div id="tab3" class="tabcontent">
+        <h1>Migration Report for wavefrontHQ/cloud-foundry-servicebroker</h1>
+        <p><strong>Generated on:</strong> 2024-06-16 00:23:04</p>
+        
+        <h2>Repository Info</h2>
+        <table>
+            <tr><th>Name</th><td>cloud-foundry-servicebroker</td></tr>
+            <tr><th>Description</th><td>Wavefront Servicebroker for Cloud Foundry</td></tr>
+            <tr><th>Language</th><td>Java</td></tr>
+            <tr><th>Topics</th><td>cloud-foundry, wavefront, monitoring</td></tr>
+            <tr><th>Default Branch</th><td>master</td></tr>
+            <tr><th>Size (bytes)</th><td>37</td></tr>
+            <tr><th>Created At</th><td>2017-08-02 20:47:33</td></tr>
+            <tr><th>Updated At</th><td>2023-06-16 12:42:58</td></tr>
+            <tr><th>Subscribers Count</th><td>28</td></tr>
+            <tr><th>Stargazers Count</th><td>0</td></tr>
+            <tr><th>Watchers Count</th><td>0</td></tr>
+            <tr><th>Forks Count</th><td>4</td></tr>
+            <tr><th>Open Issues Count</th><td>1</td></tr>
+            <tr><th>License</th><td>Apache License 2.0</td></tr>
+            <tr><th>GitHub URL</th><td><a href="https://github.com/wavefrontHQ/cloud-foundry-servicebroker">https://github.com/wavefrontHQ/cloud-foundry-servicebroker</a></td></tr>
+        </table>
+
+        <h2>Summary</h2>
+        <table>
+            <tr><th>Total Files</th><td>18</td></tr>
+            <tr><th>Java Files</th><td>13</td></tr>
+            <tr><th>PCF References</th><td>35</td></tr>
+            <tr><th>Configuration Files</th><td>1</td></tr>
+            <tr><th>Deployment Manifests</th><td>1</td></tr>
+            <tr><th>Dependencies</th><td>7</td></tr>
+            <tr><th>Java Versions</th><td>1.8</td></tr>
+            <tr><th>Angular Versions</th><td></td></tr>
+            <tr><th>Node Versions</th><td></td></tr>
+            <tr><th>Complexity</th><td>High</td></tr>
+    
+        </table>
+        
+       
+        <h2>File Details</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+    <tr><td>.gitignore</td><td>.gitignore</td><td>26</td><td>5</td></tr><tr><td>LICENSE</td><td>LICENSE</td><td>11357</td><td>202</td></tr><tr><td>README.md</td><td>README.md</td><td>683</td><td>10</td></tr><tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td></tr><tr><td>pom.xml</td><td>pom.xml</td><td>2897</td><td>88</td></tr><tr><td>Application.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/Application.java</td><td>502</td><td>19</td></tr><tr><td>BrokerConfig.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/BrokerConfig.java</td><td>443</td><td>20</td></tr><tr><td>CatalogConfig.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/CatalogConfig.java</td><td>2771</td><td>84</td></tr><tr><td>ProxyConfig.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/ProxyConfig.java</td><td>769</td><td>41</td></tr><tr><td>Route.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/Route.java</td><td>1430</td><td>77</td></tr><tr><td>ServiceInstance.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/ServiceInstance.java</td><td>3654</td><td>137</td></tr><tr><td>ServiceInstanceBinding.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/ServiceInstanceBinding.java</td><td>1483</td><td>65</td></tr><tr><td>ProxyServiceInstanceBindingRepository.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceBindingRepository.java</td><td>411</td><td>14</td></tr><tr><td>ProxyServiceInstanceRepository.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceRepository.java</td><td>383</td><td>14</td></tr><tr><td>ProxyServiceInstanceBindingService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>3359</td><td>84</td></tr><tr><td>ProxyServiceInstanceService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceService.java</td><td>2771</td><td>75</td></tr><tr><td>ProxyServiceInstanceBindingServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>5280</td><td>141</td></tr><tr><td>ProxyServiceInstanceServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceServiceTest.java</td><td>3559</td><td>106</td></tr>
+        </table>
+    
+        <h2>Dependencies</h2>
+        <table>
+            <tr><th>Group ID</th><th>Artifact ID</th><th>Version</th></tr>
+        <tr><td>org.springframework.cloud</td><td>spring-cloud-cloudfoundry-service-broker</td><td>${springCloudServiceBrokerVersion}</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-data-jpa</td><td>N/A</td></tr><tr><td>com.h2database</td><td>h2</td><td>N/A</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-test</td><td>N/A</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-test</td><td>N/A</td></tr><tr><td>org.springframework.cloud</td><td>spring-cloud-cloudfoundry-service-broker</td><td>${springCloudServiceBrokerVersion}</td></tr><tr><td>junit</td><td>junit</td><td>N/A</td></tr>
+        </table>
+        
+            <h2>Configuration Files</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td></tr>
+            </table>
+            
+            <h2>Deployment Manifests</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td></tr>
+            </table>
+            
+            <h2>Security Settings</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td></tr>
+            </table>
+            
+            <h2>Volume Mounts</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td></tr>
+            </table>
+            
+            <h2>Logging and Monitoring</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td></tr>
+            </table>
+            
+            <h2>Scaling Policies</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td></tr>
+            </table>
+            
+            <h2>Compliance Requirements</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td></tr>
+            </table>
+            
+            <h2>Documentation</h2>
+            <table>
+                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
+            <tr><td>README.md</td><td>README.md</td><td>683</td><td>10</td></tr>
+            </table>
+            
+        <h2>Manifest Files Analysis</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Content</th></tr>
+        <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td><td><pre>---
+applications:
+- name: wavefront-proxy-service-broker
+  instances: 1
+  memory: 1G
+  path: target/wavefront-cloudfoundry-broker-0.0.1-SNAPSHOT.jar
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git
+  # change the route domain name accordingly
+  route:
+  - route: wavefront-proxy-service-broker.apps.wavefront.io
+  env:
+    SECURITY_USER_NAME: admin
+    SECURITY_USER_PASSWORD: admin
+    # change the hostname and port accordingly
+    wavefront.proxy.hostname: tcp.wavefront.io
+    wavefront.proxy.port: 2878
+    wavefront.proxy.tracingPort: 30000
+    wavefront.proxy.distributionPort: 2878
+</pre></td></tr>
+        </table>
+        
+        <h2>PCF References</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Line Number</th><th>Line Content</th></tr>
+        <tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td><td>6</td><td>path: target/wavefront-cloudfoundry-broker-0.0.1-snapshot.jar</td></tr><tr><td>manifest.yml</td><td>manifest.yml</td><td>605</td><td>19</td><td>7</td><td>buildpack: https://github.com/cloudfoundry/java-buildpack.git</td></tr><tr><td>pom.xml</td><td>pom.xml</td><td>2897</td><td>88</td><td>8</td><td><artifactid>wavefront-cloudfoundry-broker</artifactid></td></tr><tr><td>pom.xml</td><td>pom.xml</td><td>2897</td><td>88</td><td>12</td><td><name>wavefront-cloudfoundry-broker</name></td></tr><tr><td>pom.xml</td><td>pom.xml</td><td>2897</td><td>88</td><td>31</td><td><artifactid>spring-cloud-cloudfoundry-service-broker</artifactid></td></tr><tr><td>pom.xml</td><td>pom.xml</td><td>2897</td><td>88</td><td>65</td><td><artifactid>spring-cloud-cloudfoundry-service-broker</artifactid></td></tr><tr><td>Application.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/Application.java</td><td>502</td><td>19</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker;</td></tr><tr><td>BrokerConfig.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/BrokerConfig.java</td><td>443</td><td>20</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.config;</td></tr><tr><td>CatalogConfig.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/CatalogConfig.java</td><td>2771</td><td>84</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.config;</td></tr><tr><td>CatalogConfig.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/CatalogConfig.java</td><td>2771</td><td>84</td><td>45</td><td>* @return the metadata for the pcf apps manager console</td></tr><tr><td>ProxyConfig.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/ProxyConfig.java</td><td>769</td><td>41</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.config;</td></tr><tr><td>Route.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/Route.java</td><td>1430</td><td>77</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.model;</td></tr><tr><td>ServiceInstance.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/ServiceInstance.java</td><td>3654</td><td>137</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.model;</td></tr><tr><td>ServiceInstanceBinding.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/ServiceInstanceBinding.java</td><td>1483</td><td>65</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.model;</td></tr><tr><td>ProxyServiceInstanceBindingRepository.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceBindingRepository.java</td><td>411</td><td>14</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.repository;</td></tr><tr><td>ProxyServiceInstanceBindingRepository.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceBindingRepository.java</td><td>411</td><td>14</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;</td></tr><tr><td>ProxyServiceInstanceRepository.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceRepository.java</td><td>383</td><td>14</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.repository;</td></tr><tr><td>ProxyServiceInstanceRepository.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceRepository.java</td><td>383</td><td>14</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;</td></tr><tr><td>ProxyServiceInstanceBindingService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>3359</td><td>84</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.service;</td></tr><tr><td>ProxyServiceInstanceBindingService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>3359</td><td>84</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.config.proxyconfig;</td></tr><tr><td>ProxyServiceInstanceBindingService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>3359</td><td>84</td><td>4</td><td>import com.wavefront.cloudfoundry.servicebroker.model.route;</td></tr><tr><td>ProxyServiceInstanceBindingService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>3359</td><td>84</td><td>5</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;</td></tr><tr><td>ProxyServiceInstanceBindingService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>3359</td><td>84</td><td>6</td><td>import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancebindingrepository;</td></tr><tr><td>ProxyServiceInstanceService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceService.java</td><td>2771</td><td>75</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.service;</td></tr><tr><td>ProxyServiceInstanceService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceService.java</td><td>2771</td><td>75</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;</td></tr><tr><td>ProxyServiceInstanceService.java</td><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceService.java</td><td>2771</td><td>75</td><td>4</td><td>import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancerepository;</td></tr><tr><td>ProxyServiceInstanceBindingServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>5280</td><td>141</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.service;</td></tr><tr><td>ProxyServiceInstanceBindingServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>5280</td><td>141</td><td>6</td><td>import com.wavefront.cloudfoundry.servicebroker.config.proxyconfig;</td></tr><tr><td>ProxyServiceInstanceBindingServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>5280</td><td>141</td><td>7</td><td>import com.wavefront.cloudfoundry.servicebroker.model.route;</td></tr><tr><td>ProxyServiceInstanceBindingServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>5280</td><td>141</td><td>8</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;</td></tr><tr><td>ProxyServiceInstanceBindingServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>5280</td><td>141</td><td>9</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;</td></tr><tr><td>ProxyServiceInstanceBindingServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>5280</td><td>141</td><td>10</td><td>import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancebindingrepository;</td></tr><tr><td>ProxyServiceInstanceServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceServiceTest.java</td><td>3559</td><td>106</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.service;</td></tr><tr><td>ProxyServiceInstanceServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceServiceTest.java</td><td>3559</td><td>106</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;</td></tr><tr><td>ProxyServiceInstanceServiceTest.java</td><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceServiceTest.java</td><td>3559</td><td>106</td><td>4</td><td>import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancerepository;</td></tr>
+        </table>
+        
+        <h2>PCF Migration Recommendations</h2>
+        <table>
+            <tr><th>Path</th><th>Line Number</th><th>Line Content</th><th>Recommendation</th></tr>
+        <tr><td>manifest.yml</td><td>6</td><td>path: target/wavefront-cloudfoundry-broker-0.0.1-snapshot.jar</td><td>Replace 'path: target/wavefront-cloudfoundry-broker-0.0.1-snapshot.jar' with OCP-specific configuration.</td></tr><tr><td>manifest.yml</td><td>7</td><td>buildpack: https://github.com/cloudfoundry/java-buildpack.git</td><td>Replace 'buildpack: https://github.com/cloudfoundry/java-buildpack.git' with OCP-specific configuration.</td></tr><tr><td>pom.xml</td><td>8</td><td><artifactid>wavefront-cloudfoundry-broker</artifactid></td><td>Replace '<artifactid>wavefront-cloudfoundry-broker</artifactid>' with OCP-specific configuration.</td></tr><tr><td>pom.xml</td><td>12</td><td><name>wavefront-cloudfoundry-broker</name></td><td>Replace '<name>wavefront-cloudfoundry-broker</name>' with OCP-specific configuration.</td></tr><tr><td>pom.xml</td><td>31</td><td><artifactid>spring-cloud-cloudfoundry-service-broker</artifactid></td><td>Replace '<artifactid>spring-cloud-cloudfoundry-service-broker</artifactid>' with OCP-specific configuration.</td></tr><tr><td>pom.xml</td><td>65</td><td><artifactid>spring-cloud-cloudfoundry-service-broker</artifactid></td><td>Replace '<artifactid>spring-cloud-cloudfoundry-service-broker</artifactid>' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/Application.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/BrokerConfig.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.config;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.config;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/CatalogConfig.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.config;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.config;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/CatalogConfig.java</td><td>45</td><td>* @return the metadata for the pcf apps manager console</td><td>Replace '* @return the metadata for the pcf apps manager console' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/config/ProxyConfig.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.config;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.config;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/Route.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.model;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.model;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/ServiceInstance.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.model;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.model;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/model/ServiceInstanceBinding.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.model;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.model;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceBindingRepository.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.repository;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.repository;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceBindingRepository.java</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceRepository.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.repository;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.repository;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/repository/ProxyServiceInstanceRepository.java</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.service;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.service;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.config.proxyconfig;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.config.proxyconfig;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>4</td><td>import com.wavefront.cloudfoundry.servicebroker.model.route;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.route;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>5</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingService.java</td><td>6</td><td>import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancebindingrepository;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancebindingrepository;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceService.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.service;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.service;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceService.java</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;' with OCP-specific configuration.</td></tr><tr><td>src/main/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceService.java</td><td>4</td><td>import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancerepository;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancerepository;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.service;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.service;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>6</td><td>import com.wavefront.cloudfoundry.servicebroker.config.proxyconfig;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.config.proxyconfig;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>7</td><td>import com.wavefront.cloudfoundry.servicebroker.model.route;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.route;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>8</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>9</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.serviceinstancebinding;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceBindingServiceTest.java</td><td>10</td><td>import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancebindingrepository;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancebindingrepository;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceServiceTest.java</td><td>1</td><td>package com.wavefront.cloudfoundry.servicebroker.service;</td><td>Replace 'package com.wavefront.cloudfoundry.servicebroker.service;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceServiceTest.java</td><td>3</td><td>import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.model.serviceinstance;' with OCP-specific configuration.</td></tr><tr><td>src/test/java/com/wavefront/cloudfoundry/servicebroker/service/ProxyServiceInstanceServiceTest.java</td><td>4</td><td>import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancerepository;</td><td>Replace 'import com.wavefront.cloudfoundry.servicebroker.repository.proxyserviceinstancerepository;' with OCP-specific configuration.</td></tr>
+        </table>
+        
+        <h2>Java Versions (from build files)</h2>
+        <table>
+            <tr><th>File</th><th>Java Version</th></tr>
+        <tr><td>build file</td><td>1.8</td></tr>
+        </table>
+        </div>
+        <script>
+            document.getElementsByClassName("tablinks")[0].click();
+        </script>
+    </body>
+    </html>
+    
