@@ -113,6 +113,7 @@ def parse_pom_xml(content):
     namespaces = {'maven': 'http://maven.apache.org/POM/4.0.0'}
     dependencies = []
     java_version = 'N/A'
+    spring_boot_version = 'N/A'
     for dependency in root.findall('.//maven:dependency', namespaces):
         group_id_element = dependency.find('maven:groupId', namespaces)
         artifact_id_element = dependency.find('maven:artifactId', namespaces)
@@ -133,17 +134,43 @@ def parse_pom_xml(content):
     if java_version_element is not None:
         java_version = java_version_element.text
 
-    return dependencies, java_version
+    # Extract Spring Boot version
+    parent_version_element = root.find('.//maven:parent/maven:version', namespaces)
+    if parent_version_element is not None and 'spring-boot' in root.find('.//maven:parent/maven:artifactId', namespaces).text:
+        spring_boot_version = parent_version_element.text
+
+    return dependencies, java_version, spring_boot_version
 
 def parse_gradle_file(content):
     java_version = 'N/A'
+    spring_boot_version = 'N/A'
     lines = content.split('\n')
     for line in lines:
         if 'sourceCompatibility' in line or 'targetCompatibility' in line:
             parts = line.split()
             if len(parts) >= 2:
                 java_version = parts[-1].replace("'", "").replace("\"", "")
-    return java_version
+        if 'spring-boot' in line and 'version' in line:
+            parts = line.split()
+            if len(parts) >= 2:
+                spring_boot_version = parts[-1].replace("'", "").replace("\"", "")
+    return java_version, spring_boot_version
+
+def parse_package_json(content):
+    import json
+    package_json = json.loads(content)
+    dependencies = package_json.get('dependencies', {})
+    dev_dependencies = package_json.get('devDependencies', {})
+    
+    angular_version = 'N/A'
+    node_version = package_json.get('engines', {}).get('node', 'N/A')
+    
+    if '@angular/core' in dependencies:
+        angular_version = dependencies['@angular/core']
+    elif '@angular/core' in dev_dependencies:
+        angular_version = dev_dependencies['@angular/core']
+    
+    return angular_version, node_version
 
 def get_dependencies_and_versions(repo_name):
     wait_for_rate_limit_reset()
@@ -151,20 +178,35 @@ def get_dependencies_and_versions(repo_name):
         repo = g.get_repo(repo_name)
         pom_files = get_files_recursively(repo, '', ['pom.xml', 'pom_*.xml'])
         gradle_files = get_files_recursively(repo, '', ['build.gradle'])
+        package_json_files = get_files_recursively(repo, '', ['package.json'])
         dependencies = []
         java_versions = []
+        spring_boot_versions = []
+        angular_versions = []
+        node_versions = []
         for pom_file in pom_files:
             content = repo.get_contents(pom_file.path).decoded_content.decode('utf-8')
-            deps, java_version = parse_pom_xml(content)
+            deps, java_version, spring_boot_version = parse_pom_xml(content)
             dependencies.extend(deps)
             if java_version != 'N/A':
                 java_versions.append(java_version)
+            if spring_boot_version != 'N/A':
+                spring_boot_versions.append(spring_boot_version)
         for gradle_file in gradle_files:
             content = repo.get_contents(gradle_file.path).decoded_content.decode('utf-8')
-            java_version = parse_gradle_file(content)
+            java_version, spring_boot_version = parse_gradle_file(content)
             if java_version != 'N/A':
                 java_versions.append(java_version)
-        return dependencies, java_versions
+            if spring_boot_version != 'N/A':
+                spring_boot_versions.append(spring_boot_version)
+        for package_json_file in package_json_files:
+            content = repo.get_contents(package_json_file.path).decoded_content.decode('utf-8')
+            angular_version, node_version = parse_package_json(content)
+            if angular_version != 'N/A':
+                angular_versions.append(angular_version)
+            if node_version != 'N/A':
+                node_versions.append(node_version)
+        return dependencies, java_versions, spring_boot_versions, angular_versions, node_versions
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
@@ -223,17 +265,6 @@ def search_pcf_references(repo_name):
             return search_pcf_references(repo_name)
         else:
             raise ValueError(f"Error searching PCF references in repository '{repo_name}': {e}")
-
-def get_pcf_migration_recommendations(pcf_references):
-    recommendations = []
-    for reference in pcf_references:
-        recommendations.append({
-            'path': reference['path'],
-            'line_number': reference['line_number'],
-            'line_content': reference['line_content'],
-            'recommendation': f"Replace '{reference['line_content']}' with OCP-specific configuration."
-        })
-    return recommendations
 
 def calculate_complexity(java_files_count, dependencies_count, config_files_count, pcf_references_count):
     complexity_score = java_files_count + dependencies_count + config_files_count + pcf_references_count
@@ -326,7 +357,8 @@ def generate_html_report(repo_reports, summary_report, filename):
                 XLSX.writeFile(wb, '{filename.replace('.html', '.xlsx')}');
             }}
             function sanitizeSheetTitle(title) {{
-                return title.replace(/[\\\\/:*?\\[\\]]/g, '').substring(0, 31);
+                var invalidChars = /[\\\\/:*?\\[\\]]/g;
+                return title.replace(invalidChars, '').substring(0, 31);
             }}
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.6/xlsx.full.min.js"></script>
@@ -360,7 +392,7 @@ def generate_report_for_repo(repo, include_estimates):
         file_details = get_file_details(repo_name, [])
         
         print("Fetching dependencies and versions...")
-        dependencies, java_versions = get_dependencies_and_versions(repo_name)
+        dependencies, java_versions, spring_boot_versions, angular_versions, node_versions = get_dependencies_and_versions(repo_name)
         
         print("Fetching configuration files...")
         config_files = get_files_recursively(repo, '', [".properties", ".yml", ".json"])
@@ -401,7 +433,7 @@ def generate_report_for_repo(repo, include_estimates):
         html_content = generate_html_content(
             repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, 
             security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, 
-            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, complexity, include_estimates
+            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, spring_boot_versions, angular_versions, node_versions, complexity, include_estimates
         )
         
         report = {
@@ -414,6 +446,9 @@ def generate_report_for_repo(repo, include_estimates):
             "deployment_manifests": deployment_manifests,
             "dependencies": dependencies,
             "java_versions": java_versions,
+            "spring_boot_versions": spring_boot_versions,
+            "angular_versions": angular_versions,
+            "node_versions": node_versions,
             "complexity": complexity
         }
         
@@ -423,7 +458,7 @@ def generate_report_for_repo(repo, include_estimates):
         print(f"Error generating report for repository '{repo.full_name}': {e}")
         return None
 
-def generate_html_content(repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, complexity, include_estimates):
+def generate_html_content(repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, spring_boot_versions, angular_versions, node_versions, complexity, include_estimates):
     html_content = f"""
         <h1>Migration Report for {repo_name}</h1>
         <p><strong>Generated on:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
@@ -456,6 +491,9 @@ def generate_html_content(repo_name, repo_info, java_files_count, file_details, 
             <tr><th>Deployment Manifests</th><td>{len(deployment_manifests)}</td></tr>
             <tr><th>Dependencies</th><td>{len(dependencies)}</td></tr>
             <tr><th>Java Versions</th><td>{', '.join(set(java_versions))}</td></tr>
+            <tr><th>Spring Boot Versions</th><td>{', '.join(set(spring_boot_versions))}</td></tr>
+            <tr><th>Angular Versions</th><td>{', '.join(set(angular_versions))}</td></tr>
+            <tr><th>Node Versions</th><td>{', '.join(set(node_versions))}</td></tr>
             <tr><th>Complexity</th><td>{complexity}</td></tr>
     """
     
@@ -555,6 +593,45 @@ def generate_html_content(repo_name, repo_info, java_files_count, file_details, 
         </table>
         """
     
+    # Add Spring Boot Versions section if not empty
+    if spring_boot_versions:
+        html_content += """
+        <h2>Spring Boot Versions</h2>
+        <table>
+            <tr><th>Version</th></tr>
+        """
+        for version in spring_boot_versions:
+            html_content += f"<tr><td>{version}</td></tr>"
+        html_content += """
+        </table>
+        """
+    
+    # Add Angular Versions section if not empty
+    if angular_versions:
+        html_content += """
+        <h2>Angular Versions</h2>
+        <table>
+            <tr><th>Version</th></tr>
+        """
+        for version in angular_versions:
+            html_content += f"<tr><td>{version}</td></tr>"
+        html_content += """
+        </table>
+        """
+    
+    # Add Node Versions section if not empty
+    if node_versions:
+        html_content += """
+        <h2>Node Versions</h2>
+        <table>
+            <tr><th>Version</th></tr>
+        """
+        for version in node_versions:
+            html_content += f"<tr><td>{version}</td></tr>"
+        html_content += """
+        </table>
+        """
+    
     return html_content
 
 def generate_summary_report(repo_reports):
@@ -572,6 +649,9 @@ def generate_summary_report(repo_reports):
                 <th>Deployment Manifests</th>
                 <th>Dependencies</th>
                 <th>Java Versions</th>
+                <th>Spring Boot Versions</th>
+                <th>Angular Versions</th>
+                <th>Node Versions</th>
                 <th>Complexity</th>
             </tr>
     """
@@ -586,6 +666,9 @@ def generate_summary_report(repo_reports):
                 <td>{len(report["deployment_manifests"])}</td>
                 <td>{len(report["dependencies"])}</td>
                 <td>{', '.join(set(report["java_versions"]))}</td>
+                <td>{', '.join(set(report["spring_boot_versions"]))}</td>
+                <td>{', '.join(set(report["angular_versions"]))}</td>
+                <td>{', '.join(set(report["node_versions"]))}</td>
                 <td>{report["complexity"]}</td>
             </tr>
         """
