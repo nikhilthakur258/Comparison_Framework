@@ -4,12 +4,24 @@ from github import Github, GithubException
 from datetime import datetime
 import time
 import xml.etree.ElementTree as ET
+import json
 
 # Set up GitHub API access
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Ensure this is set as an environment variable
-if not GITHUB_TOKEN:
-    raise ValueError("Please set your GITHUB_TOKEN environment variable.")
-g = Github(GITHUB_TOKEN)
+GITHUB_TOKENS = os.getenv('GITHUB_TOKENS')  # Ensure this is set as an environment variable
+if not GITHUB_TOKENS:
+    raise ValueError("Please set your GITHUB_TOKENS environment variable.")
+tokens = GITHUB_TOKENS.split(',')
+token_index = 0
+g = Github(tokens[token_index])
+
+# Checkpoint file to save progress
+CHECKPOINT_FILE = 'checkpoint.json'
+
+def switch_token():
+    global token_index, g
+    token_index = (token_index + 1) % len(tokens)
+    g = Github(tokens[token_index])
+    print(f"Switched to token {token_index + 1}")
 
 def check_rate_limit():
     rate_limit = g.get_rate_limit()
@@ -51,7 +63,7 @@ def get_repo_info(repo_name):
         return info
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
-            wait_for_rate_limit_reset()
+            switch_token()
             return get_repo_info(repo_name)
         else:
             raise ValueError(f"Error fetching repository '{repo_name}': {e}")
@@ -81,7 +93,7 @@ def count_files(repo_name, extensions):
         return len(files), total_lines
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
-            wait_for_rate_limit_reset()
+            switch_token()
             return count_files(repo_name, extensions)
         else:
             raise ValueError(f"Error counting files in repository '{repo_name}': {e}")
@@ -104,7 +116,7 @@ def get_file_details(repo_name, extensions):
         return file_details
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
-            wait_for_rate_limit_reset()
+            switch_token()
             return get_file_details(repo_name, extensions)
         else:
             raise ValueError(f"Error fetching file details from repository '{repo_name}': {e}")
@@ -243,7 +255,7 @@ def get_dependencies_and_versions(repo_name):
         return dependencies, java_versions, spring_boot_versions, angular_versions, node_versions, build_tool, group_id, artifact_id, version, name, parent_group_id, parent_artifact_id, parent_version, parent_name
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
-            wait_for_rate_limit_reset()
+            switch_token()
             return get_dependencies_and_versions(repo_name)
         else:
             raise ValueError(f"Error fetching dependencies from repository '{repo_name}': {e}")
@@ -267,7 +279,7 @@ def analyze_manifest_files(repo_name):
         return manifest_details
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
-            wait_for_rate_limit_reset()
+            switch_token()
             return analyze_manifest_files(repo_name)
         else:
             raise ValueError(f"Error fetching manifest files from repository '{repo_name}': {e}")
@@ -295,7 +307,7 @@ def search_pcf_references(repo_name):
         return pcf_references
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
-            wait_for_rate_limit_reset()
+            switch_token()
             return search_pcf_references(repo_name)
         else:
             raise ValueError(f"Error searching PCF references in repository '{repo_name}': {e}")
@@ -738,6 +750,21 @@ def generate_summary_report(repo_reports):
     summary_content += "</table>"
     return summary_content
 
+def save_checkpoint(username, repo_reports):
+    checkpoint_data = {
+        "username": username,
+        "repo_reports": repo_reports
+    }
+    with open(CHECKPOINT_FILE, 'w') as f:
+        json.dump(checkpoint_data, f)
+
+def load_checkpoint():
+    if os.path.exists(CHECKPOINT_FILE):
+        with open(CHECKPOINT_FILE, 'r') as f:
+            checkpoint_data = json.load(f)
+            return checkpoint_data["username"], checkpoint_data["repo_reports"]
+    return None, []
+
 def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description='Generate migration report for GitHub repositories.')
@@ -749,11 +776,14 @@ def main():
     include_estimates = args.includeestimates == 'Yes'
     
     try:
-        repo_reports = []
-        username = None
-        if '/' in repo_name_or_user:
+        # Load checkpoint
+        username, repo_reports = load_checkpoint()
+        if username is None:
+            username = repo_name_or_user
+
+        if '/' in username:
             # Single repository
-            repo_name = repo_name_or_user
+            repo_name = username
             print(f"Gathering repository information for {repo_name}...")
             repo = g.get_repo(repo_name)
             report = generate_report_for_repo(repo, include_estimates)
@@ -761,7 +791,6 @@ def main():
                 repo_reports.append(report)
         else:
             # User's all repositories
-            username = repo_name_or_user
             print(f"Gathering repositories for user {username}...")
             user = g.get_user(username)
             for repo in user.get_repos():
@@ -769,9 +798,11 @@ def main():
                     report = generate_report_for_repo(repo, include_estimates)
                     if report:
                         repo_reports.append(report)
+                    # Save checkpoint after each repository
+                    save_checkpoint(username, repo_reports)
                     # Update HTML report after each repository
                     summary_report = generate_summary_report(repo_reports)
-                    html_filename = f"{username}_analysis.html"
+                    html_filename = f"{username.replace('/', '_')}_analysis.html"
                     generate_html_report(repo_reports, summary_report, html_filename)
                 except GithubException as e:
                     if e.status == 403:
@@ -783,7 +814,7 @@ def main():
         summary_report = generate_summary_report(repo_reports)
         
         # Generate HTML report with tabs
-        html_filename = f"{username}_analysis.html" if username else f"{repo_name.replace('/', '_')}_analysis.html"
+        html_filename = f"{username.replace('/', '_')}_analysis.html" if username else f"{repo_name.replace('/', '_')}_analysis.html"
         generate_html_report(repo_reports, summary_report, html_filename)
         print(f"Report generated: {html_filename}")
     
