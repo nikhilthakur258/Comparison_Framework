@@ -113,8 +113,13 @@ def parse_pom_xml(content):
     root = ET.fromstring(content)
     namespaces = {'maven': 'http://maven.apache.org/POM/4.0.0'}
     dependencies = []
+    properties = {}
     java_version = 'N/A'
     spring_boot_version = 'N/A'
+    
+    for prop in root.findall('.//maven:properties/*', namespaces):
+        properties[prop.tag.split('}', 1)[1]] = prop.text
+    
     for dependency in root.findall('.//maven:dependency', namespaces):
         group_id_element = dependency.find('maven:groupId', namespaces)
         artifact_id_element = dependency.find('maven:artifactId', namespaces)
@@ -123,6 +128,10 @@ def parse_pom_xml(content):
         group_id = group_id_element.text if group_id_element is not None else 'N/A'
         artifact_id = artifact_id_element.text if artifact_id_element is not None else 'N/A'
         version = version_element.text if version_element is not None else 'N/A'
+        
+        if version.startswith('${') and version.endswith('}'):
+            prop_name = version[2:-1]
+            version = properties.get(prop_name, 'N/A')
         
         dependencies.append({
             'group_id': group_id,
