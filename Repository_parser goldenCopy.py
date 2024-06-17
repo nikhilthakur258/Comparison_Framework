@@ -4,6 +4,7 @@ from github import Github, GithubException
 from datetime import datetime
 import time
 import xml.etree.ElementTree as ET
+import json
 
 # Set up GitHub API access
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Ensure this is set as an environment variable
@@ -27,10 +28,8 @@ def wait_for_rate_limit_reset():
         print(f"Rate limit exceeded. Waiting for {wait_time} seconds before retrying...")
         time.sleep(wait_time)
 
-def get_repo_info(repo_name):
-    wait_for_rate_limit_reset()
+def get_repo_info(repo):
     try:
-        repo = g.get_repo(repo_name)
         info = {
             'name': repo.name,
             'description': repo.description,
@@ -52,18 +51,19 @@ def get_repo_info(repo_name):
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return get_repo_info(repo_name)
+            return get_repo_info(repo)
         else:
-            raise ValueError(f"Error fetching repository '{repo_name}': {e}")
+            raise ValueError(f"Error fetching repository '{repo.name}': {e}")
 
 def get_files_recursively(repo, path='', extensions=None):
     if extensions is None:
         extensions = []
     result_files = []
     contents = repo.get_contents(path)
-    for content in contents:
+    while contents:
+        content = contents.pop(0)
         if content.type == 'dir':
-            result_files.extend(get_files_recursively(repo, content.path, extensions))
+            contents.extend(repo.get_contents(content.path))
         else:
             if any(content.name.endswith(ext) for ext in extensions):
                 result_files.append(content)
@@ -71,41 +71,43 @@ def get_files_recursively(repo, path='', extensions=None):
                 result_files.append(content)
     return result_files
 
-def count_java_files(repo_name):
-    wait_for_rate_limit_reset()
+def count_java_files(repo):
     try:
-        repo = g.get_repo(repo_name)
         java_files = get_files_recursively(repo, '', ['.java'])
         return len(java_files)
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return count_java_files(repo_name)
+            return count_java_files(repo)
         else:
-            raise ValueError(f"Error counting Java files in repository '{repo_name}': {e}")
+            raise ValueError(f"Error counting Java files in repository '{repo.name}': {e}")
 
-def get_file_details(repo_name, extensions):
-    wait_for_rate_limit_reset()
+def get_file_details(repo, extensions):
     try:
-        repo = g.get_repo(repo_name)
         files = get_files_recursively(repo, '', extensions)
         file_details = []
         for file in files:
-            content = file.decoded_content.decode('utf-8', errors='ignore')
-            lines = content.count('\n') + 1 if content else 0
+            try:
+                lines_of_code = file.decoded_content.decode('utf-8', errors='ignore').count('\n') + 1
+            except (UnicodeDecodeError, AttributeError):
+                try:
+                    lines_of_code = file.decoded_content.decode('latin-1', errors='ignore').count('\n') + 1
+                except Exception as e:
+                    print(f"Error decoding file {file.path}: {e}")
+                    lines_of_code = 0
             file_details.append({
                 'name': file.name,
                 'path': file.path,
                 'size': file.size,
-                'lines_of_code': lines,
+                'lines_of_code': lines_of_code
             })
         return file_details
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return get_file_details(repo_name, extensions)
+            return get_file_details(repo, extensions)
         else:
-            raise ValueError(f"Error fetching file details from repository '{repo_name}': {e}")
+            raise ValueError(f"Error fetching file details from repository '{repo.name}': {e}")
 
 def parse_pom_xml(content):
     root = ET.fromstring(content)
@@ -140,18 +142,25 @@ def parse_gradle_file(content):
     for line in lines:
         if 'sourceCompatibility' in line or 'targetCompatibility' in line:
             parts = line.split()
-            if len(parts) == 2:
-                java_version = parts[1].replace("'", "").replace("\"", "")
+            if len(parts) >= 2:
+                java_version = parts[-1].replace("'", "").replace("\"", "")
     return java_version
 
-def get_dependencies_and_versions(repo_name):
-    wait_for_rate_limit_reset()
+def parse_package_json(content):
+    package_info = json.loads(content)
+    dependencies = package_info.get('dependencies', {})
+    dev_dependencies = package_info.get('devDependencies', {})
+    return dependencies, dev_dependencies
+
+def get_dependencies_and_versions(repo):
     try:
-        repo = g.get_repo(repo_name)
-        pom_files = get_files_recursively(repo, '', ['pom.xml'])
+        pom_files = get_files_recursively(repo, '', ['pom.xml', 'pom_*.xml'])
         gradle_files = get_files_recursively(repo, '', ['build.gradle'])
+        package_json_files = get_files_recursively(repo, '', ['package.json'])
         dependencies = []
         java_versions = []
+        node_versions = []
+        angular_versions = []
         for pom_file in pom_files:
             content = repo.get_contents(pom_file.path).decoded_content.decode('utf-8')
             deps, java_version = parse_pom_xml(content)
@@ -163,22 +172,36 @@ def get_dependencies_and_versions(repo_name):
             java_version = parse_gradle_file(content)
             if java_version != 'N/A':
                 java_versions.append(java_version)
-        return dependencies, java_versions
+        for package_json_file in package_json_files:
+            content = repo.get_contents(package_json_file.path).decoded_content.decode('utf-8')
+            deps, dev_deps = parse_package_json(content)
+            if '@angular/core' in deps:
+                angular_versions.append(deps['@angular/core'])
+            if 'node' in deps:
+                node_versions.append(deps['node'])
+            elif 'node' in dev_deps:
+                node_versions.append(dev_deps['node'])
+        return dependencies, java_versions, angular_versions, node_versions
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return get_dependencies_and_versions(repo_name)
+            return get_dependencies_and_versions(repo)
         else:
-            raise ValueError(f"Error fetching dependencies from repository '{repo_name}': {e}")
+            raise ValueError(f"Error fetching dependencies from repository '{repo.name}': {e}")
 
-def analyze_manifest_files(repo_name):
-    wait_for_rate_limit_reset()
+def analyze_manifest_files(repo):
     try:
-        repo = g.get_repo(repo_name)
         manifest_files = get_files_recursively(repo, '', ['manifest.yml'])
         manifest_details = []
         for manifest_file in manifest_files:
-            content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
+            try:
+                content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
+            except (UnicodeDecodeError, AttributeError):
+                try:
+                    content = repo.get_contents(manifest_file.path).decoded_content.decode('latin-1', errors='ignore')
+                except Exception as e:
+                    print(f"Error decoding manifest file {manifest_file.path}: {e}")
+                    content = ""
             lines = content.count('\n') + 1 if content else 0
             manifest_details.append({
                 'name': manifest_file.name,
@@ -191,22 +214,26 @@ def analyze_manifest_files(repo_name):
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return analyze_manifest_files(repo_name)
+            return analyze_manifest_files(repo)
         else:
-            raise ValueError(f"Error fetching manifest files from repository '{repo_name}': {e}")
+            raise ValueError(f"Error fetching manifest files from repository '{repo.name}': {e}")
 
-def search_pcf_references(repo_name):
-    wait_for_rate_limit_reset()
+def search_pcf_references(repo):
     try:
-        repo = g.get_repo(repo_name)
         files = get_files_recursively(repo, '')  # Fetch all files
         pcf_references = []
         for file in files:
-            content = repo.get_contents(file.path).decoded_content.decode('utf-8', errors='ignore').lower()
+            try:
+                content = repo.get_contents(file.path).decoded_content.decode('utf-8', errors='ignore').lower()
+            except (UnicodeDecodeError, AttributeError):
+                try:
+                    content = repo.get_contents(file.path).decoded_content.decode('latin-1', errors='ignore').lower()
+                except Exception as e:
+                    print(f"Error decoding file {file.path}: {e}")
+                    content = ""
             lines = content.split('\n')
             for line_number, line in enumerate(lines, start=1):
                 if 'pcf' in line or 'cloudfoundry' in line:
-                    print(f"Found PCF reference in file: {file.path}, line: {line_number}")  # Debug log
                     pcf_references.append({
                         'name': file.name,
                         'path': file.path,
@@ -219,20 +246,9 @@ def search_pcf_references(repo_name):
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return search_pcf_references(repo_name)
+            return search_pcf_references(repo)
         else:
-            raise ValueError(f"Error searching PCF references in repository '{repo_name}': {e}")
-
-def get_pcf_migration_recommendations(pcf_references):
-    recommendations = []
-    for reference in pcf_references:
-        recommendations.append({
-            'path': reference['path'],
-            'line_number': reference['line_number'],
-            'line_content': reference['line_content'],
-            'recommendation': f"Replace '{reference['line_content']}' with OCP-specific configuration."
-        })
-    return recommendations
+            raise ValueError(f"Error searching PCF references in repository '{repo.name}': {e}")
 
 def calculate_complexity(java_files_count, dependencies_count, config_files_count, pcf_references_count):
     complexity_score = java_files_count + dependencies_count + config_files_count + pcf_references_count
@@ -244,23 +260,29 @@ def calculate_complexity(java_files_count, dependencies_count, config_files_coun
     else:
         return "High"
 
-def estimate_migration_time(complexity):
-    if complexity == "Low":
-        dev_days = 5
-        qa_days = 3
-    elif complexity == "Medium":
-        dev_days = 10
-        qa_days = 5
-    else:
-        dev_days = 20
-        qa_days = 10
-    return dev_days, qa_days
+def sanitize_sheet_title(title):
+    invalid_chars = ['\\', '/', '*', '[', ']', ':', '?']
+    for char in invalid_chars:
+        title = title.replace(char, '')
+    return title[:31]
 
-def generate_html_report(repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, pcf_recommendations, complexity, dev_days, qa_days, include_estimates):
+def generate_html_report(repo_reports, summary_report, filename):
+    tabs = ""
+    contents = ""
+    
+    for index, report in enumerate(repo_reports):
+        tab_id = sanitize_sheet_title(report["repo_name"] + str(index))
+        tabs += f'<button class="tablinks" onclick="openTab(event, \'{tab_id}\')">{report["repo_name"][:30]}</button>'
+        contents += f'<div id="{tab_id}" class="tabcontent">{report["html_content"]}</div>'
+    
+    summary_id = "summary"
+    tabs = f'<button class="tablinks" onclick="openTab(event, \'{summary_id}\')">Summary</button>' + tabs
+    contents = f'<div id="{summary_id}" class="tabcontent">{summary_report}</div>' + contents
+    
     html_content = f"""
     <html>
     <head>
-        <title>GitHub Repository Migration Report</title>
+        <title>GitHub Repositories Migration Report</title>
         <style>
             body {{ font-family: Arial, sans-serif; }}
             h1 {{ color: #333; }}
@@ -268,9 +290,167 @@ def generate_html_report(repo_name, repo_info, java_files_count, file_details, d
             table {{ border-collapse: collapse; width: 100%; }}
             th, td {{ border: 1px solid #dddddd; text-align: left; padding: 8px; }}
             th {{ background-color: #f2f2f2; }}
+            .tab {{ overflow: hidden; border: 1px solid #ccc; background-color: #f1f1f1; }}
+            .tab button {{ background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; font-size: 17px; }}
+            .tab button:hover {{ background-color: #ddd; }}
+            .tab button.active {{ background-color: #ccc; }}
+            .tabcontent {{ display: none; padding: 6px 12px; border-top: none; border-left: 1px solid #ccc; border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; }}
         </style>
+        <script>
+            function openTab(evt, tabName) {{
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {{
+                    tabcontent[i].style.display = "none";
+                }}
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {{
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }}
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }}
+            function downloadExcel() {{
+                var wb = XLSX.utils.book_new();
+                var summary = document.querySelector('#summary');
+                if (summary) {{
+                    var summaryWS = XLSX.utils.table_to_sheet(summary);
+                    XLSX.utils.book_append_sheet(wb, summaryWS, 'Summary');
+                }}
+                
+                var tabs = document.getElementsByClassName('tabcontent');
+                for (var i = 0; i < tabs.length; i++) {{
+                    var tabName = tabs[i].id;
+                    if (tabName !== 'summary') {{
+                        var tables = tabs[i].getElementsByTagName('table');
+                        if (tables.length > 0) {{
+                            var ws_data = [];
+                            for (var j = 0; j < tables.length; j++) {{
+                                ws_data.push([]);
+                                var rows = tables[j].getElementsByTagName('tr');
+                                for (var k = 0; k < rows.length; k++) {{
+                                    var cells = rows[k].getElementsByTagName('th');
+                                    if (cells.length === 0) {{
+                                        cells = rows[k].getElementsByTagName('td');
+                                    }}
+                                    var row_data = [];
+                                    for (var l = 0; l < cells.length; l++) {{
+                                        row_data.push(cells[l].innerText);
+                                    }}
+                                    ws_data.push(row_data);
+                                }}
+                                ws_data.push([]);  // Add an empty row to separate tables
+                            }}
+                            var ws = XLSX.utils.aoa_to_sheet(ws_data);
+                            XLSX.utils.book_append_sheet(wb, ws, sanitizeSheetTitle(tabName));
+                        }}
+                    }}
+                }}
+                
+                XLSX.writeFile(wb, '{filename.replace('.html', '.xlsx')}');
+            }}
+            function sanitizeSheetTitle(title) {{
+                return title.replace(/[\\\\/:*?\\[\\]]/g, '').substring(0, 31);
+            }}
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.6/xlsx.full.min.js"></script>
     </head>
     <body>
+        <button onclick="downloadExcel()">Download as Excel</button>
+        <div class="tab">
+            """ + tabs + """
+        </div>
+        """ + contents + """
+        <script>
+            document.getElementsByClassName("tablinks")[0].click();
+        </script>
+    </body>
+    </html>
+    """
+    
+    with open(filename, "w", encoding='utf-8') as file:
+        file.write(html_content)
+
+def generate_report_for_repo(repo, include_estimates):
+    try:
+        repo_name = repo.full_name
+        print(f"Generating report for repository {repo_name}...")
+        repo_info = get_repo_info(repo)
+        
+        print("Counting Java files...")
+        java_files_count = count_java_files(repo)
+        
+        print("Fetching file details...")
+        file_details = get_file_details(repo, [])
+        
+        print("Fetching dependencies and versions...")
+        dependencies, java_versions, angular_versions, node_versions = get_dependencies_and_versions(repo)
+        
+        print("Fetching configuration files...")
+        config_files = get_files_recursively(repo, '', [".properties", ".yml", ".json"])
+        
+        print("Fetching deployment manifests...")
+        deployment_manifests = get_files_recursively(repo, '', [".yml", ".yaml", "manifest.yml", "Dockerfile"])
+        
+        print("Fetching security settings...")
+        security_settings = get_files_recursively(repo, '', [".yml"])
+        
+        print("Fetching volume mounts...")
+        volume_mounts = get_files_recursively(repo, '', [".yml"])
+        
+        print("Fetching logging and monitoring configurations...")
+        logging_monitoring = get_files_recursively(repo, '', [".yml"])
+        
+        print("Fetching CI/CD pipelines...")
+        ci_cd_pipelines = get_files_recursively(repo, '', [".gitlab-ci.yml", "Jenkinsfile"])
+        
+        print("Fetching scaling policies...")
+        scaling_policies = get_files_recursively(repo, '', [".yml"])
+        
+        print("Fetching compliance requirements...")
+        compliance_requirements = get_files_recursively(repo, '', [".yml"])
+        
+        print("Fetching documentation...")
+        documentation = get_files_recursively(repo, '', [".md"])
+        
+        print("Analyzing manifest files...")
+        manifest_details = analyze_manifest_files(repo)
+        
+        print("Searching for PCF references...")
+        pcf_references = search_pcf_references(repo)
+        
+        print("Calculating complexity and estimates...")
+        complexity = calculate_complexity(java_files_count, len(dependencies), len(config_files), len(pcf_references))
+        
+        html_content = generate_html_content(
+            repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, 
+            security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, 
+            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, angular_versions, node_versions, complexity, include_estimates
+        )
+        
+        report = {
+            "repo_name": repo_name,
+            "html_content": html_content,
+            "file_details": file_details,
+            "java_files_count": java_files_count,
+            "pcf_references": pcf_references,
+            "config_files": config_files,
+            "deployment_manifests": deployment_manifests,
+            "dependencies": dependencies,
+            "java_versions": java_versions,
+            "angular_versions": angular_versions,
+            "node_versions": node_versions,
+            "complexity": complexity
+        }
+        
+        return report
+    
+    except Exception as e:
+        print(f"Error generating report for repository '{repo.full_name}': {e}")
+        return None
+
+def generate_html_content(repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, angular_versions, node_versions, complexity, include_estimates):
+    html_content = f"""
         <h1>Migration Report for {repo_name}</h1>
         <p><strong>Generated on:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         
@@ -302,13 +482,10 @@ def generate_html_report(repo_name, repo_info, java_files_count, file_details, d
             <tr><th>Deployment Manifests</th><td>{len(deployment_manifests)}</td></tr>
             <tr><th>Dependencies</th><td>{len(dependencies)}</td></tr>
             <tr><th>Java Versions</th><td>{', '.join(set(java_versions))}</td></tr>
+            <tr><th>Angular Versions</th><td>{', '.join(set(angular_versions))}</td></tr>
+            <tr><th>Node Versions</th><td>{', '.join(set(node_versions))}</td></tr>
             <tr><th>Complexity</th><td>{complexity}</td></tr>
     """
-    if include_estimates:
-        html_content += f"""
-            <tr><th>Development Estimate (days)</th><td>{dev_days}</td></tr>
-            <tr><th>QA Estimate (days)</th><td>{qa_days}</td></tr>
-        """
     
     html_content += """
         </table>
@@ -392,19 +569,6 @@ def generate_html_report(repo_name, repo_info, java_files_count, file_details, d
         html_content += """
         </table>
         """
-
-    # Add PCF Migration Recommendations section if not empty
-    if pcf_recommendations:
-        html_content += """
-        <h2>PCF Migration Recommendations</h2>
-        <table>
-            <tr><th>Path</th><th>Line Number</th><th>Line Content</th><th>Recommendation</th></tr>
-        """
-        for recommendation in pcf_recommendations:
-            html_content += f"<tr><td>{recommendation['path']}</td><td>{recommendation['line_number']}</td><td>{recommendation['line_content']}</td><td>{recommendation['recommendation']}</td></tr>"
-        html_content += """
-        </table>
-        """
     
     # Add Java Versions section if not empty
     if java_versions:
@@ -419,86 +583,121 @@ def generate_html_report(repo_name, repo_info, java_files_count, file_details, d
         </table>
         """
     
-    html_content += """
-    </body>
-    </html>
-    """
+    # Add Angular Versions section if not empty
+    if angular_versions:
+        html_content += """
+        <h2>Angular Versions</h2>
+        <table>
+            <tr><th>Version</th></tr>
+        """
+        for version in angular_versions:
+            html_content += f"<tr><td>{version}</td></tr>"
+        html_content += """
+        </table>
+        """
     
-    with open(f"{repo_name.replace('/', '_')}_analysis.html", "w", encoding='utf-8') as file:
-        file.write(html_content)
+    # Add Node Versions section if not empty
+    if node_versions:
+        html_content += """
+        <h2>Node Versions</h2>
+        <table>
+            <tr><th>Version</th></tr>
+        """
+        for version in node_versions:
+            html_content += f"<tr><td>{version}</td></tr>"
+        html_content += """
+        </table>
+        """
+    
+    return html_content
+
+def generate_summary_report(repo_reports):
+    summary_content = f"""
+        <h1>Overall Summary Report</h1>
+        <p><strong>Generated on:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        <h2>Summary of Repositories</h2>
+        <table>
+            <tr>
+                <th>Repository Name</th>
+                <th>Total Files</th>
+                <th>Java Files</th>
+                <th>PCF References</th>
+                <th>Configuration Files</th>
+                <th>Deployment Manifests</th>
+                <th>Dependencies</th>
+                <th>Java Versions</th>
+                <th>Angular Versions</th>
+                <th>Node Versions</th>
+                <th>Complexity</th>
+            </tr>
+    """
+    for report in repo_reports:
+        summary_content += f"""
+            <tr>
+                <td>{report["repo_name"]}</td>
+                <td>{len(report["file_details"])}</td>
+                <td>{report["java_files_count"]}</td>
+                <td>{len(report["pcf_references"])}</td>
+                <td>{len(report["config_files"])}</td>
+                <td>{len(report["deployment_manifests"])}</td>
+                <td>{len(report["dependencies"])}</td>
+                <td>{', '.join(set(report["java_versions"]))}</td>
+                <td>{', '.join(set(report["angular_versions"]))}</td>
+                <td>{', '.join(set(report["node_versions"]))}</td>
+                <td>{report["complexity"]}</td>
+            </tr>
+        """
+    summary_content += "</table>"
+    return summary_content
 
 def main():
     # Set up argument parser
-    parser = argparse.ArgumentParser(description='Generate migration report for a GitHub repository.')
-    parser.add_argument('repository', help='GitHub repository name (e.g., username/repo)')
+    parser = argparse.ArgumentParser(description='Generate migration report for GitHub repositories.')
+    parser.add_argument('repository', help='GitHub repository name (e.g., username/repo) or username to analyze all repositories')
     parser.add_argument('--includeestimates', help='Include Dev and QA effort estimates in the report', choices=['Yes', 'No'], default='No')
     args = parser.parse_args()
     
-    repo_name = args.repository
+    repo_name_or_user = args.repository
     include_estimates = args.includeestimates == 'Yes'
     
     try:
-        print(f"Gathering repository information for {repo_name}...")
-        repo_info = get_repo_info(repo_name)
+        repo_reports = []
+        username = None
+        if '/' in repo_name_or_user:
+            # Single repository
+            repo_name = repo_name_or_user
+            print(f"Gathering repository information for {repo_name}...")
+            repo = g.get_repo(repo_name)
+            report = generate_report_for_repo(repo, include_estimates)
+            if report:
+                repo_reports.append(report)
+        else:
+            # User's all repositories
+            username = repo_name_or_user
+            print(f"Gathering repositories for user {username}...")
+            user = g.get_user(username)
+            for repo in user.get_repos():
+                try:
+                    report = generate_report_for_repo(repo, include_estimates)
+                    if report:
+                        repo_reports.append(report)
+                    # Update HTML report after each repository
+                    summary_report = generate_summary_report(repo_reports)
+                    html_filename = f"{username}_analysis.html"
+                    generate_html_report(repo_reports, summary_report, html_filename)
+                except GithubException as e:
+                    if e.status == 403:
+                        print(f"Access denied for repository {repo.full_name}, skipping...")
+                    else:
+                        raise e
         
-        repo = g.get_repo(repo_name)
+        # Generate overall summary report
+        summary_report = generate_summary_report(repo_reports)
         
-        print("Counting Java files...")
-        java_files_count = count_java_files(repo_name)
-        
-        print("Fetching file details...")
-        file_details = get_file_details(repo_name, [])
-        
-        print("Fetching dependencies and Java versions...")
-        dependencies, java_versions = get_dependencies_and_versions(repo_name)
-        
-        print("Fetching configuration files...")
-        config_files = get_files_recursively(repo, '', [".properties", ".yml", ".json"])
-        
-        print("Fetching deployment manifests...")
-        deployment_manifests = get_files_recursively(repo, '', [".yml", ".yaml", "manifest.yml", "Dockerfile"])
-        
-        print("Fetching security settings...")
-        security_settings = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching volume mounts...")
-        volume_mounts = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching logging and monitoring configurations...")
-        logging_monitoring = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching CI/CD pipelines...")
-        ci_cd_pipelines = get_files_recursively(repo, '', [".gitlab-ci.yml", "Jenkinsfile"])
-        
-        print("Fetching scaling policies...")
-        scaling_policies = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching compliance requirements...")
-        compliance_requirements = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching documentation...")
-        documentation = get_files_recursively(repo, '', [".md"])
-        
-        print("Analyzing manifest files...")
-        manifest_details = analyze_manifest_files(repo_name)
-        
-        print("Searching for PCF references...")
-        pcf_references = search_pcf_references(repo_name)
-        
-        print("Generating PCF migration recommendations...")
-        pcf_recommendations = get_pcf_migration_recommendations(pcf_references)
-        
-        print("Calculating complexity and estimates...")
-        complexity = calculate_complexity(java_files_count, len(dependencies), len(config_files), len(pcf_references))
-        dev_days, qa_days = estimate_migration_time(complexity)
-        
-        print("Generating HTML report...")
-        generate_html_report(
-            repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, 
-            security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, 
-            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, pcf_recommendations, complexity, dev_days, qa_days, include_estimates
-        )
-        print(f"Report generated: {repo_name.replace('/', '_')}_analysis.html")
+        # Generate HTML report with tabs
+        html_filename = f"{username}_analysis.html" if username else f"{repo_name.replace('/', '_')}_analysis.html"
+        generate_html_report(repo_reports, summary_report, html_filename)
+        print(f"Report generated: {html_filename}")
     
     except Exception as e:
         print(f"Error: {e}")
