@@ -4,7 +4,6 @@ from github import Github, GithubException
 from datetime import datetime
 import time
 import xml.etree.ElementTree as ET
-import json
 
 # Set up GitHub API access
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Ensure this is set as an environment variable
@@ -28,8 +27,10 @@ def wait_for_rate_limit_reset():
         print(f"Rate limit exceeded. Waiting for {wait_time} seconds before retrying...")
         time.sleep(wait_time)
 
-def get_repo_info(repo):
+def get_repo_info(repo_name):
+    wait_for_rate_limit_reset()
     try:
+        repo = g.get_repo(repo_name)
         info = {
             'name': repo.name,
             'description': repo.description,
@@ -51,9 +52,9 @@ def get_repo_info(repo):
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return get_repo_info(repo)
+            return get_repo_info(repo_name)
         else:
-            raise ValueError(f"Error fetching repository '{repo.name}': {e}")
+            raise ValueError(f"Error fetching repository '{repo_name}': {e}")
 
 def get_files_recursively(repo, path='', extensions=None):
     if extensions is None:
@@ -71,43 +72,41 @@ def get_files_recursively(repo, path='', extensions=None):
                 result_files.append(content)
     return result_files
 
-def count_java_files(repo):
+def count_java_files(repo_name):
+    wait_for_rate_limit_reset()
     try:
+        repo = g.get_repo(repo_name)
         java_files = get_files_recursively(repo, '', ['.java'])
         return len(java_files)
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return count_java_files(repo)
+            return count_java_files(repo_name)
         else:
-            raise ValueError(f"Error counting Java files in repository '{repo.name}': {e}")
+            raise ValueError(f"Error counting Java files in repository '{repo_name}': {e}")
 
-def get_file_details(repo, extensions):
+def get_file_details(repo_name, extensions):
+    wait_for_rate_limit_reset()
     try:
+        repo = g.get_repo(repo_name)
         files = get_files_recursively(repo, '', extensions)
         file_details = []
         for file in files:
-            try:
-                lines_of_code = file.decoded_content.decode('utf-8', errors='ignore').count('\n') + 1
-            except (UnicodeDecodeError, AttributeError):
-                try:
-                    lines_of_code = file.decoded_content.decode('latin-1', errors='ignore').count('\n') + 1
-                except Exception as e:
-                    print(f"Error decoding file {file.path}: {e}")
-                    lines_of_code = 0
+            content = file.decoded_content.decode('utf-8', errors='ignore')
+            lines = content.count('\n') + 1 if content else 0
             file_details.append({
                 'name': file.name,
                 'path': file.path,
                 'size': file.size,
-                'lines_of_code': lines_of_code
+                'lines_of_code': lines,
             })
         return file_details
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return get_file_details(repo, extensions)
+            return get_file_details(repo_name, extensions)
         else:
-            raise ValueError(f"Error fetching file details from repository '{repo.name}': {e}")
+            raise ValueError(f"Error fetching file details from repository '{repo_name}': {e}")
 
 def parse_pom_xml(content):
     root = ET.fromstring(content)
@@ -146,21 +145,14 @@ def parse_gradle_file(content):
                 java_version = parts[-1].replace("'", "").replace("\"", "")
     return java_version
 
-def parse_package_json(content):
-    package_info = json.loads(content)
-    dependencies = package_info.get('dependencies', {})
-    dev_dependencies = package_info.get('devDependencies', {})
-    return dependencies, dev_dependencies
-
-def get_dependencies_and_versions(repo):
+def get_dependencies_and_versions(repo_name):
+    wait_for_rate_limit_reset()
     try:
+        repo = g.get_repo(repo_name)
         pom_files = get_files_recursively(repo, '', ['pom.xml', 'pom_*.xml'])
         gradle_files = get_files_recursively(repo, '', ['build.gradle'])
-        package_json_files = get_files_recursively(repo, '', ['package.json'])
         dependencies = []
         java_versions = []
-        node_versions = []
-        angular_versions = []
         for pom_file in pom_files:
             content = repo.get_contents(pom_file.path).decoded_content.decode('utf-8')
             deps, java_version = parse_pom_xml(content)
@@ -172,36 +164,22 @@ def get_dependencies_and_versions(repo):
             java_version = parse_gradle_file(content)
             if java_version != 'N/A':
                 java_versions.append(java_version)
-        for package_json_file in package_json_files:
-            content = repo.get_contents(package_json_file.path).decoded_content.decode('utf-8')
-            deps, dev_deps = parse_package_json(content)
-            if '@angular/core' in deps:
-                angular_versions.append(deps['@angular/core'])
-            if 'node' in deps:
-                node_versions.append(deps['node'])
-            elif 'node' in dev_deps:
-                node_versions.append(dev_deps['node'])
-        return dependencies, java_versions, angular_versions, node_versions
+        return dependencies, java_versions
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return get_dependencies_and_versions(repo)
+            return get_dependencies_and_versions(repo_name)
         else:
-            raise ValueError(f"Error fetching dependencies from repository '{repo.name}': {e}")
+            raise ValueError(f"Error fetching dependencies from repository '{repo_name}': {e}")
 
-def analyze_manifest_files(repo):
+def analyze_manifest_files(repo_name):
+    wait_for_rate_limit_reset()
     try:
+        repo = g.get_repo(repo_name)
         manifest_files = get_files_recursively(repo, '', ['manifest.yml'])
         manifest_details = []
         for manifest_file in manifest_files:
-            try:
-                content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
-            except (UnicodeDecodeError, AttributeError):
-                try:
-                    content = repo.get_contents(manifest_file.path).decoded_content.decode('latin-1', errors='ignore')
-                except Exception as e:
-                    print(f"Error decoding manifest file {manifest_file.path}: {e}")
-                    content = ""
+            content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
             lines = content.count('\n') + 1 if content else 0
             manifest_details.append({
                 'name': manifest_file.name,
@@ -214,26 +192,22 @@ def analyze_manifest_files(repo):
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return analyze_manifest_files(repo)
+            return analyze_manifest_files(repo_name)
         else:
-            raise ValueError(f"Error fetching manifest files from repository '{repo.name}': {e}")
+            raise ValueError(f"Error fetching manifest files from repository '{repo_name}': {e}")
 
-def search_pcf_references(repo):
+def search_pcf_references(repo_name):
+    wait_for_rate_limit_reset()
     try:
+        repo = g.get_repo(repo_name)
         files = get_files_recursively(repo, '')  # Fetch all files
         pcf_references = []
         for file in files:
-            try:
-                content = repo.get_contents(file.path).decoded_content.decode('utf-8', errors='ignore').lower()
-            except (UnicodeDecodeError, AttributeError):
-                try:
-                    content = repo.get_contents(file.path).decoded_content.decode('latin-1', errors='ignore').lower()
-                except Exception as e:
-                    print(f"Error decoding file {file.path}: {e}")
-                    content = ""
+            content = repo.get_contents(file.path).decoded_content.decode('utf-8', errors='ignore').lower()
             lines = content.split('\n')
             for line_number, line in enumerate(lines, start=1):
                 if 'pcf' in line or 'cloudfoundry' in line:
+                    print(f"Found PCF reference in file: {file.path}, line: {line_number}")  # Debug log
                     pcf_references.append({
                         'name': file.name,
                         'path': file.path,
@@ -246,9 +220,20 @@ def search_pcf_references(repo):
     except GithubException as e:
         if e.status == 403 and 'rate limit exceeded' in str(e):
             wait_for_rate_limit_reset()
-            return search_pcf_references(repo)
+            return search_pcf_references(repo_name)
         else:
-            raise ValueError(f"Error searching PCF references in repository '{repo.name}': {e}")
+            raise ValueError(f"Error searching PCF references in repository '{repo_name}': {e}")
+
+def get_pcf_migration_recommendations(pcf_references):
+    recommendations = []
+    for reference in pcf_references:
+        recommendations.append({
+            'path': reference['path'],
+            'line_number': reference['line_number'],
+            'line_content': reference['line_content'],
+            'recommendation': f"Replace '{reference['line_content']}' with OCP-specific configuration."
+        })
+    return recommendations
 
 def calculate_complexity(java_files_count, dependencies_count, config_files_count, pcf_references_count):
     complexity_score = java_files_count + dependencies_count + config_files_count + pcf_references_count
@@ -312,7 +297,7 @@ def generate_html_report(repo_reports, summary_report, filename):
             }}
             function downloadExcel() {{
                 var wb = XLSX.utils.book_new();
-                var summary = document.querySelector('#summary');
+                var summary = document.querySelector('#summary table');
                 if (summary) {{
                     var summaryWS = XLSX.utils.table_to_sheet(summary);
                     XLSX.utils.book_append_sheet(wb, summaryWS, 'Summary');
@@ -322,28 +307,19 @@ def generate_html_report(repo_reports, summary_report, filename):
                 for (var i = 0; i < tabs.length; i++) {{
                     var tabName = tabs[i].id;
                     if (tabName !== 'summary') {{
-                        var tables = tabs[i].getElementsByTagName('table');
-                        if (tables.length > 0) {{
-                            var ws_data = [];
-                            for (var j = 0; j < tables.length; j++) {{
-                                ws_data.push([]);
-                                var rows = tables[j].getElementsByTagName('tr');
-                                for (var k = 0; k < rows.length; k++) {{
-                                    var cells = rows[k].getElementsByTagName('th');
-                                    if (cells.length === 0) {{
-                                        cells = rows[k].getElementsByTagName('td');
-                                    }}
-                                    var row_data = [];
-                                    for (var l = 0; l < cells.length; l++) {{
-                                        row_data.push(cells[l].innerText);
-                                    }}
-                                    ws_data.push(row_data);
-                                }}
-                                ws_data.push([]);  // Add an empty row to separate tables
-                            }}
-                            var ws = XLSX.utils.aoa_to_sheet(ws_data);
-                            XLSX.utils.book_append_sheet(wb, ws, sanitizeSheetTitle(tabName));
+                        var tabTables = tabs[i].getElementsByTagName('table');
+                        var sheetData = [];
+                        for (var j = 0; j < tabTables.length; j++) {{
+                            var table = tabTables[j];
+                            var sheetTitle = table.previousElementSibling ? table.previousElementSibling.innerText : '';
+                            sheetData.push([sheetTitle]);
+                            var tableData = XLSX.utils.sheet_to_json(XLSX.utils.table_to_sheet(table), {{header:1}});
+                            sheetData = sheetData.concat(tableData);
+                            sheetData.push([]);  // Add a blank line between tables
                         }}
+                        var tabWS = XLSX.utils.aoa_to_sheet(sheetData);
+                        var sheetName = sanitizeSheetTitle(tabName);
+                        XLSX.utils.book_append_sheet(wb, tabWS, sheetName);
                     }}
                 }}
                 
@@ -375,16 +351,16 @@ def generate_report_for_repo(repo, include_estimates):
     try:
         repo_name = repo.full_name
         print(f"Generating report for repository {repo_name}...")
-        repo_info = get_repo_info(repo)
+        repo_info = get_repo_info(repo_name)
         
         print("Counting Java files...")
-        java_files_count = count_java_files(repo)
+        java_files_count = count_java_files(repo_name)
         
         print("Fetching file details...")
-        file_details = get_file_details(repo, [])
+        file_details = get_file_details(repo_name, [])
         
         print("Fetching dependencies and versions...")
-        dependencies, java_versions, angular_versions, node_versions = get_dependencies_and_versions(repo)
+        dependencies, java_versions = get_dependencies_and_versions(repo_name)
         
         print("Fetching configuration files...")
         config_files = get_files_recursively(repo, '', [".properties", ".yml", ".json"])
@@ -414,10 +390,10 @@ def generate_report_for_repo(repo, include_estimates):
         documentation = get_files_recursively(repo, '', [".md"])
         
         print("Analyzing manifest files...")
-        manifest_details = analyze_manifest_files(repo)
+        manifest_details = analyze_manifest_files(repo_name)
         
         print("Searching for PCF references...")
-        pcf_references = search_pcf_references(repo)
+        pcf_references = search_pcf_references(repo_name)
         
         print("Calculating complexity and estimates...")
         complexity = calculate_complexity(java_files_count, len(dependencies), len(config_files), len(pcf_references))
@@ -425,7 +401,7 @@ def generate_report_for_repo(repo, include_estimates):
         html_content = generate_html_content(
             repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, 
             security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, 
-            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, angular_versions, node_versions, complexity, include_estimates
+            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, complexity, include_estimates
         )
         
         report = {
@@ -438,8 +414,6 @@ def generate_report_for_repo(repo, include_estimates):
             "deployment_manifests": deployment_manifests,
             "dependencies": dependencies,
             "java_versions": java_versions,
-            "angular_versions": angular_versions,
-            "node_versions": node_versions,
             "complexity": complexity
         }
         
@@ -449,7 +423,7 @@ def generate_report_for_repo(repo, include_estimates):
         print(f"Error generating report for repository '{repo.full_name}': {e}")
         return None
 
-def generate_html_content(repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, angular_versions, node_versions, complexity, include_estimates):
+def generate_html_content(repo_name, repo_info, java_files_count, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, complexity, include_estimates):
     html_content = f"""
         <h1>Migration Report for {repo_name}</h1>
         <p><strong>Generated on:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
@@ -482,8 +456,6 @@ def generate_html_content(repo_name, repo_info, java_files_count, file_details, 
             <tr><th>Deployment Manifests</th><td>{len(deployment_manifests)}</td></tr>
             <tr><th>Dependencies</th><td>{len(dependencies)}</td></tr>
             <tr><th>Java Versions</th><td>{', '.join(set(java_versions))}</td></tr>
-            <tr><th>Angular Versions</th><td>{', '.join(set(angular_versions))}</td></tr>
-            <tr><th>Node Versions</th><td>{', '.join(set(node_versions))}</td></tr>
             <tr><th>Complexity</th><td>{complexity}</td></tr>
     """
     
@@ -583,32 +555,6 @@ def generate_html_content(repo_name, repo_info, java_files_count, file_details, 
         </table>
         """
     
-    # Add Angular Versions section if not empty
-    if angular_versions:
-        html_content += """
-        <h2>Angular Versions</h2>
-        <table>
-            <tr><th>Version</th></tr>
-        """
-        for version in angular_versions:
-            html_content += f"<tr><td>{version}</td></tr>"
-        html_content += """
-        </table>
-        """
-    
-    # Add Node Versions section if not empty
-    if node_versions:
-        html_content += """
-        <h2>Node Versions</h2>
-        <table>
-            <tr><th>Version</th></tr>
-        """
-        for version in node_versions:
-            html_content += f"<tr><td>{version}</td></tr>"
-        html_content += """
-        </table>
-        """
-    
     return html_content
 
 def generate_summary_report(repo_reports):
@@ -626,8 +572,6 @@ def generate_summary_report(repo_reports):
                 <th>Deployment Manifests</th>
                 <th>Dependencies</th>
                 <th>Java Versions</th>
-                <th>Angular Versions</th>
-                <th>Node Versions</th>
                 <th>Complexity</th>
             </tr>
     """
@@ -642,8 +586,6 @@ def generate_summary_report(repo_reports):
                 <td>{len(report["deployment_manifests"])}</td>
                 <td>{len(report["dependencies"])}</td>
                 <td>{', '.join(set(report["java_versions"]))}</td>
-                <td>{', '.join(set(report["angular_versions"]))}</td>
-                <td>{', '.join(set(report["node_versions"]))}</td>
                 <td>{report["complexity"]}</td>
             </tr>
         """
