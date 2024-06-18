@@ -6,6 +6,8 @@ import time
 import xml.etree.ElementTree as ET
 import json
 
+from github import Github, GithubException
+
 # Set up GitHub API access
 GITHUB_TOKENS = os.getenv('GITHUB_TOKENS')  # Ensure this is set as an environment variable
 if not GITHUB_TOKENS:
@@ -33,40 +35,47 @@ def check_rate_limit():
     return remaining, reset_time
 
 def wait_for_rate_limit_reset():
-    remaining, reset_time = check_rate_limit()
-    if remaining == 0:
-        wait_time = max(reset_time - time.time(), 0) + 10  # Add a buffer time
-        print(f"Rate limit exceeded. Waiting for {wait_time} seconds before retrying...")
-        time.sleep(wait_time)
+    while True:
+        remaining, reset_time = check_rate_limit()
+        if remaining == 0:
+            if token_index == len(tokens) - 1:
+                wait_time = max(reset_time - time.time(), 0) + 10  # Add a buffer time
+                print(f"Rate limit exceeded. Waiting for {wait_time} seconds before retrying...")
+                time.sleep(wait_time)
+                token_index = 0
+            else:
+                switch_token()
+        else:
+            break
 
 def get_repo_info(repo_name):
-    wait_for_rate_limit_reset()
-    try:
-        repo = g.get_repo(repo_name)
-        info = {
-            'name': repo.name,
-            'description': repo.description,
-            'language': repo.language,
-            'topics': repo.get_topics(),
-            'default_branch': repo.default_branch,
-            'size': repo.size,
-            'created_at': repo.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'updated_at': repo.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'subscribers_count': repo.subscribers_count,
-            'stargazers_count': repo.stargazers_count,
-            'watchers_count': repo.watchers_count,
-            'forks_count': repo.forks_count,
-            'open_issues_count': repo.open_issues_count,
-            'license': repo.license.name if repo.license else 'None',
-            'html_url': repo.html_url,
-        }
-        return info
-    except GithubException as e:
-        if e.status == 403 and 'rate limit exceeded' in str(e):
-            switch_token()
-            return get_repo_info(repo_name)
-        else:
-            raise ValueError(f"Error fetching repository '{repo_name}': {e}")
+    while True:
+        try:
+            repo = g.get_repo(repo_name)
+            info = {
+                'name': repo.name,
+                'description': repo.description,
+                'language': repo.language,
+                'topics': repo.get_topics(),
+                'default_branch': repo.default_branch,
+                'size': repo.size,
+                'created_at': repo.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_at': repo.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'subscribers_count': repo.subscribers_count,
+                'stargazers_count': repo.stargazers_count,
+                'watchers_count': repo.watchers_count,
+                'forks_count': repo.forks_count,
+                'open_issues_count': repo.open_issues_count,
+                'license': repo.license.name if repo.license else 'None',
+                'html_url': repo.html_url,
+            }
+            return info
+        except GithubException as e:
+            if e.status == 403 and 'rate limit exceeded' in str(e):
+                wait_for_rate_limit_reset()
+                continue
+            else:
+                raise ValueError(f"Error fetching repository '{repo_name}': {e}")
 
 def get_files_recursively(repo, path='', extensions=None):
     if extensions is None:
@@ -85,18 +94,19 @@ def get_files_recursively(repo, path='', extensions=None):
     return result_files
 
 def count_files(repo_name, extensions):
-    wait_for_rate_limit_reset()
-    try:
-        repo = g.get_repo(repo_name)
-        files = get_files_recursively(repo, '', extensions)
-        total_lines = sum(f.decoded_content.decode('utf-8', errors='ignore').count('\n') + 1 for f in files)
-        return len(files), total_lines
-    except GithubException as e:
-        if e.status == 403 and 'rate limit exceeded' in str(e):
-            switch_token()
-            return count_files(repo_name, extensions)
-        else:
-            raise ValueError(f"Error counting files in repository '{repo_name}': {e}")
+    while True:
+        try:
+            repo = g.get_repo(repo_name)
+            files = get_files_recursively(repo, '', extensions)
+            total_lines = sum(f.decoded_content.decode('utf-8', errors='ignore').count('\n') + 1 for f in files)
+            return len(files), total_lines
+        except GithubException as e:
+            if e.status == 403 and 'rate limit exceeded' in str(e):
+                wait_for_rate_limit_reset()
+                continue
+            else:
+                raise ValueError(f"Error counting files in repository '{repo_name}': {e}")
+
 
 def get_file_details(repo_name, extensions):
     wait_for_rate_limit_reset()
