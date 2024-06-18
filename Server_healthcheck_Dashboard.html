@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Health Check Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        th, td {
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        td {
+            font-size: 14px;
+        }
+        .up {
+            color: green;
+            font-weight: bold;
+        }
+        .down {
+            color: red;
+            font-weight: bold;
+        }
+        .incident-btn {
+            padding: 7px 15px;
+            background-color: #00008B;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .incident-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Server Health Check Dashboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Server Name</th>
+                <th>Operating System</th>
+                <th>CPU Usage</th>
+                <th>Memory Usage</th>
+                <th>Disk Space</th>
+                <th>Network Status</th>
+                <th>Service Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Server1</td>
+                <td>Windows</td>
+                <td>25%</td>
+                <td>45%</td>
+                <td>70%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server2</td>
+                <td>Linux</td>
+                <td>15%</td>
+                <td>50%</td>
+                <td>80%</td>
+                <td class="up">Up</td>
+                <td class="down">Database Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server3</td>
+                <td>Windows</td>
+                <td>30%</td>
+                <td>60%</td>
+                <td>50%</td>
+                <td class="down">Down</td>
+                <td class="down">Web Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server4</td>
+                <td>Linux</td>
+                <td>20%</td>
+                <td>55%</td>
+                <td>65%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server5</td>
+                <td>Windows</td>
+                <td>10%</td>
+                <td>40%</td>
+                <td>60%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server6</td>
+                <td>Linux</td>
+                <td>18%</td>
+                <td>47%</td>
+                <td>73%</td>
+                <td class="up">Up</td>
+                <td class="down">Mail Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server7</td>
+                <td>Windows</td>
+                <td>22%</td>
+                <td>55%</td>
+                <td>68%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server8</td>
+                <td>Linux</td>
+                <td>12%</td>
+                <td>50%</td>
+                <td>75%</td>
+                <td class="up">Up</td>
+                <td class="down">FTP Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server9</td>
+                <td>Windows</td>
+                <td>27%</td>
+                <td>42%</td>
+                <td>55%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server10</td>
+                <td>Linux</td>
+                <td>17%</td>
+                <td>39%</td>
+                <td>80%</td>
+                <td class="down">Down</td>
+                <td class="down">SSH Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server11</td>
+                <td>Windows</td>
+                <td>29%</td>
+                <td>49%</td>
+                <td>62%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server12</td>
+                <td>Linux</td>
+                <td>23%</td>
+                <td>48%</td>
+                <td>66%</td>
+                <td class="up">Up</td>
+                <td class="down">Web Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server13</td>
+                <td>Windows</td>
+                <td>19%</td>
+                <td>36%</td>
+                <td>70%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server14</td>
+                <td>Linux</td>
+                <td>21%</td>
+                <td>41%</td>
+                <td>77%</td>
+                <td class="up">Up</td>
+                <td class="down">Database Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server15</td>
+                <td>Windows</td>
+                <td>14%</td>
+                <td>44%</td>
+                <td>69%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server16</td>
+                <td>Linux</td>
+                <td>26%</td>
+                <td>46%</td>
+                <td>72%</td>
+                <td class="up">Up</td>
+                <td class="down">Mail Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server17</td>
+                <td>Windows</td>
+                <td>30%</td>
+                <td>50%</td>
+                <td>65%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server18</td>
+                <td>Linux</td>
+                <td>24%</td>
+                <td>52%</td>
+                <td>60%</td>
+                <td class="up">Up</td>
+                <td class="down">FTP Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+            <tr>
+                <td>Server19</td>
+                <td>Windows</td>
+                <td>28%</td>
+                <td>38%</td>
+                <td>68%</td>
+                <td class="up">Up</td>
+                <td class="up">All Services Up</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Server20</td>
+                <td>Linux</td>
+                <td>22%</td>
+                <td>55%</td>
+                <td>75%</td>
+                <td class="down">Down</td>
+                <td class="down">SSH Service Down</td>
+                <td><button class="incident-btn">Create Incident</button></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
