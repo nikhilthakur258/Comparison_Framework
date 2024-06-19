@@ -826,7 +826,7 @@ def get_repos(username_or_repo):
     else:
         for token in tokens:
             headers = {'Authorization': f'Bearer {token}'}
-            url = f'https://api.github.com/search/repositories?q=user:{username_or_repo}&per_page=500'
+            url = f'https://abcgithub.fg.rbc.com/api/v3/search/repositories?q=user:{username_or_repo}&per_page=500'
             while url:
                 response = requests.get(url, headers=headers)
                 if response.status_code == 200:
@@ -837,6 +837,10 @@ def get_repos(username_or_repo):
                         url = response.links['next']['url']
                     else:
                         break
+                elif response.status_code == 403:
+                    print(f"Rate limit exceeded or access denied. Switching token...")
+                    switch_token()
+                    headers = {'Authorization': f'Bearer {tokens[token_index]}'}
                 else:
                     print(f"Failed to fetch repositories: {response.content}")
                     break
