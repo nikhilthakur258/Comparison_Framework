@@ -6,8 +6,6 @@ import time
 import xml.etree.ElementTree as ET
 import json
 
-from github import Github, GithubException
-
 # Set up GitHub API access
 GITHUB_TOKENS = os.getenv('GITHUB_TOKENS')  # Ensure this is set as an environment variable
 if not GITHUB_TOKENS:
@@ -107,29 +105,28 @@ def count_files(repo_name, extensions):
             else:
                 raise ValueError(f"Error counting files in repository '{repo_name}': {e}")
 
-
 def get_file_details(repo_name, extensions):
-    wait_for_rate_limit_reset()
-    try:
-        repo = g.get_repo(repo_name)
-        files = get_files_recursively(repo, '', extensions)
-        file_details = []
-        for file in files:
-            content = file.decoded_content.decode('utf-8', errors='ignore')
-            lines = content.count('\n') + 1 if content else 0
-            file_details.append({
-                'name': file.name,
-                'path': file.path,
-                'size': file.size,
-                'lines_of_code': lines,
-            })
-        return file_details
-    except GithubException as e:
-        if e.status == 403 and 'rate limit exceeded' in str(e):
-            switch_token()
-            return get_file_details(repo_name, extensions)
-        else:
-            raise ValueError(f"Error fetching file details from repository '{repo_name}': {e}")
+    while True:
+        try:
+            repo = g.get_repo(repo_name)
+            files = get_files_recursively(repo, '', extensions)
+            file_details = []
+            for file in files:
+                content = file.decoded_content.decode('utf-8', errors='ignore')
+                lines = content.count('\n') + 1 if content else 0
+                file_details.append({
+                    'name': file.name,
+                    'path': file.path,
+                    'size': file.size,
+                    'lines_of_code': lines,
+                })
+            return file_details
+        except GithubException as e:
+            if e.status == 403 and 'rate limit exceeded' in str(e):
+                wait_for_rate_limit_reset()
+                continue
+            else:
+                raise ValueError(f"Error fetching file details from repository '{repo_name}': {e}")
 
 def parse_pom_xml(content):
     root = ET.fromstring(content)
@@ -215,112 +212,112 @@ def parse_package_json(content):
     return angular_version, node_version
 
 def get_dependencies_and_versions(repo_name):
-    wait_for_rate_limit_reset()
-    try:
-        repo = g.get_repo(repo_name)
-        pom_files = get_files_recursively(repo, '', ['pom.xml'])
-        gradle_files = get_files_recursively(repo, '', ['build.gradle'])
-        package_json_files = get_files_recursively(repo, '', ['package.json'])
-        dependencies = []
-        java_versions = []
-        spring_boot_versions = []
-        angular_versions = []
-        node_versions = []
-        build_tool = 'N/A'
-        group_id = artifact_id = version = name = 'N/A'
-        parent_group_id = parent_artifact_id = parent_version = parent_name = 'N/A'
-        for pom_file in pom_files:
-            content = repo.get_contents(pom_file.path).decoded_content.decode('utf-8')
-            deps, java_version, spring_boot_version, gid, aid, ver, nm, pgid, paid, pver, pnm = parse_pom_xml(content)
-            dependencies.extend(deps)
-            if java_version != 'N/A':
-                java_versions.append(java_version)
-            if spring_boot_version != 'N/A':
-                spring_boot_versions.append(spring_boot_version)
-            build_tool = 'Maven'
-            group_id = gid
-            artifact_id = aid
-            version = ver
-            name = nm
-            parent_group_id = pgid
-            parent_artifact_id = paid
-            parent_version = pver
-            parent_name = pnm
-        for gradle_file in gradle_files:
-            content = repo.get_contents(gradle_file.path).decoded_content.decode('utf-8')
-            java_version, spring_boot_version = parse_gradle_file(content)
-            if java_version != 'N/A':
-                java_versions.append(java_version)
-            if spring_boot_version != 'N/A':
-                spring_boot_versions.append(spring_boot_version)
-            build_tool = 'Gradle'
-        for package_json_file in package_json_files:
-            content = repo.get_contents(package_json_file.path).decoded_content.decode('utf-8')
-            angular_version, node_version = parse_package_json(content)
-            if angular_version != 'N/A':
-                angular_versions.append(angular_version)
-            if node_version != 'N/A':
-                node_versions.append(node_version)
-            build_tool = 'NPM/Yarn'
-        return dependencies, java_versions, spring_boot_versions, angular_versions, node_versions, build_tool, group_id, artifact_id, version, name, parent_group_id, parent_artifact_id, parent_version, parent_name
-    except GithubException as e:
-        if e.status == 403 and 'rate limit exceeded' in str(e):
-            switch_token()
-            return get_dependencies_and_versions(repo_name)
-        else:
-            raise ValueError(f"Error fetching dependencies from repository '{repo_name}': {e}")
+    while True:
+        try:
+            repo = g.get_repo(repo_name)
+            pom_files = get_files_recursively(repo, '', ['pom.xml'])
+            gradle_files = get_files_recursively(repo, '', ['build.gradle'])
+            package_json_files = get_files_recursively(repo, '', ['package.json'])
+            dependencies = []
+            java_versions = []
+            spring_boot_versions = []
+            angular_versions = []
+            node_versions = []
+            build_tool = 'N/A'
+            group_id = artifact_id = version = name = 'N/A'
+            parent_group_id = parent_artifact_id = parent_version = parent_name = 'N/A'
+            for pom_file in pom_files:
+                content = repo.get_contents(pom_file.path).decoded_content.decode('utf-8')
+                deps, java_version, spring_boot_version, gid, aid, ver, nm, pgid, paid, pver, pnm = parse_pom_xml(content)
+                dependencies.extend(deps)
+                if java_version != 'N/A':
+                    java_versions.append(java_version)
+                if spring_boot_version != 'N/A':
+                    spring_boot_versions.append(spring_boot_version)
+                build_tool = 'Maven'
+                group_id = gid
+                artifact_id = aid
+                version = ver
+                name = nm
+                parent_group_id = pgid
+                parent_artifact_id = paid
+                parent_version = pver
+                parent_name = pnm
+            for gradle_file in gradle_files:
+                content = repo.get_contents(gradle_file.path).decoded_content.decode('utf-8')
+                java_version, spring_boot_version = parse_gradle_file(content)
+                if java_version != 'N/A':
+                    java_versions.append(java_version)
+                if spring_boot_version != 'N/A':
+                    spring_boot_versions.append(spring_boot_version)
+                build_tool = 'Gradle'
+            for package_json_file in package_json_files:
+                content = repo.get_contents(package_json_file.path).decoded_content.decode('utf-8')
+                angular_version, node_version = parse_package_json(content)
+                if angular_version != 'N/A':
+                    angular_versions.append(angular_version)
+                if node_version != 'N/A':
+                    node_versions.append(node_version)
+                build_tool = 'NPM/Yarn'
+            return dependencies, java_versions, spring_boot_versions, angular_versions, node_versions, build_tool, group_id, artifact_id, version, name, parent_group_id, parent_artifact_id, parent_version, parent_name
+        except GithubException as e:
+            if e.status == 403 and 'rate limit exceeded' in str(e):
+                wait_for_rate_limit_reset()
+                continue
+            else:
+                raise ValueError(f"Error fetching dependencies from repository '{repo_name}': {e}")
 
 def analyze_manifest_files(repo_name):
-    wait_for_rate_limit_reset()
-    try:
-        repo = g.get_repo(repo_name)
-        manifest_files = get_files_recursively(repo, '', ['manifest.yml'])
-        manifest_details = []
-        for manifest_file in manifest_files:
-            content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
-            lines = content.count('\n') + 1 if content else 0
-            manifest_details.append({
-                'name': manifest_file.name,
-                'path': manifest_file.path,
-                'size': manifest_file.size,
-                'lines_of_code': lines,
-                'content': content,
-            })
-        return manifest_details
-    except GithubException as e:
-        if e.status == 403 and 'rate limit exceeded' in str(e):
-            switch_token()
-            return analyze_manifest_files(repo_name)
-        else:
-            raise ValueError(f"Error fetching manifest files from repository '{repo_name}': {e}")
+    while True:
+        try:
+            repo = g.get_repo(repo_name)
+            manifest_files = get_files_recursively(repo, '', ['manifest.yml'])
+            manifest_details = []
+            for manifest_file in manifest_files:
+                content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
+                lines = content.count('\n') + 1 if content else 0
+                manifest_details.append({
+                    'name': manifest_file.name,
+                    'path': manifest_file.path,
+                    'size': manifest_file.size,
+                    'lines_of_code': lines,
+                    'content': content,
+                })
+            return manifest_details
+        except GithubException as e:
+            if e.status == 403 and 'rate limit exceeded' in str(e):
+                wait_for_rate_limit_reset()
+                continue
+            else:
+                raise ValueError(f"Error fetching manifest files from repository '{repo_name}': {e}")
 
 def search_pcf_references(repo_name):
-    wait_for_rate_limit_reset()
-    try:
-        repo = g.get_repo(repo_name)
-        files = get_files_recursively(repo, '')  # Fetch all files
-        pcf_references = []
-        for file in files:
-            content = repo.get_contents(file.path).decoded_content.decode('utf-8', errors='ignore').lower()
-            lines = content.split('\n')
-            for line_number, line in enumerate(lines, start=1):
-                if 'pcf' in line or 'cloudfoundry' in line:
-                    print(f"Found PCF reference in file: {file.path}, line: {line_number}")  # Debug log
-                    pcf_references.append({
-                        'name': file.name,
-                        'path': file.path,
-                        'size': file.size,
-                        'lines_of_code': content.count('\n') + 1,
-                        'line_number': line_number,
-                        'line_content': line.strip()
-                    })
-        return pcf_references
-    except GithubException as e:
-        if e.status == 403 and 'rate limit exceeded' in str(e):
-            switch_token()
-            return search_pcf_references(repo_name)
-        else:
-            raise ValueError(f"Error searching PCF references in repository '{repo_name}': {e}")
+    while True:
+        try:
+            repo = g.get_repo(repo_name)
+            files = get_files_recursively(repo, '')  # Fetch all files
+            pcf_references = []
+            for file in files:
+                content = repo.get_contents(file.path).decoded_content.decode('utf-8', errors='ignore').lower()
+                lines = content.split('\n')
+                for line_number, line in enumerate(lines, start=1):
+                    if 'pcf' in line or 'cloudfoundry' in line:
+                        print(f"Found PCF reference in file: {file.path}, line: {line_number}")  # Debug log
+                        pcf_references.append({
+                            'name': file.name,
+                            'path': file.path,
+                            'size': file.size,
+                            'lines_of_code': content.count('\n') + 1,
+                            'line_number': line_number,
+                            'line_content': line.strip()
+                        })
+            return pcf_references
+        except GithubException as e:
+            if e.status == 403 and 'rate limit exceeded' in str(e):
+                wait_for_rate_limit_reset()
+                continue
+            else:
+                raise ValueError(f"Error searching PCF references in repository '{repo_name}': {e}")
 
 def calculate_complexity(java_files_count, dependencies_count, config_files_count, pcf_references_count):
     complexity_score = java_files_count + dependencies_count + config_files_count + pcf_references_count
@@ -456,27 +453,6 @@ def generate_report_for_repo(repo, include_estimates):
         print("Fetching deployment manifests...")
         deployment_manifests = get_files_recursively(repo, '', [".yml", ".yaml", "manifest.yml", "Dockerfile"])
         
-        print("Fetching security settings...")
-        security_settings = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching volume mounts...")
-        volume_mounts = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching logging and monitoring configurations...")
-        logging_monitoring = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching CI/CD pipelines...")
-        ci_cd_pipelines = get_files_recursively(repo, '', [".gitlab-ci.yml", "Jenkinsfile"])
-        
-        print("Fetching scaling policies...")
-        scaling_policies = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching compliance requirements...")
-        compliance_requirements = get_files_recursively(repo, '', [".yml"])
-        
-        print("Fetching documentation...")
-        documentation = get_files_recursively(repo, '', [".md"])
-        
         print("Analyzing manifest files...")
         manifest_details = analyze_manifest_files(repo_name)
         
@@ -488,21 +464,22 @@ def generate_report_for_repo(repo, include_estimates):
         
         helios_onboarding = 'Yes' if any(f.path.startswith('helios') or f.path.endswith('helios-config.yml') for f in get_files_recursively(repo)) else 'No'
         
+        deployed_to_pcf = 'Yes' if any(f.name.startswith('manifest') and f.name.endswith('.yml') for f in get_files_recursively(repo)) else 'No'
+        
         html_content = generate_html_content(
             repo_name, repo_info, java_files_count, java_files_lines, file_details, dependencies, config_files, deployment_manifests, 
-            security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, 
-            scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, spring_boot_versions, angular_versions, node_versions, build_tool, group_id, artifact_id, version, name, parent_group_id, parent_artifact_id, parent_version, parent_name, complexity, include_estimates, helios_onboarding
+            manifest_details, pcf_references, java_versions, spring_boot_versions, angular_versions, node_versions, build_tool, group_id, artifact_id, version, name, parent_group_id, parent_artifact_id, parent_version, parent_name, complexity, include_estimates, helios_onboarding, deployed_to_pcf
         )
         
         report = {
             "repo_name": repo_name,
             "html_content": html_content,
-            "file_details": file_details,
+            "file_details": [file_detail for file_detail in file_details if isinstance(file_detail, dict)],  # Ensure serializable
             "java_files_count": java_files_count,
             "java_files_lines": java_files_lines,
             "pcf_references": pcf_references,
-            "config_files": config_files,
-            "deployment_manifests": deployment_manifests,
+            "config_files": [cf.path for cf in config_files],  # Serialize only the paths
+            "deployment_manifests": [dm.path for dm in deployment_manifests],  # Serialize only the paths
             "dependencies": dependencies,
             "java_versions": java_versions,
             "spring_boot_versions": spring_boot_versions,
@@ -518,7 +495,8 @@ def generate_report_for_repo(repo, include_estimates):
             "parent_version": parent_version,
             "parent_name": parent_name,
             "complexity": complexity,
-            "helios_onboarding": helios_onboarding
+            "helios_onboarding": helios_onboarding,
+            "deployed_to_pcf": deployed_to_pcf
         }
         
         return report
@@ -527,7 +505,7 @@ def generate_report_for_repo(repo, include_estimates):
         print(f"Error generating report for repository '{repo.full_name}': {e}")
         return None
 
-def generate_html_content(repo_name, repo_info, java_files_count, java_files_lines, file_details, dependencies, config_files, deployment_manifests, security_settings, volume_mounts, logging_monitoring, ci_cd_pipelines, scaling_policies, compliance_requirements, documentation, manifest_details, pcf_references, java_versions, spring_boot_versions, angular_versions, node_versions, build_tool, group_id, artifact_id, version, name, parent_group_id, parent_artifact_id, parent_version, parent_name, complexity, include_estimates, helios_onboarding):
+def generate_html_content(repo_name, repo_info, java_files_count, java_files_lines, file_details, dependencies, config_files, deployment_manifests, manifest_details, pcf_references, java_versions, spring_boot_versions, angular_versions, node_versions, build_tool, group_id, artifact_id, version, name, parent_group_id, parent_artifact_id, parent_version, parent_name, complexity, include_estimates, helios_onboarding, deployed_to_pcf):
     html_content = f"""
         <h1>Migration Report for {repo_name}</h1>
         <p><strong>Generated on:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
@@ -566,21 +544,31 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
             <tr><th>Total Files</th><td>{len(file_details)}</td></tr>
             <tr><th>Java Files</th><td>{java_files_count}</td></tr>
             <tr><th>Application Lines of Code</th><td>{java_files_lines}</td></tr>
-            <tr><th>PCF References</th><td>{len(pcf_references)}</td></tr>
+            <tr><th>PCF References</td><td>{len(pcf_references)}</td></tr>
             <tr><th>Configuration Files</th><td>{len(config_files)}</td></tr>
-            <tr><th>Deployment Manifests</th><td>{len(deployment_manifests)}</td></tr>
-            <tr><th>Dependencies</th><td>{len(dependencies)}</td></tr>
+            <tr><th>Deployment Manifests</td><td>{len(deployment_manifests)}</td></tr>
+            <tr><th>Dependencies</td><td>{len(dependencies)}</td></tr>
             <tr><th>Java Versions</th><td>{', '.join(set(java_versions))}</td></tr>
             <tr><th>Spring Boot Versions</th><td>{', '.join(set(spring_boot_versions))}</td></tr>
             <tr><th>Angular Versions</th><td>{', '.join(set(angular_versions))}</td></tr>
             <tr><th>Node Versions</th><td>{', '.join(set(node_versions))}</td></tr>
-            <tr><th>Complexity</th><td>{complexity}</td></tr>
-            <tr><th>Helios Onboarding</th><td>{helios_onboarding}</td></tr>
+            <tr><th>Complexity</td><td>{complexity}</td></tr>
+            <tr><th>Helios Onboarding</td><td>{helios_onboarding}</td></tr>
+            <tr><th>Deployed to PCF</td><td>{deployed_to_pcf}</td></tr>
     """
     
     html_content += """
         </table>
         
+    <h2>Dependencies</h2>
+        <table>
+            <tr><th>Group ID</th><th>Artifact ID</th><th>Version</th></tr>
+    """
+    for dep in dependencies:
+        html_content += f"<tr><td>{dep['group_id']}</td><td>{dep['artifact_id']}</td><td>{dep['version']}</td></tr>"
+    
+    html_content += """
+        </table>
        
         <h2>File Details</h2>
         <table>
@@ -594,30 +582,10 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
         </table>
     """
     
-    # Add dependencies section if not empty
-    if dependencies:
-        html_content += """
-        <h2>Dependencies</h2>
-        <table>
-            <tr><th>Group ID</th><th>Artifact ID</th><th>Version</th></tr>
-        """
-        for dep in dependencies:
-            html_content += f"<tr><td>{dep['group_id']}</td><td>{dep['artifact_id']}</td><td>{dep['version']}</td></tr>"
-        html_content += """
-        </table>
-        """
-
     # Add sections for Configuration Files, Deployment Manifests, etc.
     sections = [
         ("Configuration Files", config_files),
         ("Deployment Manifests", deployment_manifests),
-        ("Security Settings", security_settings),
-        ("Volume Mounts", volume_mounts),
-        ("Logging and Monitoring", logging_monitoring),
-        ("CI/CD Pipelines", ci_cd_pipelines),
-        ("Scaling Policies", scaling_policies),
-        ("Compliance Requirements", compliance_requirements),
-        ("Documentation", documentation),
     ]
     
     for section_title, files in sections:
@@ -627,10 +595,10 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
             <table>
                 <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
             """
-            for file in files:
-                file_content = next((fd for fd in file_details if fd['path'] == file.path), None)
-                if file_content:
-                    html_content += f"<tr><td>{file_content['name']}</td><td>{file_content['path']}</td><td>{file_content['size']}</td><td>{file_content['lines_of_code']}</td></tr>"
+            for file_path in files:
+                file_detail = next((fd for fd in file_details if fd['path'] == file_path), None)
+                if file_detail:
+                    html_content += f"<tr><td>{file_detail['name']}</td><td>{file_detail['path']}</td><td>{file_detail['size']}</td><td>{file_detail['lines_of_code']}</td></tr>"
             html_content += """
             </table>
             """
@@ -736,6 +704,7 @@ def generate_summary_report(repo_reports):
                 <th>Node Versions</th>
                 <th>Complexity</th>
                 <th>Helios Onboarding</th>
+                <th>Deployed to PCF</th>
             </tr>
     """
     for report in repo_reports:
@@ -755,24 +724,39 @@ def generate_summary_report(repo_reports):
                 <td>{', '.join(set(report["node_versions"]))}</td>
                 <td>{report["complexity"]}</td>
                 <td>{report["helios_onboarding"]}</td>
+                <td>{report["deployed_to_pcf"]}</td>
             </tr>
         """
     summary_content += "</table>"
     return summary_content
 
+def serialize_repo_reports(repo_reports):
+    serialized_reports = []
+    for report in repo_reports:
+        serialized_report = {k: v for k, v in report.items() if k not in ["file_details", "config_files", "deployment_manifests"]}
+        serialized_report["file_details"] = [fd for fd in report["file_details"] if isinstance(fd, dict)]
+        serialized_report["config_files"] = [cf for cf in report["config_files"]]
+        serialized_report["deployment_manifests"] = [dm for dm in report["deployment_manifests"]]
+        serialized_reports.append(serialized_report)
+    return serialized_reports
+
 def save_checkpoint(username, repo_reports):
     checkpoint_data = {
         "username": username,
-        "repo_reports": repo_reports
+        "repo_reports": serialize_repo_reports(repo_reports)
     }
     with open(CHECKPOINT_FILE, 'w') as f:
         json.dump(checkpoint_data, f)
 
 def load_checkpoint():
     if os.path.exists(CHECKPOINT_FILE):
-        with open(CHECKPOINT_FILE, 'r') as f:
-            checkpoint_data = json.load(f)
-            return checkpoint_data["username"], checkpoint_data["repo_reports"]
+        try:
+            with open(CHECKPOINT_FILE, 'r') as f:
+                checkpoint_data = json.load(f)
+                return checkpoint_data["username"], checkpoint_data["repo_reports"]
+        except json.JSONDecodeError as e:
+            print(f"Error loading checkpoint file: {e}")
+            return None, []
     return None, []
 
 def main():
