@@ -1,7 +1,7 @@
 
     <html>
     <head>
-        <title>GitHub Repository Migration Report</title>
+        <title>GitHub Repositories Migration Report</title>
         <style>
             body { font-family: Arial, sans-serif; }
             h1 { color: #333; }
@@ -9,17 +9,129 @@
             table { border-collapse: collapse; width: 100%; }
             th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
             th { background-color: #f2f2f2; }
+            .tab { overflow: hidden; border: 1px solid #ccc; background-color: #f1f1f1; }
+            .tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; font-size: 17px; }
+            .tab button:hover { background-color: #ddd; }
+            .tab button.active { background-color: #ccc; }
+            .tabcontent { display: none; padding: 6px 12px; border-top: none; border-left: 1px solid #ccc; border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; }
         </style>
+        <script>
+            function openTab(evt, tabName) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+            function downloadExcel() {
+                var wb = XLSX.utils.book_new();
+                var summary = document.querySelector('#summary table');
+                if (summary) {
+                    var summaryWS = XLSX.utils.table_to_sheet(summary);
+                    XLSX.utils.book_append_sheet(wb, summaryWS, 'Summary');
+                }
+                
+                var tabs = document.getElementsByClassName('tabcontent');
+                for (var i = 0; i < tabs.length; i++) {
+                    var tabName = tabs[i].id;
+                    if (tabName !== 'summary') {
+                        var tabTables = tabs[i].getElementsByTagName('table');
+                        var sheetData = [];
+                        for (var j = 0; j < tabTables.length; j++) {
+                            var table = tabTables[j];
+                            var sheetTitle = table.previousElementSibling ? table.previousElementSibling.innerText : '';
+                            sheetData.push([sheetTitle]);
+                            var tableData = XLSX.utils.sheet_to_json(XLSX.utils.table_to_sheet(table), {header:1});
+                            sheetData = sheetData.concat(tableData);
+                            sheetData.push([]);  // Add a blank line between tables
+                        }
+                        var tabWS = XLSX.utils.aoa_to_sheet(sheetData);
+                        var sheetName = sanitizeSheetTitle(tabName);
+                        XLSX.utils.book_append_sheet(wb, tabWS, sheetName);
+                    }
+                }
+                
+                XLSX.writeFile(wb, 'wavefrontHQ_cloud-foundry-sampleapp_analysis.xlsx');
+            }
+            function sanitizeSheetTitle(title) {
+                var invalidChars = /[\\/:*?\[\]]/g;
+                return title.replace(invalidChars, '').substring(0, 31);
+            }
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.6/xlsx.full.min.js"></script>
     </head>
     <body>
+        <button onclick="downloadExcel()">Download as Excel</button>
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'summary')">Summary</button><button class="tablinks" onclick="openTab(event, 'wavefrontHQcloud-foundry-sample')">wavefrontHQ/cloud-foundry-samp</button>
+        </div>
+        <div id="summary" class="tabcontent">
+        <h1>Overall Summary Report</h1>
+        <p><strong>Generated on:</strong> 2024-06-19 17:24:05</p>
+        <h2>Summary of Repositories</h2>
+        <table>
+            <tr>
+                <th>Repository Name</th>
+                <th>Total Files</th>
+                <th>Java Files</th>
+                <th>Application Lines of Code</th>
+                <th>PCF References</th>
+                <th>Configuration Files</th>
+                <th>Deployment Manifests</th>
+                <th>Dependencies</th>
+                <th>Java Versions</th>
+                <th>Spring Boot Versions</th>
+                <th>Angular Versions</th>
+                <th>Node Versions</th>
+                <th>Complexity</th>
+                <th>Helios Onboarding</th>
+                <th>Deployed to PCF</th>
+                <th>Private</th>
+            </tr>
+    
+            <tr>
+                <td>wavefrontHQ/cloud-foundry-sampleapp</td>
+                <td>13</td>
+                <td>8</td>
+                <td>319</td>
+                <td>12</td>
+                <td>2</td>
+                <td>1</td>
+                <td>13</td>
+                <td></td>
+                <td>1.5.21.RELEASE</td>
+                <td></td>
+                <td></td>
+                <td>High</td>
+                <td>No</td>
+                <td>Yes</td>
+                <td>No</td>
+            </tr>
+        </table></div><div id="wavefrontHQcloud-foundry-sample" class="tabcontent">
         <h1>Migration Report for wavefrontHQ/cloud-foundry-sampleapp</h1>
-        <p><strong>Generated on:</strong> 2024-06-14 23:25:38</p>
+        <p><strong>Generated on:</strong> 2024-06-19 17:24:05</p>
         
         <h2>Repository Info</h2>
         <table>
             <tr><th>Name</th><td>cloud-foundry-sampleapp</td></tr>
             <tr><th>Description</th><td>Wavefront Cloud Foundry (Spring Boot) Sample Application</td></tr>
             <tr><th>Language</th><td>Java</td></tr>
+            <tr><th>Language Version</th><td></td></tr>
+            <tr><th>Build</th><td>Maven</td></tr>
+            <tr><th>Group ID</th><td>com.example</td></tr>
+            <tr><th>Artifact ID</th><td>springboot</td></tr>
+            <tr><th>Version</th><td>0.0.1-SNAPSHOT</td></tr>
+            <tr><th>Name</th><td>N/A</td></tr>
+            <tr><th>Parent Group ID</th><td>org.springframework.boot</td></tr>
+            <tr><th>Parent Artifact ID</th><td>spring-boot-starter-parent</td></tr>
+            <tr><th>Parent Version</th><td>1.5.21.RELEASE</td></tr>
+            <tr><th>Parent Name</th><td>N/A</td></tr>
             <tr><th>Topics</th><td>cloud-foundry, wavefront, spring-boot, monitoring</td></tr>
             <tr><th>Default Branch</th><td>master</td></tr>
             <tr><th>Size (bytes)</th><td>42</td></tr>
@@ -31,107 +143,74 @@
             <tr><th>Forks Count</th><td>2</td></tr>
             <tr><th>Open Issues Count</th><td>1</td></tr>
             <tr><th>License</th><td>None</td></tr>
+            <tr><th>Private</th><td>No</td></tr>
             <tr><th>GitHub URL</th><td><a href="https://github.com/wavefrontHQ/cloud-foundry-sampleapp">https://github.com/wavefrontHQ/cloud-foundry-sampleapp</a></td></tr>
         </table>
 
         <h2>Summary</h2>
         <table>
-            <tr><th>Total Files</th><td>11</td></tr>
+            <tr><th>Total Files</th><td>13</td></tr>
             <tr><th>Java Files</th><td>8</td></tr>
-            <tr><th>PCF References</th><td>12</td></tr>
-            <tr><th>Configuration Files</th><td>2</td></tr>
-            <tr><th>Deployment Manifests</th><td>1</td></tr>
-            <tr><th>Dependencies</th><td>13</td></tr>
+            <tr><th>Application Lines of Code</th><td>319</td></tr>
+            <tr><th>PCF References</td><td>12</td></tr>
+            <tr><th>Configuration Files</td><td>2</td></tr>
+            <tr><th>Deployment Manifests</td><td>1</td></tr>
+            <tr><th>Dependencies</td><td>13</td></tr>
             <tr><th>Java Versions</th><td></td></tr>
-            <tr><th>Complexity</th><td>High</td></tr>
+            <tr><th>Spring Boot Versions</th><td>1.5.21.RELEASE</td></tr>
+            <tr><th>Angular Versions</th><td></td></tr>
+            <tr><th>Node Versions</td><td></td></tr>
+            <tr><th>Complexity</td><td>High</td></tr>
+            <tr><th>Helios Onboarding</td><td>No</td></tr>
+            <tr><th>Deployed to PCF</td><td>Yes</td></tr>
     
         </table>
         
-        <h2>Java Files</h2>
-        <p>Number of Java files: {java_files_count}</p>
+    <h2>Dependencies</h2>
+        <table>
+            <tr><th>Group ID</th><th>Artifact ID</th><th>Version</th></tr>
+    <tr><td>org.springframework.boot</td><td>spring-boot-starter-web</td><td>N/A</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-actuator</td><td>N/A</td></tr><tr><td>org.springframework</td><td>spring-context-support</td><td>N/A</td></tr><tr><td>io.dropwizard.metrics</td><td>metrics-core</td><td>N/A</td></tr><tr><td>io.dropwizard.metrics</td><td>metrics-jvm</td><td>3.1.2</td></tr><tr><td>com.h2database</td><td>h2</td><td>2.1.210</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-jdbc</td><td>N/A</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-data-jpa</td><td>N/A</td></tr><tr><td>com.google.guava</td><td>guava</td><td>32.0.1-jre</td></tr><tr><td>com.wavefront</td><td>dropwizard-metrics-3.1</td><td>4.19</td></tr><tr><td>org.apache.avro</td><td>avro</td><td>1.11.1</td></tr><tr><td>org.json</td><td>json</td><td>20230227</td></tr><tr><td>junit</td><td>junit</td><td>4.13.1</td></tr>
+        </table>
         
+        <h2>Manifest Files Analysis</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>PCF Application Name</th><th>Buildpack</th><th>Memory</th><th>Number of Services</th><th>Service Names</th><th>Instances</th></tr>
+    <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td><td>wavefront-sample-app</td><td>N/A</td><td>N/A</td><td>1</td><td>wfproxy-service1</td><td>N/A</td></tr>
+        </table>
+
         <h2>File Details</h2>
         <table>
             <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-    <tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td></tr><tr><td>SampleAppController.java</td><td>src/main/java/controller/SampleAppController.java</td><td>1111</td><td>36</td></tr><tr><td>SampleAppData.java</td><td>src/main/java/domain/SampleAppData.java</td><td>827</td><td>46</td></tr><tr><td>SampleAppRepository.java</td><td>src/main/java/repository/SampleAppRepository.java</td><td>486</td><td>22</td></tr><tr><td>SampleAppService.java</td><td>src/main/java/service/SampleAppService.java</td><td>211</td><td>11</td></tr><tr><td>SampleAppServiceImpl.java</td><td>src/main/java/service/SampleAppServiceImpl.java</td><td>863</td><td>38</td></tr><tr><td>CacheConfiguration.java</td><td>src/main/java/springboot/CacheConfiguration.java</td><td>931</td><td>29</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>111</td></tr><tr><td>SampleApplication.java</td><td>src/main/java/springboot/SampleApplication.java</td><td>562</td><td>18</td></tr><tr><td>application.properties</td><td>src/main/resources/application.properties</td><td>16</td><td>0</td></tr><tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td></tr>
+    <tr><td>.gitignore</td><td>.gitignore</td><td>36</td><td>3</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td></tr><tr><td>pom.xml</td><td>pom.xml</td><td>3527</td><td>141</td></tr><tr><td>application.properties</td><td>src/main/resources/application.properties</td><td>16</td><td>1</td></tr><tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>5</td></tr><tr><td>SampleAppController.java</td><td>src/main/java/controller/SampleAppController.java</td><td>1111</td><td>37</td></tr><tr><td>SampleAppData.java</td><td>src/main/java/domain/SampleAppData.java</td><td>827</td><td>47</td></tr><tr><td>SampleAppRepository.java</td><td>src/main/java/repository/SampleAppRepository.java</td><td>486</td><td>23</td></tr><tr><td>SampleAppService.java</td><td>src/main/java/service/SampleAppService.java</td><td>211</td><td>12</td></tr><tr><td>SampleAppServiceImpl.java</td><td>src/main/java/service/SampleAppServiceImpl.java</td><td>863</td><td>39</td></tr><tr><td>CacheConfiguration.java</td><td>src/main/java/springboot/CacheConfiguration.java</td><td>931</td><td>30</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>112</td></tr><tr><td>SampleApplication.java</td><td>src/main/java/springboot/SampleApplication.java</td><td>562</td><td>19</td></tr>
         </table>
     
-        <h2>Dependencies</h2>
-        <table>
-            <tr><th>Group ID</th><th>Artifact ID</th><th>Version</th></tr>
-        <tr><td>org.springframework.boot</td><td>spring-boot-starter-web</td><td>N/A</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-actuator</td><td>N/A</td></tr><tr><td>org.springframework</td><td>spring-context-support</td><td>N/A</td></tr><tr><td>io.dropwizard.metrics</td><td>metrics-core</td><td>N/A</td></tr><tr><td>io.dropwizard.metrics</td><td>metrics-jvm</td><td>3.1.2</td></tr><tr><td>com.h2database</td><td>h2</td><td>2.1.210</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-jdbc</td><td>N/A</td></tr><tr><td>org.springframework.boot</td><td>spring-boot-starter-data-jpa</td><td>N/A</td></tr><tr><td>com.google.guava</td><td>guava</td><td>32.0.1-jre</td></tr><tr><td>com.wavefront</td><td>dropwizard-metrics-3.1</td><td>4.19</td></tr><tr><td>org.apache.avro</td><td>avro</td><td>1.11.1</td></tr><tr><td>org.json</td><td>json</td><td>20230227</td></tr><tr><td>junit</td><td>junit</td><td>4.13.1</td></tr>
-        </table>
-        
             <h2>Configuration Files</h2>
             <table>
                 <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-            <tr><td>application.properties</td><td>src/main/resources/application.properties</td><td>16</td><td>0</td></tr><tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td></tr>
+            
             </table>
             
             <h2>Deployment Manifests</h2>
             <table>
                 <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td></tr>
+            
             </table>
             
-            <h2>Security Settings</h2>
-            <table>
-                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td></tr>
-            </table>
-            
-            <h2>Volume Mounts</h2>
-            <table>
-                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td></tr>
-            </table>
-            
-            <h2>Logging and Monitoring</h2>
-            <table>
-                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td></tr>
-            </table>
-            
-            <h2>Scaling Policies</h2>
-            <table>
-                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td></tr>
-            </table>
-            
-            <h2>Compliance Requirements</h2>
-            <table>
-                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-            <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td></tr>
-            </table>
-            
-            <h2>Documentation</h2>
-            <table>
-                <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
-            <tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td></tr>
-            </table>
-            
-        <h2>Manifest Files Analysis</h2>
-        <table>
-            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Content</th></tr>
-        <tr><td>manifest.yml</td><td>src/main/resources/manifest.yml</td><td>80</td><td>4</td><td><pre>---
-applications:
-- name: wavefront-sample-app
-  services:
-   - wfproxy-service1</pre></td></tr>
-        </table>
-        
         <h2>PCF References</h2>
         <table>
             <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Line Number</th><th>Line Content</th></tr>
-        <tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>7</td><td>this project describes how to send application metrics from a spring boot app running in pcf to a wavefront proxy.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>10</td><td>* a wavefront proxy deployed in pcf as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/)</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>11</td><td>* a wavefront proxy service instance provisioned in pcf using the [wavefront service broker for pcf](http://docs.pivotal.io/partners/wavefront-nozzle/installing.html#marketplace).</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>17</td><td>the rest of this document assumes the wavefront proxy service instance provisioned in pcf is called `wfproxy-service`. replace the service name accordingly if different.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>21</td><td>a `manifest.yml` file is used to provide parameters to a pcf application. the developer needs to identify the wavefront proxy running in pcf and add it to the manifest file.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>70</td><td>.prefixedwith("pcf")</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>71</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>74</td><td>the `wavefront-proxy` is the name of the wavefront proxy service running in pcf. the wavefront</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>79</td><td>to bind to wavefront proxy (e.g., `bindtocloudfoundryservice()`).</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>94</td><td>85</td><td>cf login -a <pcf-api-url> --skip-ssl-validation --sso</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>111</td><td>74</td><td>.prefixedwith("pcf")</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>111</td><td>75</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td></tr>
+        <tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>7</td><td>this project describes how to send application metrics from a spring boot app running in pcf to a wavefront proxy.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>10</td><td>* a wavefront proxy deployed in pcf as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/)</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>11</td><td>* a wavefront proxy service instance provisioned in pcf using the [wavefront service broker for pcf](http://docs.pivotal.io/partners/wavefront-nozzle/installing.html#marketplace).</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>17</td><td>the rest of this document assumes the wavefront proxy service instance provisioned in pcf is called `wfproxy-service`. replace the service name accordingly if different.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>21</td><td>a `manifest.yml` file is used to provide parameters to a pcf application. the developer needs to identify the wavefront proxy running in pcf and add it to the manifest file.</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>70</td><td>.prefixedwith("pcf")</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>71</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>74</td><td>the `wavefront-proxy` is the name of the wavefront proxy service running in pcf. the wavefront</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>79</td><td>to bind to wavefront proxy (e.g., `bindtocloudfoundryservice()`).</td></tr><tr><td>README.md</td><td>README.md</td><td>3375</td><td>95</td><td>85</td><td>cf login -a <pcf-api-url> --skip-ssl-validation --sso</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>112</td><td>74</td><td>.prefixedwith("pcf")</td></tr><tr><td>MetricSystem.java</td><td>src/main/java/springboot/MetricSystem.java</td><td>3694</td><td>112</td><td>75</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td></tr>
         </table>
         
-        <h2>PCF Migration Recommendations</h2>
+        <h2>Spring Boot Versions</h2>
         <table>
-            <tr><th>Path</th><th>Line Number</th><th>Line Content</th><th>Recommendation</th></tr>
-        <tr><td>README.md</td><td>7</td><td>this project describes how to send application metrics from a spring boot app running in pcf to a wavefront proxy.</td><td>Replace 'this project describes how to send application metrics from a spring boot app running in pcf to a wavefront proxy.' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>10</td><td>* a wavefront proxy deployed in pcf as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/)</td><td>Replace '* a wavefront proxy deployed in pcf as part of the [wavefront by vmware nozzle for pcf](https://network.pivotal.io/products/wavefront-nozzle/)' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>11</td><td>* a wavefront proxy service instance provisioned in pcf using the [wavefront service broker for pcf](http://docs.pivotal.io/partners/wavefront-nozzle/installing.html#marketplace).</td><td>Replace '* a wavefront proxy service instance provisioned in pcf using the [wavefront service broker for pcf](http://docs.pivotal.io/partners/wavefront-nozzle/installing.html#marketplace).' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>17</td><td>the rest of this document assumes the wavefront proxy service instance provisioned in pcf is called `wfproxy-service`. replace the service name accordingly if different.</td><td>Replace 'the rest of this document assumes the wavefront proxy service instance provisioned in pcf is called `wfproxy-service`. replace the service name accordingly if different.' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>21</td><td>a `manifest.yml` file is used to provide parameters to a pcf application. the developer needs to identify the wavefront proxy running in pcf and add it to the manifest file.</td><td>Replace 'a `manifest.yml` file is used to provide parameters to a pcf application. the developer needs to identify the wavefront proxy running in pcf and add it to the manifest file.' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>70</td><td>.prefixedwith("pcf")</td><td>Replace '.prefixedwith("pcf")' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>71</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td><td>Replace '.bindtocloudfoundryservice("wavefront-proxy", true);' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>74</td><td>the `wavefront-proxy` is the name of the wavefront proxy service running in pcf. the wavefront</td><td>Replace 'the `wavefront-proxy` is the name of the wavefront proxy service running in pcf. the wavefront' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>79</td><td>to bind to wavefront proxy (e.g., `bindtocloudfoundryservice()`).</td><td>Replace 'to bind to wavefront proxy (e.g., `bindtocloudfoundryservice()`).' with OCP-specific configuration.</td></tr><tr><td>README.md</td><td>85</td><td>cf login -a <pcf-api-url> --skip-ssl-validation --sso</td><td>Replace 'cf login -a <pcf-api-url> --skip-ssl-validation --sso' with OCP-specific configuration.</td></tr><tr><td>src/main/java/springboot/MetricSystem.java</td><td>74</td><td>.prefixedwith("pcf")</td><td>Replace '.prefixedwith("pcf")' with OCP-specific configuration.</td></tr><tr><td>src/main/java/springboot/MetricSystem.java</td><td>75</td><td>.bindtocloudfoundryservice("wavefront-proxy", true);</td><td>Replace '.bindtocloudfoundryservice("wavefront-proxy", true);' with OCP-specific configuration.</td></tr>
+            <tr><th>Version</th></tr>
+        <tr><td>1.5.21.RELEASE</td></tr>
         </table>
-        
+        </div>
+        <script>
+            document.getElementsByClassName("tablinks")[0].click();
+        </script>
     </body>
     </html>
     
