@@ -137,6 +137,8 @@ def get_file_details(repo_name, extensions):
                 continue
             else:
                 raise ValueError(f"Error fetching file details from repository '{repo_name}': {e}")
+        except Exception as e:
+            raise ValueError(f"Error fetching file details from repository '{repo_name}': {e}")
 
 def parse_pom_xml(content):
     root = ET.fromstring(content)
@@ -512,8 +514,27 @@ def generate_report_for_repo(repo, include_estimates):
         return report
     
     except Exception as e:
-        print(f"Error generating report for repository '{repo.full_name}': {e}")
-        return None
+        error_message = f"Error generating report for repository '{repo.full_name}': {e}"
+        print(error_message)
+        error_report = {
+            "repo_name": repo.full_name,
+            "html_content": f"<h2>{error_message}</h2>",
+            "file_details": [],
+            "java_files_count": 0,
+            "java_files_lines": 0,
+            "pcf_references": [],
+            "config_files": [],
+            "deployment_manifests": [],
+            "dependencies": [],
+            "java_versions": [],
+            "spring_boot_versions": [],
+            "angular_versions": [],
+            "node_versions": [],
+            "complexity": "N/A",
+            "helios_onboarding": "No",
+            "deployed_to_pcf": "No"
+        }
+        return error_report
 
 def generate_html_content(repo_name, repo_info, java_files_count, java_files_lines, file_details, dependencies, config_files, deployment_manifests, manifest_details, pcf_references, java_versions, spring_boot_versions, angular_versions, node_versions, build_tool, group_id, artifact_id, version, name, parent_group_id, parent_artifact_id, parent_version, parent_name, complexity, include_estimates, helios_onboarding, deployed_to_pcf):
     html_content = f"""
