@@ -36,18 +36,15 @@ def check_rate_limit():
     return remaining, reset_time
 
 def wait_for_rate_limit_reset():
-    while True:
+    remaining, reset_time = check_rate_limit()
+    while remaining == 0:
+        switch_token()
         remaining, reset_time = check_rate_limit()
-        if remaining == 0:
-            if token_index == len(tokens) - 1:
-                wait_time = max(reset_time - time.time(), 0) + 10  # Add a buffer time
-                print(f"Rate limit exceeded. Waiting for {wait_time} seconds before retrying...")
-                time.sleep(wait_time)
-                token_index = 0
-            else:
-                switch_token()
-        else:
-            break
+        if remaining == 0 and token_index == len(tokens) - 1:
+            wait_time = max(reset_time - time.time(), 0) + 10  # Add a buffer time
+            print(f"Rate limit exceeded. Waiting for {wait_time} seconds before retrying...")
+            time.sleep(wait_time)
+            token_index = 0  # Reset token index to start again
 
 def get_repo_info(repo_name):
     while True:
@@ -301,6 +298,7 @@ def analyze_manifest_files(repo_name):
                     'buildpack': manifest_data.get('buildpack', 'N/A'),
                     'memory': manifest_data.get('memory', 'N/A'),
                     'number_of_services': manifest_data.get('number_of_services', 'N/A'),
+                    'service_names': manifest_data.get('service_names', 'N/A'),
                     'instances': manifest_data.get('instances', 'N/A'),
                     'content': content,
                 })
@@ -321,6 +319,7 @@ def parse_manifest(content):
         'buildpack': application_data.get('buildpack', 'N/A'),
         'memory': application_data.get('memory', 'N/A'),
         'number_of_services': len(application_data.get('services', [])),
+        'service_names': ', '.join(application_data.get('services', [])),
         'instances': application_data.get('instances', 'N/A')
     }
 
@@ -622,7 +621,17 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
     
     html_content += """
         </table>
-       
+        
+        <h2>Manifest Files Analysis</h2>
+        <table>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>PCF Application Name</th><th>Buildpack</th><th>Memory</th><th>Number of Services</th><th>Service Names</th><th>Instances</th></tr>
+    """
+    for manifest in manifest_details:
+        html_content += f"<tr><td>{manifest['name']}</td><td>{manifest['path']}</td><td>{manifest['size']}</td><td>{manifest['lines_of_code']}</td><td>{manifest['pcf_application_name']}</td><td>{manifest['buildpack']}</td><td>{manifest['memory']}</td><td>{manifest['number_of_services']}</td><td>{manifest['service_names']}</td><td>{manifest['instances']}</td></tr>"
+    
+    html_content += """
+        </table>
+
         <h2>File Details</h2>
         <table>
             <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th></tr>
@@ -655,19 +664,6 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
             html_content += """
             </table>
             """
-    
-    # Add Manifest Files Analysis section if not empty
-    if manifest_details:
-        html_content += """
-        <h2>Manifest Files Analysis</h2>
-        <table>
-            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>PCF Application Name</th><th>Buildpack</th><th>Memory</th><th>Number of Services</th><th>Instances</th></tr>
-        """
-        for manifest in manifest_details:
-            html_content += f"<tr><td>{manifest['name']}</td><td>{manifest['path']}</td><td>{manifest['size']}</td><td>{manifest['lines_of_code']}</td><td>{manifest['pcf_application_name']}</td><td>{manifest['buildpack']}</td><td>{manifest['memory']}</td><td>{manifest['number_of_services']}</td><td>{manifest['instances']}</td></tr>"
-        html_content += """
-        </table>
-        """
     
     # Add PCF References section if not empty
     if pcf_references:
@@ -818,26 +814,32 @@ def delete_checkpoint_file():
     if os.path.exists(CHECKPOINT_FILE):
         os.remove(CHECKPOINT_FILE)
         print(f"Checkpoint file {CHECKPOINT_FILE} deleted.")
+    if os.path.exists(REPO_FILE):
+        os.remove(REPO_FILE)
+        print(f"Repo file {REPO_FILE} deleted.")
 
-def get_repos(username):
-    print(f"Gathering repositories for user {username}...")
+def get_repos(username_or_repo):
+    print(f"Gathering repositories for {username_or_repo}...")
     repo_names = set()
-    for token in tokens:
-        headers = {'Authorization': f'Bearer {token}'}
-        url = f'https://api.github.com/search/repositories?q=user:{username}&per_page=500'
-        while url:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                data = response.json()
-                repo_names.update([item['full_name'] for item in data['items']])
-                # Check if there are more pages of results
-                if 'next' in response.links:
-                    url = response.links['next']['url']
+    if '/' in username_or_repo:
+        repo_names.add(username_or_repo)
+    else:
+        for token in tokens:
+            headers = {'Authorization': f'Bearer {token}'}
+            url = f'https://api.github.com/search/repositories?q=user:{username_or_repo}&per_page=500'
+            while url:
+                response = requests.get(url, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    repo_names.update([item['full_name'] for item in data['items']])
+                    # Check if there are more pages of results
+                    if 'next' in response.links:
+                        url = response.links['next']['url']
+                    else:
+                        break
                 else:
+                    print(f"Failed to fetch repositories: {response.content}")
                     break
-            else:
-                print(f"Failed to fetch repositories: {response.content}")
-                break
     
     with open(REPO_FILE, 'w') as file:
         for repo_name in repo_names:
@@ -892,7 +894,7 @@ def main():
         summary_report = generate_summary_report(repo_reports)
         
         # Generate HTML report with tabs
-        html_filename = f"{username.replace('/', '_')}_analysis.html" if username else f"{repo_name.replace('/', '_')}_analysis.html"
+        html_filename = f"{username.replace('/', '_')}_analysis.html" if username else f"{repo_name_or_user.replace('/', '_')}_analysis.html"
         generate_html_report(repo_reports, summary_report, html_filename)
         print(f"Report generated: {html_filename}")
 
