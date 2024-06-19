@@ -283,7 +283,7 @@ def analyze_manifest_files(repo_name):
     while True:
         try:
             repo = g.get_repo(repo_name)
-            manifest_files = get_files_recursively(repo, '', ['manifest.yml', 'manifest*prod*.yml'])
+            manifest_files = get_files_recursively(repo, '', ['manifest.yml', 'manifest*prod*.yml', 'manifest_*.yml'])
             manifest_details = []
             for manifest_file in manifest_files:
                 content = decode_content(manifest_file.decoded_content)
@@ -300,7 +300,6 @@ def analyze_manifest_files(repo_name):
                     'number_of_services': manifest_data.get('number_of_services', 'N/A'),
                     'service_names': manifest_data.get('service_names', 'N/A'),
                     'instances': manifest_data.get('instances', 'N/A'),
-                    'content': content,
                 })
             return manifest_details
         except GithubException as e:
