@@ -291,11 +291,17 @@ def analyze_manifest_files(repo_name):
             for manifest_file in manifest_files:
                 content = decode_content(manifest_file.decoded_content)
                 lines = content.count('\n') + 1 if content else 0
+                manifest_data = parse_manifest(content)
                 manifest_details.append({
                     'name': manifest_file.name,
                     'path': manifest_file.path,
                     'size': manifest_file.size,
                     'lines_of_code': lines,
+                    'pcf_application_name': manifest_data.get('name', 'N/A'),
+                    'buildpack': manifest_data.get('buildpack', 'N/A'),
+                    'memory': manifest_data.get('memory', 'N/A'),
+                    'number_of_services': manifest_data.get('number_of_services', 'N/A'),
+                    'instances': manifest_data.get('instances', 'N/A'),
                     'content': content,
                 })
             return manifest_details
@@ -305,6 +311,18 @@ def analyze_manifest_files(repo_name):
                 continue
             else:
                 raise ValueError(f"Error fetching manifest files from repository '{repo_name}': {e}")
+
+def parse_manifest(content):
+    import yaml
+    manifest_data = yaml.safe_load(content)
+    application_data = manifest_data['applications'][0] if 'applications' in manifest_data and manifest_data['applications'] else {}
+    return {
+        'name': application_data.get('name', 'N/A'),
+        'buildpack': application_data.get('buildpack', 'N/A'),
+        'memory': application_data.get('memory', 'N/A'),
+        'number_of_services': len(application_data.get('services', [])),
+        'instances': application_data.get('instances', 'N/A')
+    }
 
 def search_pcf_references(repo_name):
     while True:
@@ -643,10 +661,10 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
         html_content += """
         <h2>Manifest Files Analysis</h2>
         <table>
-            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>Content</th></tr>
+            <tr><th>Name</th><th>Path</th><th>Size (bytes)</th><th>Lines of Code</th><th>PCF Application Name</th><th>Buildpack</th><th>Memory</th><th>Number of Services</th><th>Instances</th></tr>
         """
         for manifest in manifest_details:
-            html_content += f"<tr><td>{manifest['name']}</td><td>{manifest['path']}</td><td>{manifest['size']}</td><td>{manifest['lines_of_code']}</td><td><pre>{manifest['content']}</pre></td></tr>"
+            html_content += f"<tr><td>{manifest['name']}</td><td>{manifest['path']}</td><td>{manifest['size']}</td><td>{manifest['lines_of_code']}</td><td>{manifest['pcf_application_name']}</td><td>{manifest['buildpack']}</td><td>{manifest['memory']}</td><td>{manifest['number_of_services']}</td><td>{manifest['instances']}</td></tr>"
         html_content += """
         </table>
         """
@@ -806,7 +824,7 @@ def get_repos(username):
     repo_names = set()
     for token in tokens:
         headers = {'Authorization': f'Bearer {token}'}
-        url = f'https://api.github.com/search/repositories?q=user:{username}&per_page=100'
+        url = f'https://api.github.com/search/repositories?q=user:{username}&per_page=500'
         while url:
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
