@@ -1,5 +1,6 @@
 import os
 import argparse
+import requests
 from github import Github, GithubException
 from datetime import datetime
 import time
@@ -17,6 +18,7 @@ g = Github(tokens[token_index])
 
 # Checkpoint file to save progress
 CHECKPOINT_FILE = 'checkpoint.json'
+REPO_FILE = 'repo.txt'
 
 def switch_token():
     global token_index, g
@@ -67,6 +69,7 @@ def get_repo_info(repo_name):
                 'open_issues_count': repo.open_issues_count,
                 'license': repo.license.name if repo.license else 'None',
                 'html_url': repo.html_url,
+                'private': repo.private
             }
             return info
         except GithubException as e:
@@ -283,7 +286,7 @@ def analyze_manifest_files(repo_name):
     while True:
         try:
             repo = g.get_repo(repo_name)
-            manifest_files = get_files_recursively(repo, '', ['manifest.yml'])
+            manifest_files = get_files_recursively(repo, '', ['manifest.yml', 'manifest*prod*.yml'])
             manifest_details = []
             for manifest_file in manifest_files:
                 content = decode_content(manifest_file.decoded_content)
@@ -463,7 +466,7 @@ def generate_report_for_repo(repo, include_estimates):
         config_files = get_files_recursively(repo, '', [".properties", ".yml", ".json"])
         
         print("Fetching deployment manifests...")
-        deployment_manifests = get_files_recursively(repo, '', [".yml", ".yaml", "manifest.yml", "Dockerfile"])
+        deployment_manifests = get_files_recursively(repo, '', ["manifest.yml", "manifest*prod*.yml", ".yaml", "Dockerfile"])
         
         print("Analyzing manifest files...")
         manifest_details = analyze_manifest_files(repo_name)
@@ -567,6 +570,7 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
             <tr><th>Forks Count</th><td>{repo_info['forks_count']}</td></tr>
             <tr><th>Open Issues Count</th><td>{repo_info['open_issues_count']}</td></tr>
             <tr><th>License</th><td>{repo_info['license']}</td></tr>
+            <tr><th>Private</th><td>{"Yes" if repo_info['private'] else "No"}</td></tr>
             <tr><th>GitHub URL</th><td><a href="{repo_info['html_url']}">{repo_info['html_url']}</a></td></tr>
         </table>
 
@@ -736,6 +740,7 @@ def generate_summary_report(repo_reports):
                 <th>Complexity</th>
                 <th>Helios Onboarding</th>
                 <th>Deployed to PCF</th>
+                <th>Private</th>
             </tr>
     """
     for report in repo_reports:
@@ -756,6 +761,7 @@ def generate_summary_report(repo_reports):
                 <td>{report["complexity"]}</td>
                 <td>{report["helios_onboarding"]}</td>
                 <td>{report["deployed_to_pcf"]}</td>
+                <td>{"Yes" if report.get("private") else "No"}</td>
             </tr>
         """
     summary_content += "</table>"
@@ -795,6 +801,31 @@ def delete_checkpoint_file():
         os.remove(CHECKPOINT_FILE)
         print(f"Checkpoint file {CHECKPOINT_FILE} deleted.")
 
+def get_repos(username):
+    print(f"Gathering repositories for user {username}...")
+    repo_names = set()
+    for token in tokens:
+        headers = {'Authorization': f'Bearer {token}'}
+        url = f'https://api.github.com/search/repositories?q=user:{username}&per_page=100'
+        while url:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                repo_names.update([item['full_name'] for item in data['items']])
+                # Check if there are more pages of results
+                if 'next' in response.links:
+                    url = response.links['next']['url']
+                else:
+                    break
+            else:
+                print(f"Failed to fetch repositories: {response.content}")
+                break
+    
+    with open(REPO_FILE, 'w') as file:
+        for repo_name in repo_names:
+            file.write(f"{repo_name}\n")
+    print(f"Repository list saved to {REPO_FILE}")
+
 def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description='Generate migration report for GitHub repositories.')
@@ -810,44 +841,34 @@ def main():
         username, repo_reports = load_checkpoint()
         if username is None:
             username = repo_name_or_user
+            get_repos(username)
+        
+        with open(REPO_FILE, 'r') as file:
+            repo_names = [line.strip() for line in file.readlines()]
 
-        if '/' in username:
-            # Single repository
-            repo_name = username
-            print(f"Gathering repository information for {repo_name}...")
+        # Load repo names that have already been processed
+        processed_repo_names = {report["repo_name"] for report in repo_reports}
+        
+        for repo_name in repo_names:
+            if repo_name in processed_repo_names:
+                continue  # Skip already processed repositories
+            
             repo = g.get_repo(repo_name)
-            report = generate_report_for_repo(repo, include_estimates)
-            if report:
-                repo_reports.append(report)
-        else:
-            # User's all repositories
-            print(f"Gathering repositories for user {username}...")
-            user = g.get_user(username)
-            repo_names = [repo.full_name for repo in user.get_repos(type='all')]  # Include both public and private repositories
-            
-            # Load repo names that have already been processed
-            processed_repo_names = {report["repo_name"] for report in repo_reports}
-            
-            for repo_name in repo_names:
-                if repo_name in processed_repo_names:
-                    continue  # Skip already processed repositories
-                
-                repo = g.get_repo(repo_name)
-                try:
-                    report = generate_report_for_repo(repo, include_estimates)
-                    if report:
-                        repo_reports.append(report)
-                    # Save checkpoint after each repository
-                    save_checkpoint(username, repo_reports)
-                    # Update HTML report after each repository
-                    summary_report = generate_summary_report(repo_reports)
-                    html_filename = f"{username.replace('/', '_')}_analysis.html"
-                    generate_html_report(repo_reports, summary_report, html_filename)
-                except GithubException as e:
-                    if e.status == 403:
-                        print(f"Access denied for repository {repo.full_name}, skipping...")
-                    else:
-                        raise e
+            try:
+                report = generate_report_for_repo(repo, include_estimates)
+                if report:
+                    repo_reports.append(report)
+                # Save checkpoint after each repository
+                save_checkpoint(username, repo_reports)
+                # Update HTML report after each repository
+                summary_report = generate_summary_report(repo_reports)
+                html_filename = f"{username.replace('/', '_')}_analysis.html"
+                generate_html_report(repo_reports, summary_report, html_filename)
+            except GithubException as e:
+                if e.status == 403:
+                    print(f"Access denied for repository {repo.full_name}, skipping...")
+                else:
+                    raise e
         
         # Generate overall summary report
         summary_report = generate_summary_report(repo_reports)
