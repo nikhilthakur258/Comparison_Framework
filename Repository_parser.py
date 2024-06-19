@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 import xml.etree.ElementTree as ET
 import json
+import chardet
 
 # Set up GitHub API access
 GITHUB_TOKENS = os.getenv('GITHUB_TOKENS')  # Ensure this is set as an environment variable
@@ -91,12 +92,21 @@ def get_files_recursively(repo, path='', extensions=None):
                 result_files.append(content)
     return result_files
 
+def decode_content(file_content):
+    try:
+        detected_encoding = chardet.detect(file_content)
+        encoding = detected_encoding.get('encoding') or 'utf-8'
+        return file_content.decode(encoding, errors='ignore')
+    except Exception as e:
+        print(f"Error decoding content: {e}. Falling back to 'utf-8'.")
+        return file_content.decode('utf-8', errors='ignore')
+
 def count_files(repo_name, extensions):
     while True:
         try:
             repo = g.get_repo(repo_name)
             files = get_files_recursively(repo, '', extensions)
-            total_lines = sum(f.decoded_content.decode('utf-8', errors='ignore').count('\n') + 1 for f in files)
+            total_lines = sum(decode_content(f.decoded_content).count('\n') + 1 for f in files)
             return len(files), total_lines
         except GithubException as e:
             if e.status == 403 and 'rate limit exceeded' in str(e):
@@ -112,7 +122,7 @@ def get_file_details(repo_name, extensions):
             files = get_files_recursively(repo, '', extensions)
             file_details = []
             for file in files:
-                content = file.decoded_content.decode('utf-8', errors='ignore')
+                content = decode_content(file.decoded_content)
                 lines = content.count('\n') + 1 if content else 0
                 file_details.append({
                     'name': file.name,
@@ -227,7 +237,7 @@ def get_dependencies_and_versions(repo_name):
             group_id = artifact_id = version = name = 'N/A'
             parent_group_id = parent_artifact_id = parent_version = parent_name = 'N/A'
             for pom_file in pom_files:
-                content = repo.get_contents(pom_file.path).decoded_content.decode('utf-8')
+                content = decode_content(repo.get_contents(pom_file.path).decoded_content)
                 deps, java_version, spring_boot_version, gid, aid, ver, nm, pgid, paid, pver, pnm = parse_pom_xml(content)
                 dependencies.extend(deps)
                 if java_version != 'N/A':
@@ -244,7 +254,7 @@ def get_dependencies_and_versions(repo_name):
                 parent_version = pver
                 parent_name = pnm
             for gradle_file in gradle_files:
-                content = repo.get_contents(gradle_file.path).decoded_content.decode('utf-8')
+                content = decode_content(repo.get_contents(gradle_file.path).decoded_content)
                 java_version, spring_boot_version = parse_gradle_file(content)
                 if java_version != 'N/A':
                     java_versions.append(java_version)
@@ -252,7 +262,7 @@ def get_dependencies_and_versions(repo_name):
                     spring_boot_versions.append(spring_boot_version)
                 build_tool = 'Gradle'
             for package_json_file in package_json_files:
-                content = repo.get_contents(package_json_file.path).decoded_content.decode('utf-8')
+                content = decode_content(repo.get_contents(package_json_file.path).decoded_content)
                 angular_version, node_version = parse_package_json(content)
                 if angular_version != 'N/A':
                     angular_versions.append(angular_version)
@@ -274,7 +284,7 @@ def analyze_manifest_files(repo_name):
             manifest_files = get_files_recursively(repo, '', ['manifest.yml'])
             manifest_details = []
             for manifest_file in manifest_files:
-                content = repo.get_contents(manifest_file.path).decoded_content.decode('utf-8', errors='ignore')
+                content = decode_content(manifest_file.decoded_content)
                 lines = content.count('\n') + 1 if content else 0
                 manifest_details.append({
                     'name': manifest_file.name,
@@ -298,7 +308,7 @@ def search_pcf_references(repo_name):
             files = get_files_recursively(repo, '')  # Fetch all files
             pcf_references = []
             for file in files:
-                content = repo.get_contents(file.path).decoded_content.decode('utf-8', errors='ignore').lower()
+                content = decode_content(file.decoded_content).lower()
                 lines = content.split('\n')
                 for line_number, line in enumerate(lines, start=1):
                     if 'pcf' in line or 'cloudfoundry' in line:
@@ -545,13 +555,13 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
             <tr><th>Java Files</th><td>{java_files_count}</td></tr>
             <tr><th>Application Lines of Code</th><td>{java_files_lines}</td></tr>
             <tr><th>PCF References</td><td>{len(pcf_references)}</td></tr>
-            <tr><th>Configuration Files</th><td>{len(config_files)}</td></tr>
+            <tr><th>Configuration Files</td><td>{len(config_files)}</td></tr>
             <tr><th>Deployment Manifests</td><td>{len(deployment_manifests)}</td></tr>
             <tr><th>Dependencies</td><td>{len(dependencies)}</td></tr>
             <tr><th>Java Versions</th><td>{', '.join(set(java_versions))}</td></tr>
             <tr><th>Spring Boot Versions</th><td>{', '.join(set(spring_boot_versions))}</td></tr>
             <tr><th>Angular Versions</th><td>{', '.join(set(angular_versions))}</td></tr>
-            <tr><th>Node Versions</th><td>{', '.join(set(node_versions))}</td></tr>
+            <tr><th>Node Versions</td><td>{', '.join(set(node_versions))}</td></tr>
             <tr><th>Complexity</td><td>{complexity}</td></tr>
             <tr><th>Helios Onboarding</td><td>{helios_onboarding}</td></tr>
             <tr><th>Deployed to PCF</td><td>{deployed_to_pcf}</td></tr>
@@ -759,6 +769,11 @@ def load_checkpoint():
             return None, []
     return None, []
 
+def delete_checkpoint_file():
+    if os.path.exists(CHECKPOINT_FILE):
+        os.remove(CHECKPOINT_FILE)
+        print(f"Checkpoint file {CHECKPOINT_FILE} deleted.")
+
 def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description='Generate migration report for GitHub repositories.')
@@ -787,7 +802,16 @@ def main():
             # User's all repositories
             print(f"Gathering repositories for user {username}...")
             user = g.get_user(username)
-            for repo in user.get_repos():
+            repo_names = [repo.full_name for repo in user.get_repos(type='all')]  # Include both public and private repositories
+            
+            # Load repo names that have already been processed
+            processed_repo_names = {report["repo_name"] for report in repo_reports}
+            
+            for repo_name in repo_names:
+                if repo_name in processed_repo_names:
+                    continue  # Skip already processed repositories
+                
+                repo = g.get_repo(repo_name)
                 try:
                     report = generate_report_for_repo(repo, include_estimates)
                     if report:
@@ -811,6 +835,9 @@ def main():
         html_filename = f"{username.replace('/', '_')}_analysis.html" if username else f"{repo_name.replace('/', '_')}_analysis.html"
         generate_html_report(repo_reports, summary_report, html_filename)
         print(f"Report generated: {html_filename}")
+
+        # Delete checkpoint file after successful run
+        delete_checkpoint_file()
     
     except Exception as e:
         print(f"Error: {e}")
