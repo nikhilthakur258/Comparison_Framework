@@ -112,41 +112,16 @@ def get_service_info():
 
     return services
 
-def get_service_bindings():
-    logging.info("Fetching service instances and bindings...")
-    service_instances_command = ["cf", "service-instances"]
-    service_instances_output = run_cf_command(service_instances_command)
-    if not service_instances_output:
-        return None
-
-    service_bindings = []
-    for line in service_instances_output.splitlines()[4:]:  # Skip the header lines
-        parts = line.split()
-        if len(parts) >= 4:
-            service_instance_name = parts[0]
-            service_name = parts[1]
-            plan = parts[2]
-            bound_app = parts[3]
-            service_bindings.append({
-                "service_instance_name": service_instance_name,
-                "service_name": service_name,
-                "plan": plan,
-                "bound_app": bound_app
-            })
-
-    return service_bindings
-
-def create_excel_file(app_info, service_info, service_bindings):
+def create_excel_file(app_info, service_info):
     logging.info("Creating Excel file...")
     data = []
     for app in app_info:
         app_name = app['name']
         services = [service for service in service_info if service['bound_app'] == app_name]
-        bindings = [binding for binding in service_bindings if binding['bound_app'] == app_name]
         num_services = len(services)
         buildpack_details = ', '.join([f"{bp['name']} (version: {bp['version']}, detect_output: {bp['detect_output']})" for bp in app.get('buildpacks_info', [])])
         if num_services > 0:
-            for service, binding in zip(services, bindings):
+            for service in services:
                 data.append({
                     "PCF App Name": app['name'],
                     "Number of Instances": app['instances'],
@@ -157,7 +132,7 @@ def create_excel_file(app_info, service_info, service_bindings):
                     "Service Name": service['service_name'],
                     "Service Plan": service['plan'],
                     "Service Type": service['service_type'],
-                    "Binding Name": binding['service_instance_name']
+                    "Binding Name": service['bound_app']
                 })
         else:
             data.append({
@@ -204,10 +179,9 @@ def main():
 
     app_info = get_app_info(limit=args.num_apps)
     service_info = get_service_info()
-    service_bindings = get_service_bindings()
 
-    if app_info and service_info and service_bindings:
-        create_excel_file(app_info, service_info, service_bindings)
+    if app_info and service_info:
+        create_excel_file(app_info, service_info)
     else:
         logging.error("Failed to retrieve application or service details.")
 
