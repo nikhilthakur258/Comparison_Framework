@@ -1,0 +1,98 @@
+import subprocess
+import json
+
+def run_cf_command(command):
+    try:
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, text=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"Error running command {command}: {e.stderr}")
+        return None
+
+def get_app_info():
+    app_list_command = ["cf", "apps"]
+    app_list = run_cf_command(app_list_command)
+    if not app_list:
+        return None
+
+    # Parse the app list to get app names
+    apps = []
+    for line in app_list.splitlines()[4:]:  # Skip the header lines
+        parts = line.split()
+        if parts:
+            apps.append(parts[0])
+
+    app_details = []
+
+    for app in apps:
+        app_info = {}
+
+        # Get app details
+        app_command = ["cf", "app", app]
+        app_details_output = run_cf_command(app_command)
+        if not app_details_output:
+            continue
+
+        # Extract relevant information
+        app_info['name'] = app
+        for line in app_details_output.splitlines():
+            if line.startswith("instances:"):
+                app_info['instances'] = line.split(":")[1].strip()
+            elif line.startswith("memory:"):
+                app_info['memory'] = line.split(":")[1].strip()
+            elif line.startswith("routes:"):
+                app_info['route'] = line.split(":")[1].strip()
+        
+        # Get service bindings
+        services_command = ["cf", "services"]
+        services_output = run_cf_command(services_command)
+        if services_output:
+            services = []
+            for service_line in services_output.splitlines()[4:]:  # Skip the header lines
+                service_parts = service_line.split()
+                if len(service_parts) >= 5 and service_parts[3] == app:
+                    services.append({
+                        "name": service_parts[0],
+                        "service": service_parts[1],
+                        "plan": service_parts[2],
+                        "last_operation": ' '.join(service_parts[4:])
+                    })
+            app_info['services'] = services
+        
+        app_details.append(app_info)
+    
+    return app_details
+
+def main():
+    # Log in to PCF
+    login_command = [
+        "cf", "login", 
+        "-a", "API_ENDPOINT", 
+        "-u", "USERNAME", 
+        "-p", "PASSWORD", 
+        "-o", "ORG", 
+        "-s", "SPACE"
+    ]
+    run_cf_command(login_command)
+
+    app_info = get_app_info()
+
+    if app_info:
+        print("App Information:")
+        for app in app_info:
+            print(f"Name: {app['name']}")
+            print(f"Instances: {app['instances']}")
+            print(f"Memory: {app['memory']}")
+            print(f"Route: {app['route']}")
+            if 'services' in app:
+                for service in app['services']:
+                    print(f"  Service Name: {service['name']}")
+                    print(f"  Service: {service['service']}")
+                    print(f"  Plan: {service['plan']}")
+                    print(f"  Last Operation: {service['last_operation']}")
+            print()
+    else:
+        print("Failed to retrieve application details.")
+
+if __name__ == "__main__":
+    main()
