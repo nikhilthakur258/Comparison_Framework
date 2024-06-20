@@ -114,42 +114,36 @@ def get_service_info():
 
 def create_excel_file(app_info, service_info):
     logging.info("Creating Excel file...")
-    data = []
-    for app in app_info:
-        app_name = app['name']
-        services = [service for service in service_info if service['bound_app'] == app_name]
-        num_services = len(services)
-        buildpack_details = ', '.join([f"{bp['name']} (version: {bp['version']}, detect_output: {bp['detect_output']})" for bp in app.get('buildpacks_info', [])])
-        if num_services > 0:
-            for service in services:
-                data.append({
-                    "PCF App Name": app['name'],
-                    "Number of Instances": app['instances'],
-                    "Memory": app['memory'],
-                    "Number of Services Bound": num_services,
-                    "Routes": app['routes'],
-                    "Buildpacks": buildpack_details,
-                    "Service Name": service['service_name'],
-                    "Service Plan": service['plan'],
-                    "Service Type": service['service_type'],
-                    "Binding Name": service['bound_app']
-                })
-        else:
-            data.append({
-                "PCF App Name": app['name'],
-                "Number of Instances": app['instances'],
-                "Memory": app['memory'],
-                "Number of Services Bound": num_services,
-                "Routes": app['routes'],
-                "Buildpacks": buildpack_details,
-                "Service Name": 'N/A',
-                "Service Plan": 'N/A',
-                "Service Type": 'N/A',
-                "Binding Name": 'N/A'
-            })
 
-    df = pd.DataFrame(data)
-    df.to_excel('app_info.xlsx', index=False)
+    # Data for the first tab (PCF Details)
+    pcf_details_data = []
+    for app in app_info:
+        services = [service for service in service_info if service['bound_app'] == app['name']]
+        pcf_details_data.append({
+            "PCF App Name": app['name'],
+            "Number of Instances": app['instances'],
+            "Memory": app['memory'],
+            "Number of Services Bound": len(services)
+        })
+
+    # Data for the second tab (PCF Services)
+    pcf_services_data = []
+    for service in service_info:
+        pcf_services_data.append({
+            "PCF App Name": service['bound_app'],
+            "Service Type": service['service_type'],
+            "Service Name": service['service_name']
+        })
+
+    # Create dataframes
+    df_pcf_details = pd.DataFrame(pcf_details_data)
+    df_pcf_services = pd.DataFrame(pcf_services_data)
+
+    # Write to Excel
+    with pd.ExcelWriter('app_info.xlsx') as writer:
+        df_pcf_details.to_excel(writer, sheet_name='PCF Details', index=False)
+        df_pcf_services.to_excel(writer, sheet_name='PCF Services', index=False)
+
     logging.info("Excel file 'app_info.xlsx' created successfully.")
 
 def main():
