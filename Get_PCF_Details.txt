@@ -1,6 +1,7 @@
 import subprocess
 import pandas as pd
 import logging
+import argparse
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -15,7 +16,7 @@ def run_cf_command(command):
         logging.error(f"Error running command {command}: {e.stderr}")
         return None
 
-def get_app_info():
+def get_app_info(limit=None):
     logging.info("Fetching list of apps...")
     app_list_command = ["cf", "apps"]
     app_list = run_cf_command(app_list_command)
@@ -28,6 +29,9 @@ def get_app_info():
         parts = line.split()
         if parts:
             apps.append(parts[0])
+    
+    if limit:
+        apps = apps[:limit]
 
     app_details = []
 
@@ -55,51 +59,76 @@ def get_app_info():
         app_info.setdefault('instances', 'N/A')
         app_info.setdefault('memory', 'N/A')
         app_info.setdefault('route', 'N/A')
-        
-        # Get service bindings
-        logging.info(f"Fetching services for app: {app}")
-        services_command = ["cf", "services"]
-        services_output = run_cf_command(services_command)
-        if services_output:
-            services = []
-            for service_line in services_output.splitlines()[4:]:  # Skip the header lines
-                service_parts = service_line.split()
-                if len(service_parts) >= 5 and service_parts[3] == app:
-                    services.append({
-                        "name": service_parts[0],
-                        "service": service_parts[1],
-                        "plan": service_parts[2],
-                        "last_operation": ' '.join(service_parts[4:])
-                    })
-            app_info['services'] = services
-        else:
-            app_info['services'] = []
-        
+
         app_details.append(app_info)
-    
+
     return app_details
 
-def create_excel_file(app_info):
+def get_service_info():
+    logging.info("Fetching list of services...")
+    services_command = ["cf", "services"]
+    services_output = run_cf_command(services_command)
+    if not services_output:
+        return None
+
+    services = []
+    for service_line in services_output.splitlines()[4:]:  # Skip the header lines
+        service_parts = service_line.split()
+        if len(service_parts) >= 5:
+            service_name = service_parts[0]
+            service_type = service_parts[1]
+            service_plan = service_parts[2]
+            bound_app = service_parts[3]
+            last_operation = ' '.join(service_parts[4:])
+            services.append({
+                "service_name": service_name,
+                "service_type": service_type,
+                "plan": service_plan,
+                "bound_app": bound_app,
+                "last_operation": last_operation
+            })
+
+    return services
+
+def create_excel_file(app_info, service_info):
     logging.info("Creating Excel file...")
     data = []
     for app in app_info:
-        for service in app.get('services', [{}]):
+        app_name = app['name']
+        services = [service for service in service_info if service['bound_app'] == app_name]
+        if services:
+            for service in services:
+                data.append({
+                    "Name": app['name'],
+                    "Instances": app['instances'],
+                    "Memory": app['memory'],
+                    "Route": app['route'],
+                    "Service Name": service['service_name'],
+                    "Service": service['service_type'],
+                    "Plan": service['plan'],
+                    "Last Operation": service['last_operation']
+                })
+        else:
             data.append({
                 "Name": app['name'],
                 "Instances": app['instances'],
                 "Memory": app['memory'],
                 "Route": app['route'],
-                "Service Name": service.get('name', ''),
-                "Service": service.get('service', ''),
-                "Plan": service.get('plan', ''),
-                "Last Operation": service.get('last_operation', '')
+                "Service Name": 'N/A',
+                "Service": 'N/A',
+                "Plan": 'N/A',
+                "Last Operation": 'N/A'
             })
-    
+
     df = pd.DataFrame(data)
     df.to_excel('app_info.xlsx', index=False)
     logging.info("Excel file 'app_info.xlsx' created successfully.")
 
 def main():
+    parser = argparse.ArgumentParser(description="Fetch PCF application and service details.")
+    parser.add_argument('-n', '--num_apps', type=int, help="Number of apps to process")
+    args = parser.parse_args()
+
     logging.info("Starting PCF application info retrieval script...")
 
     # Set API endpoint with skip SSL validation
@@ -120,12 +149,13 @@ def main():
     ]
     run_cf_command(login_command)
 
-    app_info = get_app_info()
+    app_info = get_app_info(limit=args.num_apps)
+    service_info = get_service_info()
 
-    if app_info:
-        create_excel_file(app_info)
+    if app_info and service_info:
+        create_excel_file(app_info, service_info)
     else:
-        logging.error("Failed to retrieve application details.")
+        logging.error("Failed to retrieve application or service details.")
 
     logging.info("Script finished.")
 
