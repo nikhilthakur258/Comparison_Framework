@@ -113,23 +113,25 @@ def get_service_info():
     return services
 
 def get_service_bindings():
-    logging.info("Fetching service bindings...")
-    service_bindings_command = ["cf", "service-bindings"]
-    service_bindings_output = run_cf_command(service_bindings_command)
-    if not service_bindings_output:
+    logging.info("Fetching service instances and bindings...")
+    service_instances_command = ["cf", "service-instances"]
+    service_instances_output = run_cf_command(service_instances_command)
+    if not service_instances_output:
         return None
 
     service_bindings = []
-    for line in service_bindings_output.splitlines()[4:]:  # Skip the header lines
+    for line in service_instances_output.splitlines()[4:]:  # Skip the header lines
         parts = line.split()
         if len(parts) >= 4:
-            binding_name = parts[0]
-            service_instance = parts[1]
-            app_name = parts[2]
+            service_instance_name = parts[0]
+            service_name = parts[1]
+            plan = parts[2]
+            bound_app = parts[3]
             service_bindings.append({
-                "binding_name": binding_name,
-                "service_instance": service_instance,
-                "app_name": app_name
+                "service_instance_name": service_instance_name,
+                "service_name": service_name,
+                "plan": plan,
+                "bound_app": bound_app
             })
 
     return service_bindings
@@ -140,7 +142,7 @@ def create_excel_file(app_info, service_info, service_bindings):
     for app in app_info:
         app_name = app['name']
         services = [service for service in service_info if service['bound_app'] == app_name]
-        bindings = [binding for binding in service_bindings if binding['app_name'] == app_name]
+        bindings = [binding for binding in service_bindings if binding['bound_app'] == app_name]
         num_services = len(services)
         buildpack_details = ', '.join([f"{bp['name']} (version: {bp['version']}, detect_output: {bp['detect_output']})" for bp in app.get('buildpacks_info', [])])
         if num_services > 0:
@@ -155,7 +157,7 @@ def create_excel_file(app_info, service_info, service_bindings):
                     "Service Name": service['service_name'],
                     "Service Plan": service['plan'],
                     "Service Type": service['service_type'],
-                    "Binding Name": binding['binding_name']
+                    "Binding Name": binding['service_instance_name']
                 })
         else:
             data.append({
