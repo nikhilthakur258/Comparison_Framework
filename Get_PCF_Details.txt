@@ -50,6 +50,11 @@ def get_app_info():
                 app_info['memory'] = line.split(":")[1].strip()
             elif line.startswith("routes:"):
                 app_info['route'] = line.split(":")[1].strip()
+
+        # Ensure all keys are present in the app_info dictionary
+        app_info.setdefault('instances', 'N/A')
+        app_info.setdefault('memory', 'N/A')
+        app_info.setdefault('route', 'N/A')
         
         # Get service bindings
         logging.info(f"Fetching services for app: {app}")
@@ -67,6 +72,8 @@ def get_app_info():
                         "last_operation": ' '.join(service_parts[4:])
                     })
             app_info['services'] = services
+        else:
+            app_info['services'] = []
         
         app_details.append(app_info)
     
