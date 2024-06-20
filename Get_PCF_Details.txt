@@ -53,12 +53,33 @@ def get_app_info(limit=None):
             elif 'memory:' in line:
                 app_info['memory'] = line.split(':')[1].strip()
             elif 'routes:' in line:
-                app_info['route'] = line.split(':')[1].strip()
+                app_info['routes'] = line.split(':')[1].strip()
+            elif 'buildpacks:' in line:
+                app_info['buildpacks'] = line.split(':')[1].strip()
+
+        # Extract buildpack details
+        app_info['buildpacks_info'] = []
+        buildpacks_start = False
+        for line in app_details_output.splitlines():
+            if 'buildpack' in line and 'name' in line and 'version' in line and 'detect output' in line:
+                buildpacks_start = True
+                continue
+            if buildpacks_start and line.strip():
+                parts = [part.strip() for part in line.split() if part.strip()]
+                if len(parts) >= 3:
+                    app_info['buildpacks_info'].append({
+                        'name': parts[0],
+                        'version': parts[1],
+                        'detect_output': ' '.join(parts[2:])
+                    })
+            elif buildpacks_start and not line.strip():
+                break
 
         # Ensure all keys are present in the app_info dictionary
         app_info.setdefault('instances', 'N/A')
         app_info.setdefault('memory', 'N/A')
-        app_info.setdefault('route', 'N/A')
+        app_info.setdefault('routes', 'N/A')
+        app_info.setdefault('buildpacks', 'N/A')
 
         app_details.append(app_info)
 
@@ -96,29 +117,16 @@ def create_excel_file(app_info, service_info):
     for app in app_info:
         app_name = app['name']
         services = [service for service in service_info if service['bound_app'] == app_name]
-        if services:
-            for service in services:
-                data.append({
-                    "Name": app['name'],
-                    "Instances": app['instances'],
-                    "Memory": app['memory'],
-                    "Route": app['route'],
-                    "Service Name": service['service_name'],
-                    "Service": service['service_type'],
-                    "Plan": service['plan'],
-                    "Last Operation": service['last_operation']
-                })
-        else:
-            data.append({
-                "Name": app['name'],
-                "Instances": app['instances'],
-                "Memory": app['memory'],
-                "Route": app['route'],
-                "Service Name": 'N/A',
-                "Service": 'N/A',
-                "Plan": 'N/A',
-                "Last Operation": 'N/A'
-            })
+        num_services = len(services)
+        buildpack_details = ', '.join([f"{bp['name']} (version: {bp['version']}, detect_output: {bp['detect_output']})" for bp in app.get('buildpacks_info', [])])
+        data.append({
+            "PCF App Name": app['name'],
+            "Number of Instances": app['instances'],
+            "Memory": app['memory'],
+            "Number of Services Bound": num_services,
+            "Routes": app['routes'],
+            "Buildpacks": buildpack_details
+        })
 
     df = pd.DataFrame(data)
     df.to_excel('app_info.xlsx', index=False)
