@@ -120,14 +120,30 @@ def create_excel_file(app_info, service_info):
         services = [service for service in service_info if service['bound_app'] == app_name]
         num_services = len(services)
         buildpack_details = ', '.join([f"{bp['name']} (version: {bp['version']}, detect_output: {bp['detect_output']})" for bp in app.get('buildpacks_info', [])])
-        data.append({
-            "PCF App Name": app['name'],
-            "Number of Instances": app['instances'],
-            "Memory": app['memory'],
-            "Number of Services Bound": num_services,
-            "Routes": app['routes'],
-            "Buildpacks": buildpack_details
-        })
+        for service in services:
+            data.append({
+                "PCF App Name": app['name'],
+                "Number of Instances": app['instances'],
+                "Memory": app['memory'],
+                "Number of Services Bound": num_services,
+                "Routes": app['routes'],
+                "Buildpacks": buildpack_details,
+                "Service Name": service['service_name'],
+                "Service Plan": service['plan'],
+                "Service Instance": service['service_type'],
+            })
+        if not services:  # If no services are bound, add an entry with N/A for service details
+            data.append({
+                "PCF App Name": app['name'],
+                "Number of Instances": app['instances'],
+                "Memory": app['memory'],
+                "Number of Services Bound": num_services,
+                "Routes": app['routes'],
+                "Buildpacks": buildpack_details,
+                "Service Name": 'N/A',
+                "Service Plan": 'N/A',
+                "Service Instance": 'N/A',
+            })
 
     df = pd.DataFrame(data)
     df.to_excel('app_info.xlsx', index=False)
