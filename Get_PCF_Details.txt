@@ -10,7 +10,6 @@ def run_cf_command(command):
     logging.info(f"Running command: {' '.join(command)}")
     try:
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, text=True)
-        logging.info(f"Command succeeded: {' '.join(command)}")
         return result.stdout
     except subprocess.CalledProcessError as e:
         logging.error(f"Error running command {command}: {e.stderr}")
@@ -50,8 +49,8 @@ def get_app_info(limit=None):
         for line in app_details_output.splitlines():
             if 'instances:' in line:
                 app_info['instances'] = line.split(':')[1].strip().split('/')[0].strip()
-            elif 'memory:' in line:
-                app_info['memory'] = line.split(':')[1].strip()
+            elif 'memory usage:' in line or 'usage:' in line:
+                app_info['memory'] = line.split(':')[1].strip().split(' x ')[0].strip()
             elif 'routes:' in line:
                 app_info['routes'] = line.split(':')[1].strip()
             elif 'buildpacks:' in line:
@@ -131,7 +130,7 @@ def create_excel_file(app_info, service_info):
                     "Buildpacks": buildpack_details,
                     "Service Name": service['service_name'],
                     "Service Plan": service['plan'],
-                    "Instance Name": app['name']
+                    "Service Type": service['service_type']
                 })
         else:
             data.append({
@@ -143,7 +142,7 @@ def create_excel_file(app_info, service_info):
                 "Buildpacks": buildpack_details,
                 "Service Name": 'N/A',
                 "Service Plan": 'N/A',
-                "Instance Name": app['name']
+                "Service Type": 'N/A'
             })
 
     df = pd.DataFrame(data)
