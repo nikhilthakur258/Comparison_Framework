@@ -48,12 +48,12 @@ def get_app_info(limit=None):
         # Extract relevant information
         app_info['name'] = app
         for line in app_details_output.splitlines():
-            if line.startswith("instances:"):
-                app_info['instances'] = line.split(":")[1].strip()
-            elif line.startswith("memory:"):
-                app_info['memory'] = line.split(":")[1].strip()
-            elif line.startswith("routes:"):
-                app_info['route'] = line.split(":")[1].strip()
+            if 'instances:' in line:
+                app_info['instances'] = line.split(':')[1].strip().split('/')[0].strip()
+            elif 'memory:' in line:
+                app_info['memory'] = line.split(':')[1].strip()
+            elif 'routes:' in line:
+                app_info['route'] = line.split(':')[1].strip()
 
         # Ensure all keys are present in the app_info dictionary
         app_info.setdefault('instances', 'N/A')
