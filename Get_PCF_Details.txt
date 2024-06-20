@@ -1,5 +1,5 @@
 import subprocess
-import json
+import pandas as pd
 
 def run_cf_command(command):
     try:
@@ -63,6 +63,24 @@ def get_app_info():
     
     return app_details
 
+def create_excel_file(app_info):
+    data = []
+    for app in app_info:
+        for service in app.get('services', [{}]):
+            data.append({
+                "Name": app['name'],
+                "Instances": app['instances'],
+                "Memory": app['memory'],
+                "Route": app['route'],
+                "Service Name": service.get('name', ''),
+                "Service": service.get('service', ''),
+                "Plan": service.get('plan', ''),
+                "Last Operation": service.get('last_operation', '')
+            })
+    
+    df = pd.DataFrame(data)
+    df.to_excel('app_info.xlsx', index=False)
+
 def main():
     # Log in to PCF
     login_command = [
@@ -78,19 +96,8 @@ def main():
     app_info = get_app_info()
 
     if app_info:
-        print("App Information:")
-        for app in app_info:
-            print(f"Name: {app['name']}")
-            print(f"Instances: {app['instances']}")
-            print(f"Memory: {app['memory']}")
-            print(f"Route: {app['route']}")
-            if 'services' in app:
-                for service in app['services']:
-                    print(f"  Service Name: {service['name']}")
-                    print(f"  Service: {service['service']}")
-                    print(f"  Plan: {service['plan']}")
-                    print(f"  Last Operation: {service['last_operation']}")
-            print()
+        create_excel_file(app_info)
+        print("Excel file 'app_info.xlsx' created successfully.")
     else:
         print("Failed to retrieve application details.")
 
