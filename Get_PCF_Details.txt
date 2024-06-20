@@ -82,10 +82,17 @@ def create_excel_file(app_info):
     df.to_excel('app_info.xlsx', index=False)
 
 def main():
+    # Set API endpoint with skip SSL validation
+    api_command = [
+        "cf", "api", 
+        "API_ENDPOINT", 
+        "--skip-ssl-validation"
+    ]
+    run_cf_command(api_command)
+
     # Log in to PCF
     login_command = [
         "cf", "login", 
-        "-a", "API_ENDPOINT", 
         "-u", "USERNAME", 
         "-p", "PASSWORD", 
         "-o", "ORG", 
