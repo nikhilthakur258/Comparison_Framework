@@ -99,15 +99,16 @@ def get_service_info():
             service_name = service_parts[0]
             service_type = service_parts[1]
             service_plan = service_parts[2]
-            bound_app = service_parts[3]
+            bound_apps = service_parts[3].split(",") if service_parts[3] else []
             last_operation = ' '.join(service_parts[4:])
-            services.append({
-                "service_name": service_name,
-                "service_type": service_type,
-                "plan": service_plan,
-                "bound_app": bound_app,
-                "last_operation": last_operation
-            })
+            for bound_app in bound_apps:
+                services.append({
+                    "service_name": service_name,
+                    "service_type": service_type,
+                    "plan": service_plan,
+                    "bound_app": bound_app.strip(),
+                    "last_operation": last_operation
+                })
 
     return services
 
