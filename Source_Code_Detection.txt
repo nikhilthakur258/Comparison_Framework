@@ -1,0 +1,178 @@
+<script>
+function runPythonScript() {
+    var pythonScriptPath = "AzureOpenAI_requirements_BDD.py";
+    var inputText = document.getElementById('inputTextArea').value;
+    
+    // Check if input text contains source code, PII, or toxic content
+    if (detectSourceCodeOrPIIOrToxicity(inputText)) {
+        displayMessage("Detected source code, PII, or toxic content in input. Please remove it before generating requirements.");
+        return;
+    }
+    
+    if (inputText.trim() === '') {
+        alert('Please enter input before generating requirements.');
+        return; // Exit the function if no input is provided
+    }
+    
+    document.getElementById('loadingSpinner').style.display = 'inline-block';
+    // Make an AJAX request to your Flask server
+    fetch('/run_script', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ scriptPath: pythonScriptPath, inputText: inputText }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('outputTextArea').value = data.output;
+        document.getElementById('downloadBtn').disabled = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        console.log('Request completed');
+        // Hide loading spinner after response
+        document.getElementById('loadingSpinner').style.display = 'none';
+    });
+}
+
+function detectSourceCodeOrPIIOrToxicity(inputText) {
+    // Regular expression patterns to detect source code
+    var sourceCodePatterns = [
+        // General source code patterns
+        /function\s*\([^)]*\)\s*{[^{}]*}/, // JavaScript function declaration
+        /def\s+[A-Za-z_][A-Za-z0-9_]*\s*\([^)]*\):[^:]*\n/, // Python function declaration
+        /public\s+class\s+[A-Za-z_][A-Za-z0-9_]*\s*{[^{}]*}/, // Java public class declaration
+        /class\s+[A-Za-z_][A-Za-z0-9_]*\s*{[^{}]*}/, // Class declaration
+        /import\s+[A-Za-z0-9_.]+\s*;/, // Java import statement
+        /import\s+[A-Za-z0-9_.]+\s*$/, // Python import statement
+        /#include\s+[<"][A-Za-z0-9_]+[">]/, // C/C++ include statement
+        /<script.*?>[\s\S]*?<\/script>/, // HTML <script> tag
+        /<style.*?>[\s\S]*?<\/style>/, // HTML <style> tag
+        /<\?php[\s\S]*?\?>/s, // PHP code block
+        /\bvar\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*function\s*\([^)]*\)\s*{[^{}]*}/, // JavaScript anonymous function declaration
+        /function\s*\([^)]*\)\s*=>\s*{[^{}]*}/, // JavaScript arrow function declaration
+        /function\s*[A-Za-z_][A-Za-z0-9_]*\s*\([^)]*\)\s*=>\s*{[^{}]*}/, // JavaScript arrow function declaration with name
+        /class\s+[A-Za-z_][A-Za-z0-9_]*\s*{[^{}]*}/, // JavaScript class declaration
+        /def\s+[A-Za-z_][A-Za-z0-9_]*\([^)]*\):[^:]*\n/, // Ruby method declaration
+        /class\s+[A-Za-z_][A-Za-z0-9_]*\s*{[^{}]*}/, // Ruby class declaration
+        /\/\/.*\n/, // Single-line comments
+        /\/\*[\s\S]*?\*\//, // Multi-line comments
+        // Additional patterns for other languages
+        /\/\/.*\n/, // Linux/Unix shell comments
+        /PERFORM\s+[A-Za-z_][A-Za-z0-9_]*\s*THROUGH\s*[A-Za-z_][A-Za-z0-9_]*\.$/, // COBOL PERFORM statement
+        /EXEC\s+SQL.*END-EXEC\.$/, // Mainframe SQL embedded in COBOL
+        /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|USE|BEGIN|COMMIT|ROLLBACK)\b.*;/i, // SQL statements
+        /public\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s*args\s*\)\s*{[^{}]*}/i, // Java main method declaration
+        /public\s+static\s+void\s+main\s*\(\s*String\s*\[\s*\]\s*args\s*\)\s*{[^{}]*}/i, // Java main method declaration with spaces
+        // Add more patterns for other languages if needed
+    ];
+
+    // Regular expression patterns to detect PII
+    var piiPatterns = [
+        /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z]{2,}\b/i, // Email addresses
+        /\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b/, // Social Security numbers (SSN)
+        /\b(?:\d[ -]*?){13,16}\b/, // Credit card numbers
+        /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/, // US phone numbers
+        /\b\d{4}[-.\s]?\d{6}[-.\s]?\d{5}\b/, // Aadhaar numbers (India)
+        /\b\d{4}[-.\s]?\d{4}[-.\s]?\d{4}\b/, // Other 12-digit numbers
+        /\b\d{5}[-.\s]?\d{5}[-.\s]?\d{4}\b/, // Other 14-digit numbers
+        /\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b/, // US SSNs
+        /\b\d{2}[-.\s]?\d{2}[-.\s]?\d{4}\b/, // Other 8-digit numbers
+        /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/, // US phone numbers
+        /\b\d{3}[-.\s]?\d{4}[-.\s]?\d{4}\b/, // Other phone numbers
+        /\b(?:19|20)\d{2}[-.\s]?\d{2}[-.\s]?\d{2}\b/, // Dates of birth (YYYY-MM-DD, YYYY.MM.DD, YYYY/MM/DD)
+        /\b\d{1,2}[-.\s]?(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-.\s]?\d{2,4}\b/i, // Dates of birth (DD-MMM-YYYY)
+        /\b\d{5}[-.\s]?\d{5}[-.\s]?\d{4}\b/, // ZIP codes
+        /\b\d{9}\b/, // 9-digit numbers (e.g., passport numbers)
+        /\b\d{10}\b/, // 10-digit numbers
+        /\b\d{11}\b/, // 11-digit numbers
+        /\b\d{12}\b/, // 12-digit numbers
+        /\b\d{13}\b/, // 13-digit numbers
+        /\b\d{14}\b/, // 14-digit numbers
+        /\b\d{15}\b/, // 15-digit numbers
+        /\b\d{16}\b/, // 16-digit numbers
+        /\b\d{17}\b/, // 17-digit numbers
+        /\b\d{18}\b/, // 18-digit numbers
+        /\b\d{19}\b/, // 19-digit numbers
+        /\b\d{20}\b/, // 20-digit numbers
+        /\b(?:\d[ -]*?){4}[-.\s]?(?:\d[ -]*?){4}[-.\s]?(?:\d[ -]*?){4}[-.\s]?(?:\d[ -]*?){4}\b/, // Credit card numbers with spaces or dashes
+        /\b(?:\d[ -]*?){4}[-.\s]?(?:\d[ -]*?){6}[-.\s]?(?:\d[ -]*?){5}\b/, // Credit card numbers with spaces or dashes (Amex)
+        /\b[A-Za-z]{2}\d{6}\b/, // UK driving license numbers
+        /\b[A-Za-z]{2}\d{7}\b/, // UK passport numbers
+        /\b[A-Za-z]{1,2}\d{6}\b/, // US passport numbers
+        /\b[A-Za-z0-9]{9}\b/, // General 9-character alphanumeric strings
+        /\b[A-Za-z0-9]{10}\b/, // General 10-character alphanumeric strings
+        /\b[A-Za-z0-9]{11}\b/, // General 11-character alphanumeric strings
+        /\b[A-Za-z0-9]{12}\b/, // General 12-character alphanumeric strings
+        /\b[A-Za-z0-9]{13}\b/, // General 13-character alphanumeric strings
+        /\b[A-Za-z0-9]{14}\b/, // General 14-character alphanumeric strings
+        /\b[A-Za-z0-9]{15}\b/, // General 15-character alphanumeric strings
+        /\b[A-Za-z0-9]{16}\b/, // General 16-character alphanumeric strings
+        /\b[A-Za-z0-9]{17}\b/, // General 17-character alphanumeric strings
+        /\b[A-Za-z0-9]{18}\b/, // General 18-character alphanumeric strings
+        /\b[A-Za-z0-9]{19}\b/, // General 19-character alphanumeric strings
+        /\b[A-Za-z0-9]{20}\b/, // General 20-character alphanumeric strings
+        /\b\d{9}\b/, // 9-digit numbers (e.g., passport numbers)
+        /\b\d{10}\b/, // 10-digit numbers
+        /\b\d{11}\b/, // 11-digit numbers
+        /\b\d{12}\b/, // 12-digit numbers
+        /\b\d{13}\b/, // 13-digit numbers
+        /\b\d{14}\b/, // 14-digit numbers
+        /\b\d{15}\b/, // 15-digit numbers
+        /\b\d{16}\b/, // 16-digit numbers
+        /\b\d{17}\b/, // 17-digit numbers
+        /\b\d{18}\b/, // 18-digit numbers
+        /\b\d{19}\b/, // 19-digit numbers
+        /\b\d{20}\b/, // 20-digit numbers
+        /\b[A-Za-z]{2}\d{6}\b/, // UK driving license numbers
+        /\b[A-Za-z]{2}\d{7}\b/, // UK passport numbers
+        /\b[A-Za-z]{1,2}\d{6}\b/, // US passport numbers
+        /\b[A-Za-z0-9]{9}\b/, // General 9-character alphanumeric strings
+        /\b[A-Za-z0-9]{10}\b/, // General 10-character alphanumeric strings
+        /\b[A-Za-z0-9]{11}\b/, // General 11-character alphanumeric strings
+        /\b[A-Za-z0-9]{12}\b/, // General 12-character alphanumeric strings
+        /\b[A-Za-z0-9]{13}\b/, // General 13-character alphanumeric strings
+        /\b[A-Za-z0-9]{14}\b/, // General 14-character alphanumeric strings
+        /\b[A-Za-z0-9]{15}\b/, // General 15-character alphanumeric strings
+        /\b[A-Za-z0-9]{16}\b/, // General 16-character alphanumeric strings
+        /\b[A-Za-z0-9]{17}\b/, // General 17-character alphanumeric strings
+        /\b[A-Za-z0-9]{18}\b/, // General 18-character alphanumeric strings
+        /\b[A-Za-z0-9]{19}\b/, // General 19-character alphanumeric strings
+        /\b[A-Za-z0-9]{20}\b/, // General 20-character alphanumeric strings
+    ];
+
+    // Regular expression patterns to detect toxicity
+    var toxicPatterns = [
+        /\b(?:damn|hell|shit|fuck|bitch|bastard|asshole|dick|cunt|nigger|kike|spic|chink|gook|faggot|dyke|tranny|retard|idiot|stupid|dumb|moron|shut up|kill yourself|i hate you|go to hell|you suck|you're worthless|you're pathetic|you're a loser|you're an idiot|you're stupid|you're retarded)\b/i,
+        // Add more patterns as needed
+    ];
+
+    // Check if input text matches any source code, PII, or toxic pattern
+    for (var i = 0; i < sourceCodePatterns.length; i++) {
+        if (sourceCodePatterns[i].test(inputText)) {
+            return true;
+        }
+    }
+
+    for (var j = 0; j < piiPatterns.length; j++) {
+        if (piiPatterns[j].test(inputText)) {
+            return true;
+        }
+    }
+
+    for (var k = 0; k < toxicPatterns.length; k++) {
+        if (toxicPatterns[k].test(inputText)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function displayMessage(message) {
+    document.getElementById('outputTextArea').value = message;
+}
+</script>
