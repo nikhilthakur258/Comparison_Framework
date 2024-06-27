@@ -1,0 +1,79 @@
+Overview
+The script compare_csv compares two CSV or PSV (Pipe Separated Values) files and generates an HTML report highlighting the differences and similarities. It reads the files in chunks to handle large datasets efficiently. The generated HTML report includes a summary of the comparison and a detailed table with row-by-row comparisons.
+
+Requirements
+Python 3.x
+Pandas library (pip install pandas)
+Script Usage
+Command Line Arguments
+The script accepts the following command-line arguments:
+
+file1: Path to the first CSV/PSV file.
+file2: Path to the second CSV/PSV file.
+-o, --output: Path to the output HTML file. (Required)
+-k, --key_cols: Key columns for identifying rows uniquely (Optional, default is empty).
+-t, --type: Type of report to generate. Options are full (default), difference, or matched.
+-c, --compare_cols: Comma-separated list of columns to compare (Optional).
+-d, --delimiter: Delimiter used in the CSV/PSV files. Default is comma (,).
+-s, --start_line: Start line for comparison. Default is 1.
+-e, --end_line: End line for comparison (Optional).
+Example Usages
+Basic Usage
+
+Compare two CSV files and generate a full comparison report.
+
+bash
+Copy code
+python compare_csv.py file1.csv file2.csv -o report.html
+Specifying Key Columns
+
+Compare using specific key columns to identify rows uniquely.
+
+bash
+Copy code
+python compare_csv.py file1.csv file2.csv -o report.html -k id name
+Generating a Differences-Only Report
+
+Generate a report showing only the differences between the files.
+
+bash
+Copy code
+python compare_csv.py file1.csv file2.csv -o report.html -t difference
+Generating a Matched-Only Report
+
+Generate a report showing only the matched rows between the files.
+
+bash
+Copy code
+python compare_csv.py file1.csv file2.csv -o report.html -t matched
+Comparing Specific Columns
+
+Compare specific columns from the CSV files.
+
+bash
+Copy code
+python compare_csv.py file1.csv file2.csv -o report.html -c col1,col2,col3
+Using a Different Delimiter
+
+Compare files with a different delimiter (e.g., pipe |).
+
+bash
+Copy code
+python compare_csv.py file1.psv file2.psv -o report.html -d '|'
+Specifying a Range of Lines to Compare
+
+Compare a specific range of lines from the CSV files.
+
+bash
+Copy code
+python compare_csv.py file1.csv file2.csv -o report.html -s 10 -e 100
+Full Command Line Argument Example
+bash
+Copy code
+python compare_csv.py file1.csv file2.csv -o report.html -k id name -t difference -c col1,col2 -d '|' -s 10 -e 100
+Script Execution
+Basic Execution:
+
+bash
+Copy code
+python compare_csv.py file1.csv file2.csv -o report.html
