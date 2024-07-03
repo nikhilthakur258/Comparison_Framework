@@ -15,8 +15,6 @@ disable_warnings(InsecureRequestWarning)
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Ensure this is set as an environment variable
 if not GITHUB_TOKEN:
     raise ValueError("Please set your GITHUB_TOKEN environment variable.")
-GITHUB_HOST = 'rbcgithub.fg.rbc.com'
-BASE_URL = f"https://{GITHUB_HOST}/api/v3"
 
 # Create a session to be used with PyGithub
 session = requests.Session()
