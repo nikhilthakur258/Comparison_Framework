@@ -96,6 +96,8 @@ def decode_content(file_content):
     try:
         detected_encoding = chardet.detect(file_content)
         encoding = detected_encoding.get('encoding') or 'utf-8'
+        if encoding.lower() == 'none':
+            encoding = 'utf-8'
         return file_content.decode(encoding, errors='ignore')
     except Exception as e:
         print(f"Error decoding content: {e}. Falling back to 'utf-8'.")
@@ -599,9 +601,9 @@ def generate_html_content(repo_name, repo_info, java_files_count, java_files_lin
             <tr><th>Configuration Files</td><td>{len(config_files)}</td></tr>
             <tr><th>Deployment Manifests</td><td>{len(deployment_manifests)}</td></tr>
             <tr><th>Dependencies</td><td>{len(dependencies)}</td></tr>
-            <tr><th>Java Versions</th><td>{', '.join(set(java_versions))}</td></tr>
-            <tr><th>Spring Boot Versions</th><td>{', '.join(set(spring_boot_versions))}</td></tr>
-            <tr><th>Angular Versions</th><td>{', '.join(set(angular_versions))}</td></tr>
+            <tr><th>Java Versions</td><td>{', '.join(set(java_versions))}</td></tr>
+            <tr><th>Spring Boot Versions</td><td>{', '.join(set(spring_boot_versions))}</td></tr>
+            <tr><th>Angular Versions</td><td>{', '.join(set(angular_versions))}</td></tr>
             <tr><th>Node Versions</td><td>{', '.join(set(node_versions))}</td></tr>
             <tr><th>Complexity</td><td>{complexity}</td></tr>
             <tr><th>Helios Onboarding</td><td>{helios_onboarding}</td></tr>
