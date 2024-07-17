@@ -485,7 +485,7 @@ def generate_html_report(repo_reports, summary_report, filename):
 def generate_report_for_repo(repo, branch, include_estimates):
     try:
         repo_name = repo.full_name
-        print(f"Generating report for repository {repo_name} on branch {branch}...")
+        print(f"Generating report for repository {repo_name}...")
         repo_info = get_repo_info(repo_name)
         
         print("Counting Java files...")
@@ -898,9 +898,9 @@ def main():
                 continue  # Skip already processed repositories
             
             repo = g.get_repo(repo_name)
-            branch_to_use = branch if branch else repo.default_branch
+            branch_name = branch or repo.default_branch
             try:
-                report = generate_report_for_repo(repo, branch_to_use, include_estimates)
+                report = generate_report_for_repo(repo, branch_name, include_estimates)
                 if report:
                     repo_reports.append(report)
                 # Save checkpoint after each repository
