@@ -6,13 +6,14 @@ ${HOST}           your.linux.server
 ${USER}           your_username
 ${PASSWORD}       your_password
 ${SUDO_USER}      QAuser
+${BEELINE_CMD}    beeline -u "jdbc:hive2://your.hive.server:10000/default" -n ${USER} -p ${PASSWORD} --silent=true --outputformat=csv2 -e "YOUR_HIVE_QUERY_HERE" > output.csv
 
 *** Test Cases ***
 Login And Execute Hive Queries
     [Documentation]    Logs into a Linux server, runs a sudo command, executes HIVE queries, and fetches data in CSV format.
     Connect To Linux
     Switch To Sudo User
-    Execute Hive Queries
+    Execute Beeline Queries
     Fetch Data In CSV
     Disconnect From Linux
 
@@ -28,9 +29,9 @@ Switch To Sudo User
     ${output}          Read Until Prompt    $
     Log                ${output}
 
-Execute Hive Queries
-    [Documentation]    Execute HIVE queries on the Linux server.
-    Write              hive -e "YOUR_HIVE_QUERY_HERE" > output.csv
+Execute Beeline Queries
+    [Documentation]    Execute HIVE queries using Beeline on the Linux server.
+    Write              ${BEELINE_CMD}
     ${output}          Read Until Prompt    $
     Log                ${output}
 
